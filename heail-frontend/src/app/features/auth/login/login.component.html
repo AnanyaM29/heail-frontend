@@ -1,0 +1,66 @@
+<div class="auth-shell">
+  <!-- Left panel -->
+  <aside class="auth-brand">
+    <app-heail-logo />
+    <div class="brand-quote">
+      <p>"What is measured can be improved —<br>but only if the measurement is <em>accurate</em>."</p>
+    </div>
+    <app-mrule />
+    <p class="brand-sub">One door for everyone.<br>Your role decides your destination.</p>
+  </aside>
+
+  <!-- Right panel -->
+  <main class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-eyebrow">Welcome back</div>
+      <h1 class="auth-title">Sign in to HEAIL</h1>
+      <app-mrule [short]="true" />
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate autocomplete="on">
+
+        <div class="fld">
+          <label for="email">Email address</label>
+          <input id="email" type="email" formControlName="email"
+                 placeholder="name@company.com" autocomplete="email"
+                 [class.err]="invalid('email')">
+          @if (invalid('email')) {
+            <span class="err-msg">Enter a valid email address.</span>
+          }
+        </div>
+
+        <div class="fld">
+          <label for="password">
+            Password
+            <a routerLink="/forgot-password" class="label-link">Forgot password?</a>
+          </label>
+          <div class="pw-wrap">
+            <input id="password" [type]="showPw() ? 'text' : 'password'"
+                   formControlName="password" placeholder="••••••••"
+                   autocomplete="current-password" [class.err]="invalid('password')">
+            <button type="button" class="pw-eye" (click)="showPw.set(!showPw())"
+                    [attr.aria-label]="showPw() ? 'Hide password' : 'Show password'">
+              {{ showPw() ? '🙈' : '👁' }}
+            </button>
+          </div>
+          @if (invalid('password')) {
+            <span class="err-msg">Password is required.</span>
+          }
+        </div>
+
+        @if (error()) {
+          <div class="alert-err" role="alert">{{ error() }}</div>
+        }
+
+        <button type="submit" class="btn btn-gold w-full" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> } Sign In
+        </button>
+
+      </form>
+
+      <p class="auth-foot">
+        Don't have an account?
+        <a routerLink="/register" class="gold-link">Create one →</a>
+      </p>
+    </div>
+  </main>
+</div>

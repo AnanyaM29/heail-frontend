@@ -1,0 +1,32 @@
+<nav>
+  <div class="wrap navbar">
+    <a class="logo" routerLink="/">
+      <span class="name">HEAIL</span>
+      <span class="tag">Human Experience + AI Logic</span>
+    </a>
+
+    <button class="hamb" (click)="toggleMenu()" aria-label="Menu">☰</button>
+
+    <ul class="navlinks" [class.open]="menuOpen()">
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">Home</a></li>
+      <li class="has-dd">
+        <span class="ndrop" tabindex="0">Solutions <span class="caret">▼</span></span>
+        <div class="dd">
+          <a routerLink="/for-organisations" (click)="closeMenu()">For Organisations</a>
+          <a routerLink="/for-leaders" (click)="closeMenu()">For Leaders</a>
+          <a routerLink="/for-hr" (click)="closeMenu()">For HR Teams</a>
+          <a routerLink="/for-students" (click)="closeMenu()">For Students <span class="soon">coming soon</span></a>
+        </div>
+      </li>
+      <li><a routerLink="/transformation" routerLinkActive="active" (click)="closeMenu()">Transformation</a></li>
+      <li><a routerLink="/tests" routerLinkActive="active" (click)="closeMenu()">Tests</a></li>
+      <li><a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a></li>
+      <li><a routerLink="/partners" routerLinkActive="active" (click)="closeMenu()">Partners</a></li>
+      <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact Us</a></li>
+      <li class="nav-cta" style="display:flex;gap:8px;align-items:center">
+        <a class="btn btn-ghost" style="padding:10px 20px" routerLink="/register" (click)="closeMenu()">Register</a>
+        <a class="btn btn-gold" style="padding:10px 20px" routerLink="/login" (click)="closeMenu()">Login</a>
+      </li>
+    </ul>
+  </div>
+</nav>

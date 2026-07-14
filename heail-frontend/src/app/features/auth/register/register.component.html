@@ -1,0 +1,138 @@
+<div class="auth-shell">
+  <aside class="auth-brand">
+    <app-heail-logo />
+    <div class="brand-quote">
+      <p>"Accurate measurement first.<br>Human interpretation always.<br>Improvement you can re-measure."</p>
+    </div>
+    <app-mrule />
+    <p class="brand-sub">Join HEAIL as an Organisation, Employee, or Leader.<br>One standard. One platform.</p>
+  </aside>
+
+  <main class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-eyebrow">Create your account</div>
+      <h1 class="auth-title">Register with HEAIL</h1>
+      <app-mrule [short]="true" />
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        <!-- Role selector -->
+        <div class="role-tabs">
+          <button type="button" class="role-tab" [class.active]="isOrgAdmin"
+                  (click)="form.get('role')?.setValue('ORG_ADMIN')">
+            For Organisations
+          </button>
+          <button type="button" class="role-tab" [class.active]="isEmployee"
+                  (click)="form.get('role')?.setValue('EMPLOYEE')">
+            For Employees / Leaders
+          </button>
+        </div>
+
+        <div class="fld">
+          <label for="name">Full name</label>
+          <input id="name" type="text" formControlName="name" placeholder="Your full name"
+                 autocomplete="name" [class.err]="invalid('name')">
+          @if (invalid('name')) { <span class="err-msg">Name is required.</span> }
+        </div>
+
+        <div class="fld">
+          <label for="email">Email address</label>
+          <input id="email" type="email" formControlName="email"
+                 placeholder="name@company.com" autocomplete="email"
+                 [class.err]="invalid('email')">
+          @if (invalid('email')) { <span class="err-msg">Enter a valid email address.</span> }
+        </div>
+
+        @if (isOrgAdmin) {
+          <div class="fld">
+            <label for="orgName">Organisation name</label>
+            <input id="orgName" type="text" formControlName="organisationName"
+                   placeholder="Company / Organisation name">
+          </div>
+          <div class="fld-row">
+            <div class="fld">
+              <label for="industry">Industry</label>
+              <input id="industry" type="text" formControlName="industry" placeholder="e.g. IT, Banking">
+            </div>
+            <div class="fld">
+              <label for="size">Organisation size</label>
+              <select id="size" formControlName="sizeCategory">
+                <option value="">Select size</option>
+                <option value="1-50">1–50 employees</option>
+                <option value="51-200">51–200</option>
+                <option value="201-500">201–500</option>
+                <option value="501-2000">501–2,000</option>
+                <option value="2000+">2,000+</option>
+              </select>
+            </div>
+          </div>
+        }
+
+        @if (isEmployee) {
+          <div class="fld">
+            <label for="empRole">Your role</label>
+            <select id="empRole" formControlName="role">
+              <option value="EMPLOYEE">Employee</option>
+              <option value="LEADER">Leader</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label for="orgId">Organisation ID <span class="label-hint">provided by your organisation admin</span></label>
+            <input id="orgId" type="text" formControlName="organisationId"
+                   placeholder="e.g. a1b2c3d4-..." [class.err]="invalid('organisationId')">
+            @if (invalid('organisationId')) { <span class="err-msg">Organisation ID is required.</span> }
+          </div>
+        }
+
+        <div formGroupName="passwords">
+          <div class="fld">
+            <label for="password">Password <span class="label-hint">min 8 characters</span></label>
+            <div class="pw-wrap">
+              <input id="password" [type]="showPw() ? 'text' : 'password'"
+                     formControlName="password" placeholder="••••••••"
+                     autocomplete="new-password"
+                     [class.err]="pwInvalid('password')">
+              <button type="button" class="pw-eye" (click)="showPw.set(!showPw())">{{ showPw() ? '🙈' : '👁' }}</button>
+            </div>
+            @if (pwInvalid('password')) { <span class="err-msg">Password must be at least 8 characters.</span> }
+          </div>
+          <div class="fld">
+            <label for="confirm">Confirm password</label>
+            <input id="confirm" [type]="showPw() ? 'text' : 'password'"
+                   formControlName="confirm" placeholder="••••••••"
+                   autocomplete="new-password"
+                   [class.err]="pwGroup.errors?.['mismatch'] && pwGroup.get('confirm')?.touched">
+            @if (pwGroup.errors?.['mismatch'] && pwGroup.get('confirm')?.touched) {
+              <span class="err-msg">Passwords do not match.</span>
+            }
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="terms-block">
+          <label class="check-label">
+            <input type="checkbox" formControlName="termsAccepted">
+            <span>I accept the HEAIL <a href="#" class="gold-link">Terms of Use</a> and <a href="#" class="gold-link">Privacy Policy</a>. I understand assessments are non-refundable once dispatched.</span>
+          </label>
+          @if (form.get('termsAccepted')?.invalid && form.get('termsAccepted')?.touched) {
+            <span class="err-msg">You must accept the Terms to continue.</span>
+          }
+        </div>
+
+        @if (error()) {
+          <div class="alert-err" role="alert">{{ error() }}</div>
+        }
+
+        <button type="submit" class="btn btn-gold w-full" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> } Create Account
+        </button>
+
+      </form>
+
+      <p class="auth-foot">
+        Already have an account?
+        <a routerLink="/login" class="gold-link">Sign in →</a>
+      </p>
+    </div>
+  </main>
+</div>
