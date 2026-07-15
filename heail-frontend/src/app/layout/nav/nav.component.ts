@@ -1,5 +1,6 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, signal, inject, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-nav',
@@ -9,10 +10,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './nav.component.css'
 })
 export class NavComponent {
+  auth = inject(AuthService);
   menuOpen = signal(false);
+  firstName = computed(() => this.auth.user()?.name?.split(' ')[0] ?? '');
 
   toggleMenu() { this.menuOpen.update(v => !v); }
   closeMenu() { this.menuOpen.set(false); }
+
+  logout() { this.closeMenu(); this.auth.logout(); }
 
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event) {

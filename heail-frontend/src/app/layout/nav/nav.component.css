@@ -23,6 +23,7 @@ nav {
 .caret { font-size: 9px; margin-left: 4px; color: var(--gold); }
 
 .nav-cta { margin-left: 8px; }
+.searchstub { background: none; border: 1px solid rgba(217,169,63,.35); color: var(--gold); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; }
 .hamb { display: none; background: none; border: 1px solid rgba(217,169,63,.4); color: var(--gold); font-size: 20px; padding: 5px 12px; cursor: pointer; }
 
 @media (max-width: 960px) {

@@ -1,0 +1,109 @@
+@if (!isLeader()) {
+  <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
+    <div class="formwrap" style="text-align:center">
+      <h3 style="margin-bottom:12px">Leader accounts only</h3>
+      <p style="color:var(--mut)">The Gita Leader Assessment is available to Leader accounts. Please sign in with a leader account to continue.</p>
+    </div>
+  </div></section>
+} @else {
+
+  @if (error()) {
+    <section style="padding-top:20px;padding-bottom:0"><div class="wrap" style="max-width:760px">
+      <div class="alert-err" role="alert">{{ error() }}</div>
+    </div></section>
+  }
+
+  @switch (stage()) {
+
+    @case ('select') {
+      <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
+        <a class="backbtn" routerLink="/pricing">← Back</a>
+        <div class="eyebrow">For Leaders</div>
+        <h2 class="sec-title">Leadership Diagnostics</h2>
+        <div class="formwrap" style="max-width:none">
+          <table class="seltable">
+            <tr><th>Diagnostic</th><th>Price</th><th></th></tr>
+            <tr>
+              <td>The Gita Leader — Classic Assessment (50 questions · ~30 minutes · score /250)</td>
+              <td>₹1,000 / $10</td>
+              <td><button class="btn btn-navy" type="button" style="padding:10px 18px" [disabled]="actionLoading()" (click)="select()">Select</button></td>
+            </tr>
+          </table>
+          <p style="font-size:13px;color:var(--mut);margin-top:14px">More diagnostics will be added here.</p>
+        </div>
+      </div></section>
+    }
+
+    @case ('details') {
+      <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
+        <a class="backbtn" routerLink="/pricing">← Back</a>
+        <div class="eyebrow">For Leaders · Leadership Diagnostics</div>
+        <h2 class="sec-title">A little about you.</h2>
+        <div class="formwrap" style="margin-top:20px">
+          <div class="fld">
+            <label for="designation">Designation <span class="label-hint" style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--mut)">(optional)</span></label>
+            <input id="designation" type="text" placeholder="Your designation" [value]="designation()" (input)="designation.set($any($event.target).value)">
+          </div>
+          <div class="fld">
+            <label for="organisation">Organisation <span class="label-hint" style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--mut)">(optional)</span></label>
+            <input id="organisation" type="text" placeholder="Your organisation" [value]="organisationName()" (input)="organisationName.set($any($event.target).value)">
+          </div>
+          <div style="text-align:center;margin-top:22px">
+            <button class="btn btn-gold" type="button" [disabled]="actionLoading()" (click)="saveDetails()">
+              @if (actionLoading()) { <span class="spinner"></span> } Continue to Agreement
+            </button>
+          </div>
+        </div>
+      </div></section>
+    }
+
+    @case ('agreement') {
+      <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
+        <a class="backbtn" routerLink="/pricing">← Back</a>
+        <div class="eyebrow">Terms of Agreement · Leader</div>
+        <h2 class="sec-title">Before you pay.</h2>
+        <div class="formwrap" style="max-width:none">
+          <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee is non-refundable once assessment access is activated · answer honestly — your results depend on it · reminder emails run for 7 days; your access does not expire · results are personal to you and appear on your dashboard immediately on submission · each retake is a fresh purchase. Full terms are available in our <a routerLink="/terms" class="gold-link" style="text-decoration:underline">Terms of Use</a>.</p>
+          <div class="fld consent" style="margin-top:18px">
+            <input type="checkbox" id="ldrAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
+            <label for="ldrAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
+          </div>
+          <div style="text-align:center;margin-top:22px">
+            <button class="btn btn-gold" type="button" [disabled]="!agreed() || actionLoading()" (click)="acceptAgreement()">
+              @if (actionLoading()) { <span class="spinner"></span> } Proceed to Payment
+            </button>
+          </div>
+        </div>
+      </div></section>
+    }
+
+    @case ('payment') {
+      <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
+        <a class="backbtn" routerLink="/pricing">← Back</a>
+        <div class="eyebrow">Payment</div>
+        <h2 class="sec-title">Complete your payment.</h2>
+        <div class="formwrap" style="margin-top:20px;text-align:center">
+          <p style="font-family:var(--disp);font-size:26px;margin-bottom:6px">Total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
+          <p style="font-size:12.5px;color:var(--mut);margin-bottom:20px">Base {{ order()!.currency }} {{ order()!.baseAmount | number:'1.2-2' }} + GST {{ order()!.currency }} {{ order()!.gstAmount | number:'1.2-2' }} · Non-refundable · Sandbox checkout, no real charge</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">UPI / QR</button>
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">Card</button>
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">Net Banking</button>
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">NEFT / IMPS</button>
+          </div>
+          <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by the payment gateway — HEAIL never sees your card details.</p>
+        </div>
+      </div></section>
+    }
+
+    @case ('thankyou') {
+      <section style="padding-top:120px"><div class="wrap" style="max-width:640px;text-align:center">
+        <div class="eyebrow">Payment Successful</div>
+        <h2 class="sec-title">Thank you for making payment.</h2>
+        <p class="sec-sub" style="margin:0 auto">Please check your email and complete the test as soon as possible.</p>
+        <p class="hint" style="margin-top:14px">Receipt reference: {{ order()!.gatewayReference }}</p>
+        <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/leader">Go to Dashboard — Start Assessment</a></div>
+      </div></section>
+    }
+  }
+}

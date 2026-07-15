@@ -16,3 +16,10 @@ export const guestGuard: CanActivateFn = () => {
   auth.routeByRole();
   return false;
 };
+
+export const leaderGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  if (auth.role() === 'LEADER') return true;
+  auth.routeByRole();
+  return false;
+};

@@ -1,0 +1,6 @@
+.alert-err {
+  background: #FFF5F5; border: 1px solid #FEB2B2; border-left: 3px solid var(--error);
+  color: var(--error); padding: 12px 14px; font-size: 14px; border-radius: 2px;
+}
+.gold-link { color: var(--gold); font-weight: 600; }
+.gold-link:hover { color: var(--gold-bright); }

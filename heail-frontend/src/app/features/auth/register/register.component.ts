@@ -32,8 +32,6 @@ export class RegisterComponent {
     organisationName: [''],
     industry:         [''],
     sizeCategory:     [''],
-    // EMPLOYEE / LEADER only
-    organisationId:   [''],
     termsAccepted:    [false, Validators.requiredTrue]
   });
 
@@ -42,7 +40,7 @@ export class RegisterComponent {
   showPw   = signal(false);
 
   get isOrgAdmin()  { return this.form.get('role')?.value === 'ORG_ADMIN'; }
-  get isEmployee()  { return !this.isOrgAdmin; }
+  get isLeader()    { return !this.isOrgAdmin; }
   get pwGroup()      { return this.form.get('passwords')!; }
 
   submit() {
@@ -60,8 +58,6 @@ export class RegisterComponent {
       payload.organisationName = v.organisationName;
       payload.industry         = v.industry;
       payload.sizeCategory     = v.sizeCategory;
-    } else {
-      payload.organisationId = v.organisationId;
     }
 
     this.loading.set(true);

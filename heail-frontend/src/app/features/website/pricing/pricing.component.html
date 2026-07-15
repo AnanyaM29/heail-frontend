@@ -1,7 +1,13 @@
 <div class="phero"><div class="wrap">
-  <div class="eyebrow">Pricing</div>
+  <div class="eyebrow">Make Payment</div>
   <h1>Pricing</h1>
   <p class="sub">Assessment prices are published. Program engagements are scoped to your context and quoted on request.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px">
+    <a class="btn btn-gold" routerLink="/pricing/buy-org">For Organisations</a>
+    <a class="btn btn-ghost" routerLink="/pricing/buy-leader">For Leaders</a>
+    <a class="btn btn-ghost" (click)="scrollToHr($event)" href="#hrPricing">For HR Solutions</a>
+    <a class="btn btn-ghost" routerLink="/for-students">For Students</a>
+  </div>
 </div></div>
 <section><div class="wrap">
   <div class="pricegrid">
@@ -10,14 +16,14 @@
       <div class="amt">₹1,000 <span style="font-size:17px;color:var(--mut)">/ $10</span></div>
       <div class="per">per assessment</div>
       <p>Your results on your Personal Dashboard. Results lead to a one-year Transformation Journey.</p>
-      <a class="btn btn-navy" routerLink="/for-leaders">Learn more</a>
+      <a class="btn btn-navy" routerLink="/pricing/buy-leader">Make Payment</a>
     </div>
     <div class="price">
       <h4>Pulse Diagnostic Suite</h4>
       <div class="amt">₹1,000 <span style="font-size:17px;color:var(--mut)">/ $10</span></div>
-      <div class="per">per participant · per Pulse</div>
+      <div class="per">per employee · all four Pulses included</div>
       <p>LeaderPulse™, TalentPulse™, SystemPulse™, GrowthPulse™ — with the consolidated Gap Dashboard.</p>
-      <a class="btn btn-navy" routerLink="/for-organisations">Learn more</a>
+      <a class="btn btn-navy" routerLink="/pricing/buy-org">Make Payment</a>
     </div>
     <div class="price">
       <h4>1-Year Leadership Program</h4>
@@ -35,10 +41,10 @@
     </div>
     <div class="price">
       <h4>HR Solutions</h4>
-      <div class="amt req">On request</div>
-      <div class="per">Per role · per volume</div>
-      <p>Candidate screening and interview/HR-round assessments, priced to your hiring volumes.</p>
-      <a class="btn btn-navy" routerLink="/for-hr">Learn more</a>
+      <div class="amt req" style="font-size:18px">Please share JD and<br>generate/select assessments</div>
+      <div class="per">Per assessment · per candidate</div>
+      <p>Candidate screening and interview/HR-round assessments, measured against your JD.</p>
+      <a class="btn btn-navy" (click)="scrollToHr($event)" href="#hrPricing">Select Assessments</a>
     </div>
     <div class="price">
       <h4>Student Solutions</h4>
@@ -49,4 +55,20 @@
     </div>
   </div>
   <p style="text-align:center;margin-top:30px;font-size:13px;color:var(--mut)">All prices exclusive of applicable taxes. GST-compliant invoices issued for every purchase.</p>
+
+  <div id="hrPricing" style="margin-top:70px">
+    <div class="eyebrow">For HR Solutions</div>
+    <h2 class="sec-title">Share your JD. Select your assessments.</h2>
+    <p class="sec-sub prose-j">Upload your job description as a CSV/Excel file (template provided after login), with candidate names and email addresses — HEAIL suggests the right assessments, you adjust the selection, and the total leads to payment. Prefer to choose directly? Skip the JD and pick from the catalogue.</p>
+    <div class="formwrap" style="max-width:none;margin-top:26px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <button class="otp-btn" type="button" style="padding:12px 18px" (click)="notifyComingSoon('JD upload (CSV/Excel)')">Upload JD (CSV/Excel)</button>
+        <button class="otp-btn" type="button" style="padding:12px 18px" (click)="notifyComingSoon('Assessment catalogue')">Skip JD — choose assessments</button>
+      </div>
+      <p style="text-align:center;font-size:12.5px;color:var(--mut);margin-top:16px">Candidate results appear on your dashboard — name, assessment, date/time, and score (Pending until taken).</p>
+      @if (comingSoonNotice()) {
+        <p class="hint" style="text-align:center;margin-top:10px">{{ comingSoonNotice() }} is coming soon.</p>
+      }
+    </div>
+  </div>
 </div></section>

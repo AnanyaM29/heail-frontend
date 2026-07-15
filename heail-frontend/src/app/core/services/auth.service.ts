@@ -53,13 +53,16 @@ export class AuthService {
   getToken() { return localStorage.getItem(TOKEN_KEY); }
 
   routeByRole() {
-    const role = this._user()?.role;
-    switch (role) {
-      case 'SUPERADMIN':   this.router.navigate(['/admin']); break;
-      case 'ORG_ADMIN':    this.router.navigate(['/dashboard']); break;
-      case 'EMPLOYEE':     this.router.navigate(['/pulse']); break;
-      case 'LEADER':       this.router.navigate(['/leader']); break;
-      default:             this.router.navigate(['/login']);
+    this.router.navigate([this.homePath()]);
+  }
+
+  homePath(): string {
+    switch (this._user()?.role) {
+      case 'SUPERADMIN': return '/admin';
+      case 'ORG_ADMIN':   return '/dashboard';
+      case 'EMPLOYEE':    return '/pulse';
+      case 'LEADER':      return '/leader';
+      default:            return '/login';
     }
   }
 

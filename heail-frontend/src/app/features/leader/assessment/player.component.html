@@ -1,0 +1,43 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">The Gita Leader — Classic Assessment</div>
+  <h1>Question {{ index() + 1 }} of {{ total() }}</h1>
+</div></div>
+
+<section><div class="wrap">
+
+  @if (loading()) {
+    <div class="formwrap" style="text-align:center;padding:60px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+
+    <div class="progress-track"><div class="progress-fill" [style.width.%]="progressPct()"></div></div>
+    <p class="progress-label">{{ answeredCount() }} of {{ total() }} answered</p>
+
+    @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+    @if (current(); as q) {
+      <div class="formwrap question-card">
+        <p class="qtext">{{ q.text }}</p>
+        <div class="options">
+          <button type="button" class="opt" [class.selected]="currentSelected() === 'A'" (click)="select('A')">{{ q.optionA }}</button>
+          <button type="button" class="opt" [class.selected]="currentSelected() === 'B'" (click)="select('B')">{{ q.optionB }}</button>
+          <button type="button" class="opt" [class.selected]="currentSelected() === 'C'" (click)="select('C')">{{ q.optionC }}</button>
+          <button type="button" class="opt" [class.selected]="currentSelected() === 'D'" (click)="select('D')">{{ q.optionD }}</button>
+        </div>
+
+        <div class="nav-row">
+          @if (isLast()) {
+            <button type="button" class="btn btn-gold" [disabled]="!currentSelected() || submitting()" (click)="submit()">
+              @if (submitting()) { <span class="spinner"></span> } Submit Assessment
+            </button>
+          } @else {
+            <button type="button" class="btn btn-gold" [disabled]="!currentSelected()" (click)="next()">Next →</button>
+          }
+        </div>
+      </div>
+    }
+
+  }
+
+</div></section>

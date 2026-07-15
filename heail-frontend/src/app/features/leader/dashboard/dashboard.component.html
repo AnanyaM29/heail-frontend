@@ -1,0 +1,83 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">Leader Dashboard</div>
+  <h1>The Gita Leader</h1>
+  <p class="sub">Your assessment, your results, your one-year path.</p>
+</div></div>
+
+<section><div class="wrap">
+
+  @if (loading()) {
+    <div class="formwrap" style="text-align:center;padding:60px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+
+    @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+    @if (currentSession()) {
+      <div class="formwrap" style="text-align:center">
+        <h3>You have an assessment in progress</h3>
+        <p style="color:var(--mut)">Attempt {{ currentSession()!.attemptNumber }} — pick up where you left off.</p>
+        <button class="btn btn-gold" style="margin-top:18px" (click)="resumeAssessment()">Resume Assessment</button>
+      </div>
+    } @else if (latest()) {
+      <div class="formwrap result-card">
+        <div class="eyebrow" style="text-align:center">Attempt {{ latest()!.attemptNumber }}</div>
+        <div style="text-align:center">
+          <div class="overall-score">{{ latest()!.overallScore }} <span>/ 250</span></div>
+          <div class="band-pill">{{ latest()!.band }}</div>
+        </div>
+        <div class="domain-grid">
+          @for (d of domainEntries(); track d[0]) {
+            <div class="domain-card">
+              <div class="domain-code">{{ d[0] }}</div>
+              <h4>{{ domainLabel(d[0]) }}</h4>
+              <p class="score">{{ d[1] }} / 50</p>
+            </div>
+          }
+        </div>
+        <div class="principle-row">
+          <div><span class="lbl">Strongest principle</span>{{ latest()!.strongestPrinciple }}</div>
+          <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrinciple }}</div>
+        </div>
+        <div style="text-align:center;margin-top:28px">
+          <a class="btn btn-gold" routerLink="/pricing/buy-leader">Retake Assessment</a>
+        </div>
+      </div>
+
+      @if (results().length > 1) {
+        <div class="formwrap result-card" style="margin-top:24px">
+          <h3 style="margin-bottom:16px">Attempt history</h3>
+          <table class="history">
+            <thead><tr><th>Attempt</th><th>Date</th><th>Score</th><th>Band</th></tr></thead>
+            <tbody>
+              @for (r of results(); track r.id) {
+                <tr>
+                  <td>{{ r.attemptNumber }}</td>
+                  <td>{{ r.createdAt | date:'mediumDate' }}</td>
+                  <td>{{ r.overallScore }} / 250</td>
+                  <td>{{ r.band }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    } @else {
+      <div class="formwrap" style="text-align:center">
+        <h3>Begin the Classic Assessment</h3>
+        <p style="color:var(--mut)">Fifty situational questions, about thirty minutes, one sitting. Your results appear the moment you submit.</p>
+
+        @if (noEntitlement()) {
+          <p class="hint" style="margin:16px 0">You'll need to purchase the assessment first.</p>
+          <a class="btn btn-gold" routerLink="/pricing/buy-leader">Purchase Assessment</a>
+        } @else {
+          <button class="btn btn-gold" style="margin-top:18px" [disabled]="starting()" (click)="startAssessment()">
+            @if (starting()) { <span class="spinner"></span> } Start Assessment
+          </button>
+        }
+      </div>
+    }
+  }
+
+</div></section>

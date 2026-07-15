@@ -1,0 +1,38 @@
+.result-card { max-width: 860px; }
+
+.overall-score { font-family: var(--disp); font-size: 52px; color: var(--navy-deep); font-weight: 700; }
+.overall-score span { font-size: 20px; color: var(--mut); font-weight: 400; }
+
+.band-pill {
+  display: inline-block; margin-top: 6px; padding: 6px 18px; border-radius: 20px;
+  background: rgba(217,169,63,.12); border: 1px solid var(--gold);
+  font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--navy-deep);
+}
+
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  margin-top: 36px;
+}
+.domain-card {
+  min-width: 0;
+  background: #fff; border: 1px solid #E6DCC4; padding: 20px 14px;
+  text-align: center; border-radius: 2px;
+}
+.domain-card .domain-code { color: var(--gold); font-family: var(--disp); font-size: 22px; font-weight: 700; }
+.domain-card h4 {
+  font-family: var(--disp); font-size: 14.5px; margin-top: 4px; font-weight: 600;
+  line-height: 1.3; overflow-wrap: break-word;
+}
+.domain-card .score { font-size: 13px; color: var(--gold); font-weight: 600; margin-top: 8px; }
+
+.principle-row {
+  display: flex; justify-content: center; gap: 40px; margin-top: 30px;
+  font-size: 14.5px; color: var(--navy-deep); flex-wrap: wrap;
+}
+.principle-row .lbl { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); margin-bottom: 4px; }
+
+.history { width: 100%; border-collapse: collapse; }
+.history th, .history td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #E6DCC4; font-size: 14px; }
+.history th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); font-weight: 600; }
