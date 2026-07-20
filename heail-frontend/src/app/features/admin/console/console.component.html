@@ -1,0 +1,34 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">Superadmin Console</div>
+  <h1>Admin Tools</h1>
+  <p class="sub">Under construction — the full console (business views, action queue, CMS) arrives in a later phase.</p>
+</div></div>
+
+<section><div class="wrap">
+  <div class="formwrap" style="max-width:520px">
+    <h3 style="margin-bottom:6px">Resend password-reset email</h3>
+    <p style="color:var(--mut);font-size:14px;margin-bottom:20px">
+      Send a fresh OTP and reset link to any user's registered email — for support cases where an
+      invitation was missed, expired, or the user just needs a nudge.
+    </p>
+
+    <div class="fld">
+      <label for="userEmail">User email</label>
+      <input id="userEmail" type="email" placeholder="name@company.com"
+             [value]="email()" (input)="updateEmail($any($event.target).value)">
+    </div>
+
+    @if (error()) {
+      <div role="alert" style="background:#FFF5F5;border:1px solid #FEB2B2;border-left:3px solid var(--error);color:var(--error);padding:12px 14px;font-size:14px;margin-bottom:16px;border-radius:2px">
+        {{ error() }}
+      </div>
+    }
+    @if (sent()) {
+      <p class="hint" style="color:var(--success);margin-bottom:16px">Reset email sent, if that address exists in our system.</p>
+    }
+
+    <button class="btn btn-gold" type="button" style="width:100%" [disabled]="loading() || !email().trim()" (click)="sendResetEmail()">
+      @if (loading()) { <span class="spinner"></span> } Send Reset Email
+    </button>
+  </div>
+</div></section>

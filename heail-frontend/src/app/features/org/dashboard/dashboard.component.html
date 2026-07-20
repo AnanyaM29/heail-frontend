@@ -1,0 +1,127 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">Organisation Dashboard</div>
+  <h1>Diagnostic Round</h1>
+  <p class="sub">Track completion and view your HEAIL Diagnostic report. Individual employee answers remain confidential — only aggregate results are ever shown here.</p>
+</div></div>
+
+<section><div class="wrap dash-wrap">
+
+  @if (loading()) {
+    <div class="dash-panel" style="text-align:center;padding:70px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+
+    @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+    @if (!order()) {
+      <div class="dash-panel" style="text-align:center;padding:60px 42px">
+        <h3>No active diagnostic round</h3>
+        <p style="color:var(--mut);margin-top:8px">You have not purchased a HEAIL 4-Pulse Diagnostic round yet.</p>
+        <a class="btn btn-gold" style="margin-top:20px" routerLink="/pricing/buy-org-form">Start a Round</a>
+      </div>
+    }
+
+    @if (monitor(); as m) {
+      <div class="stat-row">
+        <div class="stat">
+          <b>{{ m.totalEmployees }}</b>
+          <span>Employees</span>
+        </div>
+        <div class="stat">
+          <b>{{ m.fullyCompletedCount }} <i>/ {{ m.totalEmployees }}</i></b>
+          <span>Fully Completed</span>
+        </div>
+        <div class="stat">
+          @if (m.reportReleasedAt) {
+            <b class="stat-good">Released</b>
+          } @else {
+            <b class="stat-pending">Pending</b>
+          }
+          <span>Report Status{{ m.reportReleasedAt ? ' · ' + (m.reportReleasedAt | date:'mediumDate') : '' }}</span>
+        </div>
+      </div>
+
+      @if (report(); as r) {
+        <div class="dash-panel" style="margin-top:22px">
+          <div class="panel-head">
+            <h3>Overall Result</h3>
+            <p>Based on {{ r.respondentCount }} of {{ r.totalEmployees }} employees who fully completed all four Pulses.</p>
+          </div>
+          <div class="ragdial-wrap">
+            <div [class]="ragDialClass(r.overallRag)">
+              <span class="ragdial-label">{{ ragLabel(r.overallRag) }}</span>
+            </div>
+          </div>
+
+          <div class="panel-head" style="margin-top:36px">
+            <h3>By Pulse</h3>
+          </div>
+          <div class="pulse-rag-row">
+            @for (p of r.pulses; track p.pulseCode) {
+              <div class="pulse-rag-card">
+                <p>{{ p.displayName }}</p>
+                <div [class]="ragClass(p.rag)">{{ ragLabel(p.rag) }}</div>
+              </div>
+            }
+          </div>
+
+          <div class="panel-head" style="margin-top:36px">
+            <h3>By Section</h3>
+            <p>Sorted by severity — sections needing attention first.</p>
+          </div>
+          <div class="section-table-wrap">
+            <table class="section-table">
+              <thead><tr><th>Section</th><th>RAG</th><th>Respondents</th></tr></thead>
+              <tbody>
+                @for (s of sortedSections(); track s.sectionCode) {
+                  <tr [class]="rowClass(s.rag)">
+                    <td class="sc-name">{{ s.sectionName }}<span class="sc-code">{{ s.sectionCode }}</span></td>
+                    <td><span [class]="ragClass(s.rag)">{{ ragLabel(s.rag) }}</span></td>
+                    <td class="sc-count">{{ s.respondentCount }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      } @else {
+        <div class="dash-panel" style="margin-top:22px;text-align:center;padding:44px 30px">
+          <p style="color:var(--mut);max-width:520px;margin:0 auto">The report releases automatically once all employees have completed all four Pulses, or on day 8 if at least 80% have completed. You'll be emailed the moment it's ready.</p>
+        </div>
+      }
+
+      <div class="panel-head" style="margin-top:36px">
+        <h3>Employee Progress</h3>
+      </div>
+      <div class="dash-panel" style="overflow-x:auto">
+        <table class="monitor-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              @for (p of pulseOrder; track p) { <th>{{ label(p) }}</th> }
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of m.employees; track e.id) {
+              <tr>
+                <td class="emp-name">{{ e.name }}</td>
+                @for (p of pulseOrder; track p) {
+                  <td>
+                    @switch (e.pulseStates[p]) {
+                      @case ('COMPLETED') { <span class="pstate pstate-done" title="Completed">✓</span> }
+                      @case ('IN_PROGRESS') { <span class="pstate pstate-progress" title="In progress">…</span> }
+                      @default { <span class="pstate pstate-notstarted" title="Not started">—</span> }
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  }
+
+</div></section>

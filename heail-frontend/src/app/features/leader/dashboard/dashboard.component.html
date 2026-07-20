@@ -37,8 +37,8 @@
           }
         </div>
         <div class="principle-row">
-          <div><span class="lbl">Strongest principle</span>{{ latest()!.strongestPrinciple }}</div>
-          <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrinciple }}</div>
+          <div><span class="lbl">Strongest principle</span>{{ latest()!.strongestPrincipleText ?? latest()!.strongestPrinciple }}</div>
+          <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrincipleText ?? latest()!.weakestPrinciple }}</div>
         </div>
         <div style="text-align:center;margin-top:28px">
           <a class="btn btn-gold" routerLink="/pricing/buy-leader">Retake Assessment</a>

@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Order } from '../models/order.models';
+import { environment } from '../../../environments/environment';
 
-const API = 'http://localhost:8080/api/v1/leader/orders';
+const API = `${environment.apiBaseUrl}/api/v1/leader/orders`;
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {

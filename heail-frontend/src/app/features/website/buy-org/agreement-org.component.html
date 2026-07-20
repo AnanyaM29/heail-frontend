@@ -1,47 +1,67 @@
-@switch (stage()) {
+@if (loading()) {
+  <section style="padding-top:120px"><div class="wrap" style="max-width:560px;text-align:center">
+    <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+  </div></section>
+} @else {
 
-  @case ('agreement') {
-    <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
-      <a class="backbtn" routerLink="/pricing/buy-org-form">← Back</a>
-      <div class="eyebrow">Terms of Agreement · Organisation</div>
-      <h2 class="sec-title">Before you pay.</h2>
-      <div class="formwrap" style="max-width:none">
-        <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee covers all four Pulses for every entered employee and is non-refundable once invitations are dispatched · results require 80% completion and a minimum of 5 employees within 10 days — providing correct employee details, including email addresses, is your responsibility · individual employee answers are confidential and never shared with you; results are aggregate only · employees should be encouraged to answer honestly — the outcome depends on it.</p>
-        <div class="fld consent" style="margin-top:18px">
-          <input type="checkbox" id="orgAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
-          <label for="orgAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
-        </div>
-        <div style="text-align:center;margin-top:22px">
-          <button class="btn btn-gold" type="button" [disabled]="!agreed()" (click)="proceedToPayment()">Proceed to Payment</button>
-        </div>
-      </div>
+  @if (error()) {
+    <section style="padding-top:20px;padding-bottom:0"><div class="wrap" style="max-width:760px">
+      <div class="alert-err" role="alert">{{ error() }}</div>
     </div></section>
   }
 
-  @case ('payment') {
-    <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
-      <div class="eyebrow">Payment</div>
-      <h2 class="sec-title">Complete your payment.</h2>
-      <div class="formwrap" style="margin-top:20px;text-align:center">
-        <p style="font-family:var(--disp);font-size:26px;margin-bottom:6px">Total: employees × ₹1,000 / $10</p>
-        <p style="font-size:12.5px;color:var(--mut);margin-bottom:20px">Full GST breakdown shown here · Non-refundable</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-          <button class="otp-btn" type="button" style="padding:12px 18px" (click)="pay()">UPI / QR</button>
-          <button class="otp-btn" type="button" style="padding:12px 18px" (click)="pay()">Card</button>
-          <button class="otp-btn" type="button" style="padding:12px 18px" (click)="pay()">Net Banking</button>
-          <button class="otp-btn" type="button" style="padding:12px 18px" (click)="pay()">NEFT / IMPS</button>
-        </div>
-        <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by the payment gateway — HEAIL never sees your card details.</p>
-      </div>
-    </div></section>
-  }
+  @switch (stage()) {
 
-  @case ('thankyou') {
-    <section style="padding-top:120px"><div class="wrap" style="max-width:640px;text-align:center">
-      <div class="eyebrow">Payment Successful</div>
-      <h2 class="sec-title">Thank you for making payment.</h2>
-      <p class="sec-sub" style="margin:0 auto">Please ask your employees to check their email and complete all four sections of the tests as soon as possible. Your GST invoice is on its way to your inbox.</p>
-      <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/">Return to heail.in</a></div>
-    </div></section>
+    @case ('agreement') {
+      <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
+        <a class="backbtn" routerLink="/pricing/buy-org-form">← Back</a>
+        <div class="eyebrow">Terms of Agreement · Organisation</div>
+        <h2 class="sec-title">Before you pay.</h2>
+        <div class="formwrap" style="max-width:none">
+          <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee covers all four Pulses for every entered employee and is non-refundable once invitations are dispatched · results require 80% completion and a minimum of 5 employees within 10 days — providing correct employee details, including email addresses, is your responsibility · individual employee answers are confidential and never shared with you; results are aggregate only · employees should be encouraged to answer honestly — the outcome depends on it.</p>
+          <div class="fld consent" style="margin-top:18px">
+            <input type="checkbox" id="orgAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
+            <label for="orgAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
+          </div>
+          <div style="text-align:center;margin-top:22px">
+            <button class="btn btn-gold" type="button" [disabled]="!agreed() || actionLoading()" (click)="proceedToPayment()">
+              @if (actionLoading()) { <span class="spinner"></span> } Proceed to Payment
+            </button>
+          </div>
+        </div>
+      </div></section>
+    }
+
+    @case ('payment') {
+      <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
+        <div class="eyebrow">Payment</div>
+        <h2 class="sec-title">Complete your payment.</h2>
+        <div class="formwrap" style="margin-top:20px;text-align:center">
+          <p style="font-family:var(--disp);font-size:26px;margin-bottom:6px">Total: {{ data()!.order.currency }} {{ data()!.order.totalAmount | number:'1.2-2' }}</p>
+          <p style="font-size:12.5px;color:var(--mut);margin-bottom:20px">{{ data()!.employees.length }} employees · Base {{ data()!.order.currency }} {{ data()!.order.baseAmount | number:'1.2-2' }} + GST {{ data()!.order.currency }} {{ data()!.order.gstAmount | number:'1.2-2' }} · Non-refundable · Sandbox checkout, no real charge</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">UPI / QR</button>
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">Card</button>
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">Net Banking</button>
+            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">NEFT / IMPS</button>
+          </div>
+          <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by the payment gateway — HEAIL never sees your card details.</p>
+        </div>
+      </div></section>
+    }
+
+    @case ('thankyou') {
+      <section style="padding-top:120px"><div class="wrap" style="max-width:640px;text-align:center">
+        <a class="backbtn" routerLink="/pricing">← Back</a>
+        <div class="eyebrow">Payment Successful</div>
+        <h2 class="sec-title">Thank you for making payment.</h2>
+        <p class="sec-sub" style="margin:0 auto">Please ask your employees to check their email and complete all four sections of the tests as soon as possible. Your GST invoice is on its way to your inbox.</p>
+        <p class="hint" style="margin-top:14px">{{ data()!.employees.length }} employees enrolled · {{ data()!.order.currency }} {{ data()!.order.totalAmount | number:'1.2-2' }} charged · Receipt: {{ data()!.order.gatewayReference }}</p>
+        <div style="margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a class="btn btn-gold" routerLink="/dashboard">Track Progress</a>
+          <a class="btn btn-navy" routerLink="/">Return to heail.in</a>
+        </div>
+      </div></section>
+    }
   }
 }

@@ -2,33 +2,54 @@
   <a class="backbtn" routerLink="/pricing/buy-org">← Back</a>
   <div class="eyebrow">For Organisations · HEAIL Diagnostics</div>
   <h2 class="sec-title">Enter your employee details</h2>
-  <p class="sec-sub">Minimum 5 employees — we suggest at least one each of Leader, Middle Management and Executive. Results require 80% completion and a minimum of 5 employees. You may also upload a CSV (template provided after login).</p>
+  <p class="sec-sub">Minimum 5 employees — we suggest at least one each of Leader, Middle Management and Executive. Results require 80% completion and a minimum of 5 employees. You may also upload a CSV (S.No, Name, Email, Mobile, Level).</p>
 
-  <div class="formwrap" style="margin-top:26px;max-width:none">
-    <table class="seltable">
-      <tr><th>Name</th><th>Email</th><th>Mobile (optional)</th><th>Level</th></tr>
-      @for (row of rows(); track $index) {
-        <tr>
-          <td><input placeholder="Name" [value]="row.name" (input)="updateRow($index, 'name', $any($event.target).value)"></td>
-          <td><input placeholder="Email" [value]="row.email" (input)="updateRow($index, 'email', $any($event.target).value)"></td>
-          <td><input placeholder="Mobile" [value]="row.mobile" (input)="updateRow($index, 'mobile', $any($event.target).value)"></td>
-          <td>
-            <select [value]="row.level" (change)="updateRow($index, 'level', $any($event.target).value)">
-              <option>Leader</option>
-              <option>Middle Management</option>
-              <option>Executive</option>
-            </select>
-          </td>
-        </tr>
-      }
-    </table>
-    <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
-      <button class="otp-btn" type="button" style="padding:10px 16px" (click)="addRow()">+ Add employee</button>
-      <button class="otp-btn" type="button" style="padding:10px 16px" (click)="uploadCsv()">Upload CSV</button>
+  @if (loading()) {
+    <div class="formwrap" style="text-align:center;padding:60px 42px;max-width:none">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
     </div>
-    @if (csvNotice()) {
-      <p class="hint" style="margin-top:10px">CSV upload with template — coming soon after login.</p>
+  } @else {
+
+    @if (error()) {
+      <div class="alert-err" role="alert" style="margin-top:20px">{{ error() }}</div>
     }
-    <div style="text-align:center;margin-top:26px"><a class="btn btn-gold" routerLink="/pricing/agreement-org">Continue to Agreement</a></div>
-  </div>
+
+    <div class="formwrap" style="margin-top:26px;max-width:none">
+      <table class="seltable">
+        <tr><th>Name</th><th>Email</th><th>Mobile (optional)</th><th>Level</th><th></th></tr>
+        @for (row of rows(); track $index) {
+          <tr>
+            <td><input placeholder="Name" [value]="row.name" (input)="updateRow($index, 'name', $any($event.target).value)"></td>
+            <td><input placeholder="Email" [value]="row.email" (input)="updateRow($index, 'email', $any($event.target).value)"></td>
+            <td><input placeholder="Mobile" [value]="row.mobile" (input)="updateRow($index, 'mobile', $any($event.target).value)"></td>
+            <td>
+              <select [value]="row.level" (change)="updateRow($index, 'level', $any($event.target).value)">
+                <option value="L">Leader</option>
+                <option value="MM">Middle Management</option>
+                <option value="E">Executive</option>
+              </select>
+            </td>
+            <td>
+              @if (rowError($index); as msg) {
+                <span style="color:var(--error);font-size:12px">{{ msg }}</span>
+              }
+            </td>
+          </tr>
+        }
+      </table>
+      <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+        <button class="otp-btn" type="button" style="padding:10px 16px" (click)="addRow()">+ Add employee</button>
+        <input #csvInput type="file" accept=".csv" style="display:none" (change)="onCsvSelected($event)">
+        <button class="otp-btn" type="button" style="padding:10px 16px" (click)="csvInput.click()">Upload CSV</button>
+      </div>
+      @if (csvNotice()) {
+        <p class="hint" style="margin-top:10px">CSV loaded — review the rows above before continuing.</p>
+      }
+      <div style="text-align:center;margin-top:26px">
+        <button class="btn btn-gold" type="button" [disabled]="submitting()" (click)="submit()">
+          @if (submitting()) { <span class="spinner"></span> } Continue to Agreement
+        </button>
+      </div>
+    </div>
+  }
 </div></section>

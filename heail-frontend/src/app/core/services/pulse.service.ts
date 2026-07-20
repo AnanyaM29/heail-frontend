@@ -1,22 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {
-  StartAssessmentResponse, SessionResumeResponse, AnswerResponse, LeaderResult
-} from '../models/assessment.models';
+import { StartAssessmentResponse, SessionResumeResponse, AnswerResponse } from '../models/assessment.models';
+import { PulseStatusResponse, PulseSubmitResponse, PulseCode } from '../models/pulse.models';
 import { environment } from '../../../environments/environment';
 
-const API = `${environment.apiBaseUrl}/api/v1/leader/assessment`;
+const API = `${environment.apiBaseUrl}/api/v1/employee/pulse`;
 
 @Injectable({ providedIn: 'root' })
-export class AssessmentService {
+export class PulseService {
   private http = inject(HttpClient);
 
-  start() {
-    return this.http.post<StartAssessmentResponse>(`${API}/start`, {});
+  status() {
+    return this.http.get<PulseStatusResponse>(`${API}/status`);
   }
 
-  current() {
-    return this.http.get<SessionResumeResponse | null>(`${API}/current`);
+  start(pulseCode: PulseCode) {
+    return this.http.post<StartAssessmentResponse>(`${API}/${pulseCode}/start`, {});
   }
 
   resume(sessionId: string) {
@@ -28,10 +27,6 @@ export class AssessmentService {
   }
 
   submit(sessionId: string) {
-    return this.http.post<LeaderResult>(`${API}/${sessionId}/submit`, {});
-  }
-
-  results() {
-    return this.http.get<LeaderResult[]>(`${API}/results`);
+    return this.http.post<PulseSubmitResponse>(`${API}/${sessionId}/submit`, {});
   }
 }

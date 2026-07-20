@@ -1,0 +1,54 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">Employee Dashboard</div>
+  <h1>The 4-Pulse Diagnostic</h1>
+  <p class="sub">Complete all four Pulses at your own pace, in order. Your individual answers are confidential and never shared with your organisation.</p>
+</div></div>
+
+<section><div class="wrap">
+
+  @if (loading()) {
+    <div class="formwrap" style="text-align:center;padding:60px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+
+    @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+    @if (allCompleted()) {
+      <div class="formwrap" style="text-align:center;margin-bottom:30px">
+        <h3>All four Pulses complete — thank you.</h3>
+        <p style="color:var(--mut)">Your responses have been recorded. There is nothing further for you to do.</p>
+      </div>
+    }
+
+    <div class="pulses">
+      @for (p of pulses(); track p.pulseCode) {
+        <div class="pulse" [class.locked-card]="p.state === 'LOCKED'">
+          <div class="ring"><b>{{ initial(p.pulseCode) }}</b></div>
+          <h4>{{ label(p.pulseCode) }}</h4>
+          <p>{{ description(p.pulseCode) }}</p>
+
+          @switch (p.state) {
+            @case ('COMPLETED') {
+              <div class="pulse-status done">✓ Completed{{ p.completedAt ? ' · ' + (p.completedAt | date:'mediumDate') : '' }}</div>
+            }
+            @case ('IN_PROGRESS') {
+              <button class="btn btn-gold" type="button" style="margin-top:14px" [disabled]="starting() === p.pulseCode" (click)="beginOrResume(p)">
+                @if (starting() === p.pulseCode) { <span class="spinner"></span> } Resume
+              </button>
+            }
+            @case ('PENDING') {
+              <button class="btn btn-gold" type="button" style="margin-top:14px" [disabled]="starting() === p.pulseCode" (click)="beginOrResume(p)">
+                @if (starting() === p.pulseCode) { <span class="spinner"></span> } Start
+              </button>
+            }
+            @case ('LOCKED') {
+              <div class="pulse-status locked" [title]="'Complete ' + previousLabel(p) + ' first'">🔒 Locked</div>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+
+</div></section>

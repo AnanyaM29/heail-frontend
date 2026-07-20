@@ -1,6 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
 import { MruleComponent } from '../../../shared/mrule.component';
@@ -16,10 +16,11 @@ function passwordMatch(g: AbstractControl): ValidationErrors | null {
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.css'
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnInit {
   private fb     = inject(FormBuilder);
   private auth   = inject(AuthService);
   private router = inject(Router);
+  private route  = inject(ActivatedRoute);
 
   form = this.fb.group({
     email:       ['', [Validators.required, Validators.email]],
@@ -32,6 +33,12 @@ export class ResetPasswordComponent {
   error    = signal('');
   done     = signal(false);
   showPw   = signal(false);
+
+  ngOnInit() {
+    const { email, otp } = this.route.snapshot.queryParams;
+    if (email) this.form.patchValue({ email });
+    if (otp) this.form.patchValue({ otp });
+  }
 
   submit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }

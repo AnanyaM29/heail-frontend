@@ -23,3 +23,17 @@ export const leaderGuard: CanActivateFn = () => {
   auth.routeByRole();
   return false;
 };
+
+export const employeeGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  if (auth.role() === 'EMPLOYEE') return true;
+  auth.routeByRole();
+  return false;
+};
+
+export const superadminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  if (auth.role() === 'SUPERADMIN') return true;
+  auth.routeByRole();
+  return false;
+};

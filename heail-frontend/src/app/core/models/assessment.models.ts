@@ -40,6 +40,8 @@ export interface LeaderResult {
   band: LeaderBand;
   domainScores: Record<string, number>;
   strongestPrinciple: string | null;
+  strongestPrincipleText: string | null;
   weakestPrinciple: string | null;
+  weakestPrincipleText: string | null;
   createdAt: string;
 }

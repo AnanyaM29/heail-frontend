@@ -6,8 +6,9 @@ import {
   AuthResponse, AuthUser, LoginRequest,
   RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest
 } from '../models/auth.models';
+import { environment } from '../../../environments/environment';
 
-const API = 'http://localhost:8080/api/v1/auth';
+const API = `${environment.apiBaseUrl}/api/v1/auth`;
 const TOKEN_KEY = 'heail_access';
 const REFRESH_KEY = 'heail_refresh';
 const USER_KEY = 'heail_user';

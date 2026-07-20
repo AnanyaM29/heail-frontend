@@ -1,0 +1,96 @@
+.dash-wrap { max-width: 1140px; }
+
+.dash-panel {
+  background: #fff; border: 1px solid var(--ivory2); border-top: 3px solid var(--gold);
+  padding: 34px 38px; width: 100%;
+}
+
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.panel-head h3 { font-family: var(--disp); font-size: 21px; font-weight: 600; color: var(--navy-deep); }
+.panel-head p { font-size: 12.5px; color: var(--mut); }
+
+/* ── Stat row ── */
+.stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+.stat {
+  flex: 1; min-width: 180px; background: #fff; border: 1px solid var(--ivory2);
+  border-radius: 4px; padding: 22px 24px; text-align: center;
+}
+.stat b { display: block; font-family: var(--disp); font-size: 30px; color: var(--navy-deep); font-weight: 700; }
+.stat b i { font-style: normal; font-size: 18px; color: var(--mut); font-weight: 500; }
+.stat span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); font-weight: 600; }
+.stat-good { color: var(--success) !important; font-size: 22px !important; }
+.stat-pending { color: var(--gold) !important; font-size: 22px !important; }
+
+/* ── Overall dial ── */
+.ragdial-wrap { display: flex; justify-content: center; padding: 10px 0 4px; }
+.ragdial {
+  width: 168px; height: 168px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 10px solid; position: relative;
+}
+.ragdial-label { font-family: var(--disp); font-size: 22px; font-weight: 700; text-align: center; line-height: 1.2; padding: 0 12px; }
+.ragdial-red { border-color: #FEB2B2; background: #FFF5F5; color: var(--error); }
+.ragdial-amber { border-color: #F6E05E; background: #FFFAF0; color: #B7791F; }
+.ragdial-green { border-color: #9AE6B4; background: #F0FFF4; color: var(--success); }
+.ragdial-insufficient-data { border-color: #E2D9C4; background: #F1EADA; color: var(--mut); }
+
+/* ── RAG chip (used in pulse cards + section table) ── */
+.rag {
+  display: inline-block; padding: 7px 20px; border-radius: 999px;
+  font-weight: 700; font-size: 13px; letter-spacing: .04em;
+}
+.rag-red { background: #FFF5F5; color: var(--error); border: 1px solid #FEB2B2; }
+.rag-amber { background: #FFFAF0; color: #B7791F; border: 1px solid #F6E05E; }
+.rag-green { background: #F0FFF4; color: var(--success); border: 1px solid #9AE6B4; }
+.rag-insufficient-data { background: #F1EADA; color: var(--mut); border: 1px solid #E2D9C4; }
+
+/* ── Pulse RAG cards ── */
+.pulse-rag-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.pulse-rag-card {
+  text-align: center; background: var(--ivory); border: 1px solid var(--ivory2);
+  border-radius: 4px; padding: 22px 14px;
+}
+.pulse-rag-card p { font-size: 13px; color: var(--navy); font-weight: 600; margin-bottom: 12px; }
+
+/* ── Section table ── */
+.section-table-wrap { border: 1px solid var(--ivory2); border-radius: 4px; overflow: hidden; }
+.section-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.section-table th, .section-table td { padding: 12px 18px; text-align: left; }
+.section-table th {
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut);
+  background: var(--ivory); border-bottom: 1px solid var(--ivory2);
+}
+.section-table tbody tr { border-bottom: 1px solid var(--ivory2); border-left: 3px solid transparent; }
+.section-table tbody tr:last-child { border-bottom: none; }
+.section-table .sc-name { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--navy-deep); }
+.section-table .sc-code {
+  display: inline-block; font-family: var(--body); font-weight: 600; font-size: 10px;
+  letter-spacing: .06em; color: var(--mut); background: var(--ivory); border: 1px solid var(--ivory2);
+  border-radius: 3px; padding: 2px 7px; margin-left: 10px; vertical-align: middle;
+}
+.section-table .sc-count { color: var(--mut); }
+.section-table tr.row-red { border-left-color: var(--error); background: #FFFBFB; }
+.section-table tr.row-amber { border-left-color: #B7791F; background: #FFFDF8; }
+.section-table tr.row-green { border-left-color: var(--success); background: #FBFFFC; }
+.section-table tr.row-insufficient-data { border-left-color: #D9CFB6; }
+
+/* ── Employee progress table ── */
+.monitor-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.monitor-table th, .monitor-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--ivory2); }
+.monitor-table th {
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut);
+}
+.monitor-table tbody tr:last-child td { border-bottom: none; }
+.monitor-table tbody tr:hover { background: var(--ivory); }
+.monitor-table .emp-name { font-weight: 600; color: var(--navy-deep); }
+.monitor-table td:not(:first-child), .monitor-table th:not(:first-child) { text-align: center; }
+
+.pstate { display: inline-block; font-weight: 700; font-size: 16px; }
+.pstate-done { color: var(--success); }
+.pstate-progress { color: var(--gold); }
+.pstate-notstarted { color: #C9BFA4; }
+
+@media (max-width: 720px) {
+  .dash-panel { padding: 26px 20px; }
+  .pulse-rag-row { grid-template-columns: repeat(2, 1fr); }
+  .stat-row { flex-direction: column; }
+}

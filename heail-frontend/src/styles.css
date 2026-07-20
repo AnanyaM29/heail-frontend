@@ -23,7 +23,9 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 720px) { .prose-j { text-align: left; } }
 
 /* ===== Buttons ===== */
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 34px; border-radius: 2px; font-weight: 600; font-size: 13.5px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; border: 1px solid var(--gold); transition: all .25s; font-family: var(--body); text-decoration: none; gap: 8px; }
+/* position+z-index above the fixed cookie banner (z-index:200) so on short pages
+   a bottom-of-page CTA is never silently unclickable underneath it */
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 34px; border-radius: 2px; font-weight: 600; font-size: 13.5px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; border: 1px solid var(--gold); transition: all .25s; font-family: var(--body); text-decoration: none; gap: 8px; position: relative; z-index: 201; }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-gold { background: linear-gradient(120deg, var(--gold), var(--gold-bright)); color: var(--navy-deep); border: none; }
 .btn-gold:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
