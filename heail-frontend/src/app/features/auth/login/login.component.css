@@ -29,13 +29,6 @@
 }
 .brand-quote em { color: var(--gold-bright); font-style: italic; }
 
-.brand-sub {
-  font-size: 14px;
-  color: #8FA2BE;
-  letter-spacing: .04em;
-  line-height: 1.8;
-}
-
 /* ── Right form panel ── */
 .auth-panel {
   background: var(--ivory);

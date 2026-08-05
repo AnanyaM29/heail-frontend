@@ -3,12 +3,11 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
-import { MruleComponent } from '../../../shared/mrule.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, HeailLogoComponent, MruleComponent],
+  imports: [ReactiveFormsModule, RouterLink, HeailLogoComponent],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.css'
 })

@@ -10,6 +10,7 @@ export interface Order {
   status: OrderStatus;
   agreementAcceptedAt?: string;
   gatewayReference?: string;
+  invoiceNumber?: string;
   paidAt?: string;
   createdAt: string;
   metadata?: Record<string, string>;

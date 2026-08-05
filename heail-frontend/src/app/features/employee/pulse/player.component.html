@@ -24,6 +24,7 @@
           <button type="button" class="opt" [class.selected]="currentSelected() === 'B'" (click)="select('B')">{{ q.optionB }}</button>
           <button type="button" class="opt" [class.selected]="currentSelected() === 'C'" (click)="select('C')">{{ q.optionC }}</button>
           <button type="button" class="opt" [class.selected]="currentSelected() === 'D'" (click)="select('D')">{{ q.optionD }}</button>
+          <button type="button" class="opt opt-na" [class.selected]="currentSelected() === 'N'" (click)="select('N')">Not applicable / prefer not to answer</button>
         </div>
 
         <div class="nav-row">

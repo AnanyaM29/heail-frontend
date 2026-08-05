@@ -25,7 +25,11 @@ export class OrderService {
     return this.http.post<Order>(`${API}/${id}/agreement`, { version });
   }
 
-  pay(id: string) {
-    return this.http.post<Order>(`${API}/${id}/pay`, {});
+  createPaypalOrder(id: string) {
+    return this.http.post<Order>(`${API}/${id}/create-paypal-order`, {});
+  }
+
+  capturePaypalOrder(id: string, paypalOrderId: string) {
+    return this.http.post<Order>(`${API}/${id}/capture-paypal-order`, { paypalOrderId });
   }
 }

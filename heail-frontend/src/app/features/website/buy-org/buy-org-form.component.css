@@ -1,0 +1,144 @@
+/* ── Organisation Details row: name / headcount / industry side by side ── */
+.fld-row {
+  display: grid;
+  grid-template-columns: 1.4fr .9fr 1.4fr;
+  gap: 20px;
+}
+
+/* ── Top row: Back link left, CSV actions pinned top-right of the page ── */
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.top-row .backbtn { margin: 0; }
+.csv-actions { display: flex; gap: 12px; flex-shrink: 0; }
+
+.csvbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 20px;
+  border: 1px solid #D9CFB6;
+  background: #fff;
+  color: var(--navy);
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.csvbtn svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--gold); }
+.csvbtn:hover { border-color: var(--gold); background: var(--ivory); }
+.csvbtn:hover svg { color: var(--navy); }
+
+/* ── Panel header row: label left, clear-all top-right of the panel ── */
+.panel-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.panel-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--mut); }
+
+.refresh-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #D9CFB6;
+  background: #fff;
+  color: var(--navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.refresh-btn svg { width: 16px; height: 16px; transition: transform .35s; }
+.refresh-btn:hover { border-color: var(--gold); background: var(--ivory); }
+.refresh-btn:hover svg { transform: rotate(180deg); }
+
+/* Row-based layout instead of an HTML <table> — lets column widths flex to
+   fill the available width instead of forcing a fixed table width that
+   needs horizontal scrolling on anything narrower than a wide desktop. */
+.seltable { display: flex; flex-direction: column; gap: 10px; }
+
+.selrow {
+  display: grid;
+  grid-template-columns: 1.3fr 1.5fr 1.6fr .8fr 76px;
+  gap: 14px;
+  align-items: start;
+}
+
+/* Each field gets its own cell so a validation message sits directly under
+   the field it's actually about, instead of one message spanning the whole
+   row underneath every column. */
+.selcell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.selrow-head span {
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--mut);
+}
+.selrow-head span i { font-style: normal; text-transform: none; letter-spacing: 0; opacity: .75; }
+
+.selrow input,
+.selrow select {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #D9CFB6;
+  background: var(--ivory);
+  font-family: var(--body);
+  font-size: 15px;
+  color: var(--ink);
+  border-radius: 2px;
+}
+.selrow input:focus,
+.selrow select:focus { outline: 2px solid var(--gold); background: #fff; }
+.selrow select { cursor: pointer; }
+
+.field-err { border-color: var(--error) !important; background: #FFF5F5 !important; }
+.field-err:focus { outline-color: var(--error) !important; }
+
+.mobile-cc-row { display: flex; gap: 6px; }
+.mobile-cc-row select { flex: 0 0 auto; width: 72px; padding-left: 8px; padding-right: 4px; }
+.mobile-cc-row input { flex: 1; min-width: 0; }
+
+.rowactions { display: flex; gap: 8px; justify-content: center; padding-top: 6px; }
+
+.rowdel, .rowadd {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.rowdel { border: 1px solid #D9CFB6; background: #fff; color: var(--error); }
+.rowdel:hover:not(:disabled) { background: #FFF5F5; border-color: #FEB2B2; }
+.rowdel:disabled { opacity: .3; cursor: not-allowed; }
+
+.rowadd { border: 1px solid var(--gold); background: var(--gold); color: var(--navy-deep); }
+.rowadd:hover { filter: brightness(1.08); }
+
+.cellerr { font-size: 12px; font-weight: 600; color: var(--error); line-height: 1.35; }
+
+@media (max-width: 760px) {
+  .selrow { grid-template-columns: 1fr; gap: 8px; }
+  .selrow-head { display: none; }
+  .rowactions { justify-content: flex-end; }
+  .top-row { flex-direction: column; align-items: flex-start; }
+  .fld-row { grid-template-columns: 1fr; }
+}

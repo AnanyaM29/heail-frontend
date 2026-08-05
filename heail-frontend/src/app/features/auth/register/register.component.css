@@ -61,37 +61,6 @@
   color: var(--navy-deep);
 }
 
-/* Role tabs */
-.role-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid #D9CFB6;
-  border-radius: 2px;
-  margin-bottom: 24px;
-  overflow: hidden;
-}
-
-.role-tab {
-  padding: 12px;
-  background: #fff;
-  border: none;
-  font-family: var(--body);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  color: var(--mut);
-  cursor: pointer;
-  transition: all .2s;
-  border-right: 1px solid #D9CFB6;
-}
-.role-tab:last-child { border-right: none; }
-.role-tab.active {
-  background: var(--navy);
-  color: var(--gold-bright);
-}
-.role-tab:not(.active):hover { background: var(--ivory2); }
-
 /* Fields */
 .fld {
   margin-bottom: 18px;

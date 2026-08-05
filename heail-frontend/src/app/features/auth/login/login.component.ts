@@ -3,12 +3,11 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
-import { MruleComponent } from '../../../shared/mrule.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, HeailLogoComponent, MruleComponent],
+  imports: [ReactiveFormsModule, RouterLink, HeailLogoComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

@@ -14,6 +14,15 @@
 .opt:hover { border-color: var(--gold); background: rgba(217,169,63,.06); }
 .opt.selected { border-color: var(--gold); background: rgba(217,169,63,.14); font-weight: 600; }
 
+/* Set apart from the four real answer choices — NA is a deliberate non-answer,
+   not "just another option", and the report treats a high NA rate on a
+   section as a finding in its own right, not a hole to paper over. */
+.opt-na {
+  margin-top: 8px; border-style: dashed; color: var(--mut); font-size: 13.5px; font-style: italic;
+}
+.opt-na:hover { border-color: var(--mut); background: #FAFAFA; }
+.opt-na.selected { border-color: var(--mut); background: #F0F0F0; color: var(--ink); font-weight: 600; }
+
 .nav-row { display: flex; justify-content: flex-end; margin-top: 32px; }
 
 .alert-err {

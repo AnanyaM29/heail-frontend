@@ -7,10 +7,10 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  role: 'ORG_ADMIN' | 'LEADER';
-  organisationName?: string;
-  industry?: string;
-  sizeCategory?: string;
+  city: string;
+  country: string;
+  mobile: string;
+  otp: string;
 }
 
 export interface ForgotPasswordRequest {

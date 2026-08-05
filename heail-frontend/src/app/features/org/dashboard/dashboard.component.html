@@ -1,7 +1,7 @@
 <div class="phero"><div class="wrap">
-  <div class="eyebrow">Organisation Dashboard</div>
-  <h1>Diagnostic Round</h1>
-  <p class="sub">Track completion and view your HEAIL Diagnostic report. Individual employee answers remain confidential — only aggregate results are ever shown here.</p>
+  <div class="eyebrow">Organisation Dashboard · Confidential</div>
+  <h1>{{ order()?.orgName || 'Diagnostic Round' }}</h1>
+  <p class="sub">Track completion and view your HEAIL Diagnostic report. Individual employee answers remain confidential — only aggregate and level-based results are ever shown here.</p>
 </div></div>
 
 <section><div class="wrap dash-wrap">
@@ -32,6 +32,12 @@
           <b>{{ m.fullyCompletedCount }} <i>/ {{ m.totalEmployees }}</i></b>
           <span>Fully Completed</span>
         </div>
+        @if (report(); as r0) {
+          <div class="stat">
+            <b>{{ r0.respondentsL }} / {{ r0.respondentsMM }} / {{ r0.respondentsE }}</b>
+            <span>L / MM / E</span>
+          </div>
+        }
         <div class="stat">
           @if (m.reportReleasedAt) {
             <b class="stat-good">Released</b>
@@ -43,51 +49,192 @@
       </div>
 
       @if (report(); as r) {
+
+        <!-- ── The perception spine — the primary screen ─────────────── -->
         <div class="dash-panel" style="margin-top:22px">
           <div class="panel-head">
-            <h3>Overall Result</h3>
-            <p>Based on {{ r.respondentCount }} of {{ r.totalEmployees }} employees who fully completed all four Pulses.</p>
+            <h3>The Perception Spine</h3>
+            <p>Sorted by gap — where leadership is most wrong first.</p>
           </div>
-          <div class="ragdial-wrap">
-            <div [class]="ragDialClass(r.overallRag)">
-              <span class="ragdial-label">{{ ragLabel(r.overallRag) }}</span>
-            </div>
+          <p class="spine-lead">Each row is one of the twenty sections. The three markers show where Leadership, Middle Management and Employees placed the organisation on the shared anchor questions for that section. <b>The length of the bar is the disagreement</b> — long bars aren't weaknesses, they're things leadership can't currently see.</p>
+
+          <div class="spine-controls">
+            <button type="button" class="tog" [class.active]="sortMode() === 'gap'" (click)="setSort('gap')">Sort by gap</button>
+            <button type="button" class="tog" [class.active]="sortMode() === 'score'" (click)="setSort('score')">Sort by score</button>
+            <span class="legend">
+              <span><i class="dot-l"></i>Leadership</span>
+              <span><i class="dot-mm"></i>Middle mgmt</span>
+              <span><i class="dot-e"></i>Employees</span>
+            </span>
           </div>
 
-          <div class="panel-head" style="margin-top:36px">
-            <h3>By Pulse</h3>
-          </div>
-          <div class="pulse-rag-row">
-            @for (p of r.pulses; track p.pulseCode) {
-              <div class="pulse-rag-card">
-                <p>{{ p.displayName }}</p>
-                <div [class]="ragClass(p.rag)">{{ ragLabel(p.rag) }}</div>
+          <div class="spine">
+            @for (s of sortedSections(); track s.sectionCode) {
+              <div class="srow">
+                <div class="sname">{{ s.sectionName }}<span class="pl">{{ label(s.pulseCode) }} · {{ s.sectionCode }}</span></div>
+
+                @if (s.gap !== null) {
+                  <div class="track">
+                    <div class="base"></div>
+                    <div class="span" [class.hot]="isHotGap(s.gap)"
+                         [style.left.%]="spineTrackLeft(s)"
+                         [style.width.%]="spineTrackWidth(s)"></div>
+                    <div class="dot dot-e" [style.left.%]="pct(s.levelE)" [title]="'Employees ' + s.levelE"></div>
+                    @if (s.levelMM !== null) {
+                      <div class="dot dot-mm" [style.left.%]="pct(s.levelMM)" [title]="'Middle mgmt ' + s.levelMM"></div>
+                    }
+                    <div class="dot dot-l" [style.left.%]="pct(s.levelL)" [title]="'Leadership ' + s.levelL"></div>
+                  </div>
+                  <div class="gapv" [class.hot]="isHotGap(s.gap)">{{ s.gap! > 0 ? '+' : '' }}{{ s.gap }}</div>
+                } @else {
+                  <div class="track suppressed-track">
+                    <span class="suppressed-note">{{ s.suppressedReason }}</span>
+                  </div>
+                  <div class="gapv">—</div>
+                }
               </div>
             }
           </div>
+          <div class="scale"><span></span><span class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></span><span></span></div>
+          <p class="hint" style="margin-top:12px">Gap is computed only on the fixed anchor questions tagged for every level — each section's gap figure carries the exact number of shared questions it rests on (shown on hover), not a hidden average.</p>
+        </div>
 
-          <div class="panel-head" style="margin-top:36px">
-            <h3>By Section</h3>
-            <p>Sorted by severity — sections needing attention first.</p>
-          </div>
-          <div class="section-table-wrap">
-            <table class="section-table">
-              <thead><tr><th>Section</th><th>RAG</th><th>Respondents</th></tr></thead>
-              <tbody>
-                @for (s of sortedSections(); track s.sectionCode) {
-                  <tr [class]="rowClass(s.rag)">
-                    <td class="sc-name">{{ s.sectionName }}<span class="sc-code">{{ s.sectionCode }}</span></td>
-                    <td><span [class]="ragClass(s.rag)">{{ ragLabel(s.rag) }}</span></td>
-                    <td class="sc-count">{{ s.respondentCount }}</td>
-                  </tr>
+        <!-- ── Overall result ─────────────────────────────────────────── -->
+        <div class="dash-panel" style="margin-top:22px">
+          <div class="panel-head"><h3>Where the Organisation Stands</h3></div>
+          <div class="overall-grid">
+            <div class="bigscore">
+              <div class="bigscore-v">{{ r.overallIndex }}</div>
+              <div class="bigscore-band">{{ bandLabel(r.overallBand) }}</div>
+              <div class="bigscore-of">index 0–100</div>
+            </div>
+            <div>
+              <p class="overall-lead">
+                A composite of all {{ r.respondentCount }} respondents across all four Pulses.
+                @if (r.divergenceIndex !== null) {
+                  The organisation's <b>divergence index of {{ r.divergenceIndex }}</b> is how much leadership and delivery staff disagree with each other, on average, across every measurable section.
+                } @else {
+                  A divergence index isn't computable yet — no section currently clears the 5-respondents-per-level floor.
                 }
-              </tbody>
-            </table>
+              </p>
+              <div class="ragdial-wrap" style="justify-content:flex-start;padding:6px 0 0">
+                <div [class]="ragDialClass(r.overallRag)" style="width:64px;height:64px;border-width:6px">
+                  <span class="ragdial-label" style="font-size:12px">{{ ragLabel(r.overallRag) }}</span>
+                </div>
+                <span class="hint" style="align-self:center;margin-left:14px">Legacy RAG band, shown for reference only — the index above is the primary value.</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- ── By Pulse ───────────────────────────────────────────────── -->
+        <div class="panel-head" style="margin-top:36px">
+          <h3>Four Pulses, Two Numbers Each</h3>
+          <p>Net gap alone hides the problem — divergence catches what net cancels out.</p>
+        </div>
+        <div class="pulse-rag-row">
+          @for (p of r.pulses; track p.pulseCode) {
+            <div class="pulse-rag-card pulse-card-v2">
+              <p>{{ p.displayName }}</p>
+              <div class="pulse-index">{{ p.index }}</div>
+              <div class="pulse-band">{{ bandLabel(p.band) }}</div>
+              <dl class="pulse-dl">
+                <dt>Net gap (L − E)</dt><dd>{{ p.netGap !== null ? (p.netGap! > 0 ? '+' : '') + p.netGap : '—' }}</dd>
+                <dt>Divergence</dt><dd>{{ p.divergenceIndex ?? '—' }}</dd>
+                <dt>Mgmt alignment</dt><dd>{{ p.managementAlignment ?? '—' }}</dd>
+                <dt>Consensus</dt><dd>{{ p.consensus ?? '—' }}</dd>
+              </dl>
+              @if (p.warning) { <p class="pulse-warn">{{ p.warning }}</p> }
+            </div>
+          }
+        </div>
+
+        <!-- ── Findings ───────────────────────────────────────────────── -->
+        @if (r.findings.length > 0) {
+          <div class="panel-head" style="margin-top:36px">
+            <h3>Questions Worth the Whole Report</h3>
+            <p>Individual anchor questions where the levels answered furthest apart.</p>
+          </div>
+          <div class="findings">
+            @for (f of r.findings; track f.questionId) {
+              <div class="finding">
+                <p class="finding-q">"{{ f.text }}"</p>
+                <div class="finding-split">
+                  <span>Leadership <b>{{ f.levelL ?? '—' }}</b></span>
+                  <span>Middle mgmt <b>{{ f.levelMM ?? '—' }}</b></span>
+                  <span>Employees <b>{{ f.levelE ?? '—' }}</b></span>
+                  <span class="finding-gap">Gap <b>{{ f.gap > 0 ? '+' : '' }}{{ f.gap }}</b></span>
+                </div>
+                <p class="finding-meta">{{ f.sectionName }} · {{ label(f.pulseCode) }} · n(L)={{ f.nL }}, n(MM)={{ f.nMM }}, n(E)={{ f.nE }}</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Data quality ───────────────────────────────────────────── -->
+        <div class="panel-head" style="margin-top:36px">
+          <h3>How Much of This Can You Trust</h3>
+          <p>Published before the findings, not buried behind them.</p>
+        </div>
+        <div class="dq-grid">
+          <div class="dq-item">
+            <div class="dq-k">Level coverage</div>
+            <div class="dq-v">{{ r.dataQuality.respondentsL }} / {{ r.dataQuality.respondentsMM }} / {{ r.dataQuality.respondentsE }}</div>
+            <div class="dq-n">L / MM / E respondents who fully completed all four Pulses.</div>
+          </div>
+          <div class="dq-item">
+            <div class="dq-k">Shared questions</div>
+            <div class="dq-v">{{ r.dataQuality.sharedQuestions }}</div>
+            <div class="dq-n">Fixed anchor questions answered by every respondent — gap figures rest on these only.</div>
+          </div>
+          <div class="dq-item">
+            <div class="dq-k">Straight-lining</div>
+            <div class="dq-v">{{ r.dataQuality.straightliningCount }}</div>
+            <div class="dq-n">Respondents flagged for 8+ consecutive identical answers within a Pulse.</div>
+          </div>
+          <div class="dq-item">
+            <div class="dq-k">Silence rate</div>
+            <div class="dq-v">{{ r.dataQuality.silenceRatePct | number:'1.0-1' }}%</div>
+            <div class="dq-n">"Not applicable" responses — itself a finding when concentrated in one level or section.</div>
+          </div>
+          <div class="dq-item">
+            <div class="dq-k">Voice confidence</div>
+            <div class="dq-v">{{ r.dataQuality.voiceConfidence }}</div>
+            <div class="dq-n">Share of responses carrying genuine signal (1 − silence − straight-lining).</div>
+          </div>
+          @if (r.dataQuality.medianCompletionMinutes !== null) {
+            <div class="dq-item">
+              <div class="dq-k">Median completion</div>
+              <div class="dq-v">{{ r.dataQuality.medianCompletionMinutes }} min</div>
+              <div class="dq-n">Per-Pulse. No evidence of rushed responding unless this is implausibly low.</div>
+            </div>
+          }
+        </div>
+
+        @if (r.risk.trustDeficit !== null || r.risk.attritionSignal !== null || r.risk.changeFatigue !== null || r.risk.executionDrag !== null) {
+          <div class="panel-head" style="margin-top:36px">
+            <h3>What This Costs</h3>
+            <p>Risk indices — composites held stable across every organisation, not tuned per client.</p>
+          </div>
+          <div class="dq-grid">
+            @if (r.risk.trustDeficit !== null) {
+              <div class="dq-item"><div class="dq-k">Trust deficit</div><div class="dq-v">{{ r.risk.trustDeficit }}</div><div class="dq-n">Employees' read on Management Integrity &amp; Trust, unaveraged with leadership's.</div></div>
+            }
+            @if (r.risk.executionDrag !== null) {
+              <div class="dq-item"><div class="dq-k">Execution drag</div><div class="dq-v">{{ r.risk.executionDrag! > 0 ? '+' : '' }}{{ r.risk.executionDrag }}</div><div class="dq-n">GrowthPulse index minus SystemPulse index — strategy vs. the systems meant to deliver it.</div></div>
+            }
+            @if (r.risk.attritionSignal !== null) {
+              <div class="dq-item"><div class="dq-k">Attrition signal</div><div class="dq-v">{{ r.risk.attritionSignal }}</div><div class="dq-n">Employees' read on Attrition, Exit &amp; Offboarding. A leading indicator.</div></div>
+            }
+            @if (r.risk.changeFatigue !== null) {
+              <div class="dq-item"><div class="dq-k">Change fatigue</div><div class="dq-v">{{ r.risk.changeFatigue }}</div><div class="dq-n">Employees' read on Transformation Readiness + Culture &amp; Fears, combined.</div></div>
+            }
+          </div>
+        }
+
       } @else {
         <div class="dash-panel" style="margin-top:22px;text-align:center;padding:44px 30px">
-          <p style="color:var(--mut);max-width:520px;margin:0 auto">The report releases automatically once all employees have completed all four Pulses, or on day 8 if at least 80% have completed. You'll be emailed the moment it's ready.</p>
+          <p style="color:var(--mut);max-width:520px;margin:0 auto">The report releases automatically once all employees have completed all four Pulses, or after 7 days of registration if at least 80% of your registered employees have completed the assessments. You'll be emailed the moment it's ready.</p>
         </div>
       }
 

@@ -29,7 +29,16 @@ export const routes: Routes = [
 
       /* ── Protected app stubs (inside layout) ── */
       { path: 'admin',     canActivate: [authGuard, superadminGuard], loadComponent: () => import('./features/admin/console/console.component').then(m => m.AdminConsoleComponent) },
-      { path: 'dashboard', canActivate: [authGuard], loadComponent: () => import('./features/org/dashboard/dashboard.component').then(m => m.OrgDashboardComponent) },
+      { path: 'profile',   canActivate: [authGuard], loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
+      // Unified "my activity" home — shows org-admin, respondent, and Leader
+      // activity together, since a single account can legitimately hold more
+      // than one of these at once (see DashboardController/DashboardService).
+      { path: 'dashboard',     canActivate: [authGuard], loadComponent: () => import('./features/dashboard/my-dashboard.component').then(m => m.MyDashboardComponent) },
+      { path: 'dashboard/org', canActivate: [authGuard], loadComponent: () => import('./features/org/dashboard/dashboard.component').then(m => m.OrgDashboardComponent) },
+      // NOTE: leaderGuard/employeeGuard now only check isAuthenticated() — a
+      // strict role check here would block, e.g., an org admin who is also a
+      // respondent from reaching /pulse. Mirrors the backend's @PreAuthorize
+      // loosening on the equivalent controllers.
       { path: 'pulse',     canActivate: [authGuard, employeeGuard], loadComponent: () => import('./features/employee/dashboard/dashboard.component').then(m => m.PulseDashboardComponent) },
       { path: 'pulse/assessment/:pulseCode/:sessionId', canActivate: [authGuard, employeeGuard], loadComponent: () => import('./features/employee/pulse/player.component').then(m => m.PulsePlayerComponent) },
       { path: 'leader',    canActivate: [authGuard, leaderGuard], loadComponent: () => import('./features/leader/dashboard/dashboard.component').then(m => m.LeaderDashboardComponent) },

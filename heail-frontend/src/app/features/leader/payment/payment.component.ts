@@ -1,8 +1,9 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, effect } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderService } from '../../../core/services/order.service';
+import { PaypalLoaderService } from '../../../core/services/paypal-loader.service';
 import { Order } from '../../../core/models/order.models';
 
 const AGREEMENT_VERSION = 'v1';
@@ -19,6 +20,7 @@ type Stage = 'select' | 'details' | 'agreement' | 'payment' | 'thankyou';
 export class LeaderPaymentComponent {
   auth = inject(AuthService);
   private orderService = inject(OrderService);
+  private paypalLoader = inject(PaypalLoaderService);
 
   order = signal<Order | null>(null);
   detailsDone = signal(false);
@@ -38,6 +40,61 @@ export class LeaderPaymentComponent {
     if (o.status === 'AGREEMENT_ACCEPTED' || o.status === 'PAYMENT_INITIATED') return 'payment';
     return this.detailsDone() ? 'agreement' : 'details';
   });
+
+  private paypalRendered = false;
+  private renderPaypalEffect = effect(() => {
+    const o = this.order();
+    if (!o || this.stage() !== 'payment' || this.paypalRendered) return;
+    this.paypalRendered = true;
+    this.beginPayment(o.id);
+  });
+
+  // Creates the order first, then only renders PayPal's own button widget if
+  // the backend actually started a real gateway payment (PAYMENT_INITIATED).
+  // If PayPal is disabled server-side, createPaypalOrder() comes back already
+  // PAID — stage() flips to 'thankyou' on its own, no PayPal SDK ever loads.
+  private beginPayment(orderId: string) {
+    this.actionLoading.set(true);
+    this.error.set('');
+    this.orderService.createPaypalOrder(orderId).subscribe({
+      next: res => {
+        this.order.set(res);
+        this.actionLoading.set(false);
+        if (res.status === 'PAYMENT_INITIATED' && res.gatewayReference) {
+          this.renderPaypalButtons(orderId, res.gatewayReference);
+        }
+      },
+      error: (e: any) => {
+        this.error.set(this.msg(e));
+        this.actionLoading.set(false);
+        this.paypalRendered = false;
+      }
+    });
+  }
+
+  private renderPaypalButtons(orderId: string, paypalOrderId: string) {
+    this.paypalLoader.load().then(paypal => {
+      paypal.Buttons({
+        createOrder: () => Promise.resolve(paypalOrderId),
+        onApprove: (data: any) => {
+          this.actionLoading.set(true);
+          this.error.set('');
+          this.orderService.capturePaypalOrder(orderId, data.orderID).subscribe({
+            next: updated => { this.order.set(updated); this.actionLoading.set(false); },
+            error: (e: any) => {
+              this.error.set(this.msg(e));
+              this.actionLoading.set(false);
+              this.paypalRendered = false;
+            }
+          });
+        },
+        onError: (err: any) => {
+          this.error.set('PayPal checkout error — please try again.');
+          console.error(err);
+        }
+      }).render('#paypal-button-container');
+    }).catch(() => this.error.set('Could not load PayPal checkout. Please refresh and try again.'));
+  }
 
   select() {
     this.actionLoading.set(true);
@@ -71,17 +128,6 @@ export class LeaderPaymentComponent {
     this.actionLoading.set(true);
     this.error.set('');
     this.orderService.acceptAgreement(o.id, AGREEMENT_VERSION).subscribe({
-      next: updated => { this.order.set(updated); this.actionLoading.set(false); },
-      error: (e: any) => { this.error.set(this.msg(e)); this.actionLoading.set(false); }
-    });
-  }
-
-  pay() {
-    const o = this.order();
-    if (!o) return;
-    this.actionLoading.set(true);
-    this.error.set('');
-    this.orderService.pay(o.id).subscribe({
       next: updated => { this.order.set(updated); this.actionLoading.set(false); },
       error: (e: any) => { this.error.set(this.msg(e)); this.actionLoading.set(false); }
     });

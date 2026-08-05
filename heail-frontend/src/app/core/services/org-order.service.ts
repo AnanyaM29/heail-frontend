@@ -34,11 +34,23 @@ export class OrgOrderService {
     return this.http.put<OrgOrderResponse>(`${API}/${id}/employees`, rows);
   }
 
+  setOrgDetails(id: string, organisationName: string, headcount: number, industry: string) {
+    return this.http.put<OrgOrderResponse>(`${API}/${id}/organisation`, { organisationName, headcount, industry });
+  }
+
   acceptAgreement(id: string, version: string) {
     return this.http.post<OrgOrderResponse>(`${API}/${id}/agreement`, { version });
   }
 
-  pay(id: string) {
-    return this.http.post<OrgOrderResponse>(`${API}/${id}/pay`, {});
+  createPaypalOrder(id: string) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/create-paypal-order`, {});
+  }
+
+  capturePaypalOrder(id: string, paypalOrderId: string) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/capture-paypal-order`, { paypalOrderId });
+  }
+
+  cancel(id: string) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/cancel`, {});
   }
 }

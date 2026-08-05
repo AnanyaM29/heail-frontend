@@ -13,6 +13,10 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--body); color: var(--ink); background: var(--ivory); line-height: 1.7; font-size: 16.5px; font-weight: 400; }
+body.cookie-banner-open { padding-bottom: 90px; }
+@media (max-width: 600px) {
+  body.cookie-banner-open { padding-bottom: 170px; }
+}
 h1, h2, h3 { font-family: var(--disp); font-weight: 600; line-height: 1.12; }
 a { color: inherit; text-decoration: none; }
 
@@ -27,6 +31,10 @@ a { color: inherit; text-decoration: none; }
    a bottom-of-page CTA is never silently unclickable underneath it */
 .btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 34px; border-radius: 2px; font-weight: 600; font-size: 13.5px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; border: 1px solid var(--gold); transition: all .25s; font-family: var(--body); text-decoration: none; gap: 8px; position: relative; z-index: 201; }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
+/* Opt out of the elevation above: on a page short enough that this button sits
+   right above the footer, the raised z-index makes it visually punch through
+   the footer on scroll instead of tucking behind it like any in-flow element. */
+.no-elevate { position: static; z-index: auto; }
 .btn-gold { background: linear-gradient(120deg, var(--gold), var(--gold-bright)); color: var(--navy-deep); border: none; }
 .btn-gold:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
 .btn-ghost { background: transparent; color: var(--gold-bright); }
@@ -34,17 +42,6 @@ a { color: inherit; text-decoration: none; }
 .btn-navy { background: var(--navy); color: var(--ivory); border-color: var(--navy); }
 .btn-navy:hover:not(:disabled) { background: var(--navy-glow); }
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-
-/* ===== Measurement rule ===== */
-.mrule { display: flex; align-items: flex-end; gap: 0; height: 26px; margin: 34px 0; user-select: none; }
-.mrule i { flex: 1; border-left: 1px solid var(--gold-dim); height: 8px; }
-.mrule i:nth-child(5n+1) { height: 16px; border-left-color: var(--gold); }
-.mrule i:nth-child(10n+1) { height: 26px; border-left-color: var(--gold-bright); }
-.mrule.center { max-width: 420px; margin-left: auto; margin-right: auto; }
-.mrule.onlight i { border-left-color: rgba(217,169,63,.45); }
-.mrule.onlight i:nth-child(5n+1) { border-left-color: var(--gold); }
-.mrule.onlight i:nth-child(10n+1) { border-left-color: #B8860B; }
-.mrule.short { max-width: 240px; }
 
 /* ===== Spinner ===== */
 .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: currentColor; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; flex-shrink: 0; }
@@ -152,6 +149,22 @@ section { padding: 88px 0; }
 .formnote { margin-top: 18px; font-size: 12.5px; color: var(--mut); text-align: center; }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--mut); }
 .consent input { width: auto; margin-top: 4px; }
+
+/* plan-selection rows (buy-org, leader-payment "choose a diagnostic" stage) —
+   a wide horizontal card per plan instead of a table stretched thin across a
+   wide panel with nothing to fill the extra space. */
+.plans { display: flex; flex-direction: column; gap: 14px; margin-top: 30px; }
+.planrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 28px;
+  background: #fff; border: 1px solid #E6DCC4; border-left: 3px solid var(--gold);
+  padding: 28px 32px; flex-wrap: wrap;
+}
+.planrow .pinfo { flex: 1; min-width: 260px; }
+.planrow .pinfo h3 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+.planrow .pinfo p { font-size: 15.5px; color: var(--mut); }
+.planrow .pside { display: flex; align-items: center; gap: 26px; flex-shrink: 0; }
+.planrow .pprice { font-family: var(--disp); font-size: 30px; font-weight: 700; color: var(--navy); white-space: nowrap; line-height: 1.2; }
+.planrow .pprice small { display: block; font-family: var(--body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); font-weight: 600; margin-top: 2px; }
 
 /* doors */
 .doors { background: var(--ivory2); }

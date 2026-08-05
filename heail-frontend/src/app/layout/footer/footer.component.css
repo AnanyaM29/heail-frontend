@@ -1,6 +1,6 @@
 footer { background: #060F20; color: #7E90A8; padding: 52px 0 40px; font-size: 13.5px; }
 .foot-top { display: flex; justify-content: space-between; gap: 26px; flex-wrap: wrap; align-items: flex-start; padding-bottom: 26px; border-bottom: 1px solid rgba(217,169,63,.14); }
-.foot .fl { font-family: var(--disp); color: var(--ivory); letter-spacing: .16em; font-size: 20px; font-weight: 700; }
+.foot-logo-img { height: 88px; width: auto; }
 .foot .fsig { font-family: var(--disp); font-style: italic; color: #93A6C0; margin-top: 6px; font-size: 13px; letter-spacing: .06em; }
 .foot-links { display: flex; gap: 44px; flex-wrap: wrap; }
 .foot-links h5 { color: var(--gold); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 12px; }

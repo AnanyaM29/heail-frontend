@@ -12,11 +12,16 @@ export interface OrderEmployee {
 export interface OrgOrderResponse {
   order: Order;
   employees: OrderEmployee[];
+  orgName: string | null;
+  orgHeadcount: number | null;
+  orgIndustry: string | null;
+  minEmployeesRequired: number | null;
 }
 
 export interface EmployeeRow {
   name: string;
   email: string;
+  mobileCc: string;
   mobile: string;
   level: string;
 }

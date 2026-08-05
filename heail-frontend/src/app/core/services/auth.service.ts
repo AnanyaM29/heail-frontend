@@ -35,6 +35,10 @@ export class AuthService {
     );
   }
 
+  sendRegistrationOtp(email: string) {
+    return this.http.post<void>(`${API}/register/send-otp`, { email });
+  }
+
   forgotPassword(req: ForgotPasswordRequest) {
     return this.http.post<void>(`${API}/forgot-password`, req);
   }
@@ -53,17 +57,25 @@ export class AuthService {
 
   getToken() { return localStorage.getItem(TOKEN_KEY); }
 
+  /** Used after a profile update: the response is a full fresh AuthResponse
+   *  (new tokens + user), since changing the email moves the JWT subject and
+   *  the previously-held token would stop resolving to any user otherwise. */
+  applyAuthResponse(res: AuthResponse) { this.persist(res); }
+
   routeByRole() {
     this.router.navigate([this.homePath()]);
   }
 
   homePath(): string {
+    // Everyone lands on the unified /dashboard now — it aggregates
+    // org-admin, respondent, and Leader activity for the account regardless
+    // of which single role happens to be stored. Only SUPERADMIN is still
+    // routed to its own console.
     switch (this._user()?.role) {
       case 'SUPERADMIN': return '/admin';
-      case 'ORG_ADMIN':   return '/dashboard';
-      case 'EMPLOYEE':    return '/pulse';
-      case 'LEADER':      return '/leader';
-      default:            return '/login';
+      case null:
+      case undefined:     return '/login';
+      default:            return '/dashboard';
     }
   }
 

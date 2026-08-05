@@ -1,8 +1,29 @@
-<section style="padding-top:100px"><div class="wrap" style="max-width:760px">
-  <a class="backbtn" routerLink="/pricing/buy-org">← Back</a>
+<section style="padding-top:100px"><div class="wrap" style="max-width:1100px">
+
+  <div class="top-row">
+    <a class="backbtn" routerLink="/pricing/buy-org">← Back</a>
+    <div class="csv-actions">
+      <input #csvInput type="file" accept=".csv" style="display:none" (change)="onCsvSelected($event)">
+      <button class="csvbtn" type="button" (click)="csvInput.click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>
+        Upload CSV
+      </button>
+      <button class="csvbtn" type="button" (click)="downloadTemplate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Download Template
+      </button>
+    </div>
+  </div>
+
   <div class="eyebrow">For Organisations · HEAIL Diagnostics</div>
   <h2 class="sec-title">Enter your employee details</h2>
-  <p class="sec-sub">Minimum 5 employees — we suggest at least one each of Leader, Middle Management and Executive. Results require 80% completion and a minimum of 5 employees. You may also upload a CSV (S.No, Name, Email, Mobile, Level).</p>
+  <p class="sec-sub">
+    @if (orgSaved()) {
+      Minimum {{ minRequired() }} employees required for your organisation size ({{ orgHeadcount() }} headcount) — entering everyone is recommended. We suggest at least one each of Leader, Middle Management and Executive.
+    } @else {
+      Fill in your organisation details below, then enter your employees. We suggest at least one each of Leader, Middle Management and Executive.
+    }
+  </p>
 
   @if (loading()) {
     <div class="formwrap" style="text-align:center;padding:60px 42px;max-width:none">
@@ -14,39 +35,114 @@
       <div class="alert-err" role="alert" style="margin-top:20px">{{ error() }}</div>
     }
 
-    <div class="formwrap" style="margin-top:26px;max-width:none">
-      <table class="seltable">
-        <tr><th>Name</th><th>Email</th><th>Mobile (optional)</th><th>Level</th><th></th></tr>
+    <div class="formwrap" style="margin-top:26px;max-width:none;padding:38px 40px">
+
+      <div class="panel-head-row">
+        <span class="panel-label">Organisation Details</span>
+      </div>
+      <div class="fld-row" style="margin-bottom:30px">
+        <div class="fld">
+          <label for="orgName">Organisation name <span style="color:var(--error)">*</span></label>
+          <input id="orgName" type="text" [value]="organisationName()" placeholder="Company / Organisation name"
+                 [class.field-err]="orgNameInvalid"
+                 (input)="organisationName.set($any($event.target).value)">
+          @if (orgNameInvalid) { <span class="cellerr">⚠ Organisation name is required</span> }
+        </div>
+        <div class="fld">
+          <label for="headcount">Number of employees <span style="color:var(--error)">*</span></label>
+          <input id="headcount" type="number" min="1" [value]="orgHeadcount()" placeholder="Total headcount"
+                 [class.field-err]="headcountInvalid"
+                 (input)="onHeadcountInput($event)">
+          @if (headcountInvalid) { <span class="cellerr">⚠ Headcount is required</span> }
+        </div>
+        <div class="fld">
+          <label for="industry">Industry <span style="color:var(--error)">*</span></label>
+          <select id="industry" [class.field-err]="industryInvalid"
+                  (change)="onIndustryChange($any($event.target).value)">
+            <option value="" [selected]="!industry()">Select industry</option>
+            @for (opt of industryOptions; track opt) {
+              <option [value]="opt" [selected]="opt === industry()">{{ opt }}</option>
+            }
+          </select>
+          @if (isIndustryOther) {
+            <input type="text" [value]="industryOther()" placeholder="Please specify"
+                   style="margin-top:10px" [class.field-err]="industryInvalid"
+                   (input)="industryOther.set($any($event.target).value)">
+          }
+          @if (industryInvalid) { <span class="cellerr">⚠ Please select your industry</span> }
+        </div>
+      </div>
+
+      <div class="panel-head-row">
+        <span class="panel-label">Employee List</span>
+        <button class="refresh-btn" type="button" title="Clear all rows and start over" (click)="clearAll()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        </button>
+      </div>
+
+      <div class="seltable">
+        <div class="selrow selrow-head">
+          <span>Name <span style="color:var(--error)">*</span></span>
+          <span>Email <span style="color:var(--error)">*</span></span>
+          <span>Mobile <i>(optional)</i></span>
+          <span>Level <span style="color:var(--error)">*</span></span>
+          <span></span>
+        </div>
+
         @for (row of rows(); track $index) {
-          <tr>
-            <td><input placeholder="Name" [value]="row.name" (input)="updateRow($index, 'name', $any($event.target).value)"></td>
-            <td><input placeholder="Email" [value]="row.email" (input)="updateRow($index, 'email', $any($event.target).value)"></td>
-            <td><input placeholder="Mobile" [value]="row.mobile" (input)="updateRow($index, 'mobile', $any($event.target).value)"></td>
-            <td>
-              <select [value]="row.level" (change)="updateRow($index, 'level', $any($event.target).value)">
+          <div class="selrow">
+            <div class="selcell">
+              <input placeholder="Full name" [value]="row.name" [class.field-err]="fieldError($index,'name')"
+                     (input)="updateRow($index, 'name', $any($event.target).value)">
+              @if (fieldError($index,'name')) { <span class="cellerr">⚠ {{ rowError($index) }}</span> }
+            </div>
+            <div class="selcell">
+              <input placeholder="name@company.com" type="email" [value]="row.email" [class.field-err]="fieldError($index,'email')"
+                     (input)="updateRow($index, 'email', $any($event.target).value)">
+              @if (fieldError($index,'email')) { <span class="cellerr">⚠ {{ rowError($index) }}</span> }
+            </div>
+            <div class="selcell">
+              <div class="mobile-cc-row">
+                <select [value]="row.mobileCc" aria-label="Country code" (change)="updateRow($index, 'mobileCc', $any($event.target).value)">
+                  <option value="+91">+91</option>
+                  <option value="+1">+1</option>
+                  <option value="+44">+44</option>
+                  <option value="+971">+971</option>
+                  <option value="+61">+61</option>
+                  <option value="+65">+65</option>
+                </select>
+                <input placeholder="10-digit mobile" type="tel" inputmode="numeric" maxlength="20" [value]="row.mobile" [class.field-err]="fieldError($index,'mobile')"
+                       (input)="onMobileInput($index, $event)">
+              </div>
+              @if (fieldError($index,'mobile')) { <span class="cellerr">⚠ {{ rowError($index) }}</span> }
+            </div>
+            <div class="selcell">
+              <select [value]="row.level" [class.field-err]="fieldError($index,'level')" (change)="updateRow($index, 'level', $any($event.target).value)">
                 <option value="L">Leader</option>
                 <option value="MM">Middle Management</option>
                 <option value="E">Executive</option>
               </select>
-            </td>
-            <td>
-              @if (rowError($index); as msg) {
-                <span style="color:var(--error);font-size:12px">{{ msg }}</span>
+              @if (fieldError($index,'level')) { <span class="cellerr">⚠ {{ rowError($index) }}</span> }
+            </div>
+            <div class="rowactions">
+              <button type="button" class="rowdel" title="Remove this row" [disabled]="rows().length <= 1" (click)="removeRow($index)">−</button>
+              @if ($index === rows().length - 1) {
+                <button type="button" class="rowadd" title="Add another employee" (click)="addRow()">+</button>
               }
-            </td>
-          </tr>
+            </div>
+          </div>
         }
-      </table>
-      <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
-        <button class="otp-btn" type="button" style="padding:10px 16px" (click)="addRow()">+ Add employee</button>
-        <input #csvInput type="file" accept=".csv" style="display:none" (change)="onCsvSelected($event)">
-        <button class="otp-btn" type="button" style="padding:10px 16px" (click)="csvInput.click()">Upload CSV</button>
       </div>
-      @if (csvNotice()) {
-        <p class="hint" style="margin-top:10px">CSV loaded — review the rows above before continuing.</p>
+
+      @if (csvError()) {
+        <p style="color:var(--error);font-size:13px;margin-top:14px">{{ csvError() }}</p>
       }
-      <div style="text-align:center;margin-top:26px">
-        <button class="btn btn-gold" type="button" [disabled]="submitting()" (click)="submit()">
+      @if (csvNotice() && !csvError()) {
+        <p class="hint" style="margin-top:14px">CSV loaded — review the rows above before continuing.</p>
+      }
+
+      <div style="text-align:center;margin-top:30px">
+        <button class="btn btn-gold no-elevate" type="button" [disabled]="submitting()" (click)="submit()">
           @if (submitting()) { <span class="spinner"></span> } Continue to Agreement
         </button>
       </div>

@@ -4,73 +4,88 @@
     <div class="brand-quote">
       <p>"Accurate measurement first.<br>Human interpretation always.<br>Improvement you can re-measure."</p>
     </div>
-    <app-mrule />
-    <p class="brand-sub">Join HEAIL as a Company or a Leader.<br>One standard. One platform.</p>
+    <p class="brand-sub">Register your Organization/Yourself with HEAIL today</p>
   </aside>
 
   <main class="auth-panel">
     <div class="auth-card">
       <div class="auth-eyebrow">Create your account</div>
       <h1 class="auth-title">Register with HEAIL</h1>
-      <app-mrule [short]="true" />
 
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
 
-        <!-- Role selector -->
-        <div class="role-tabs">
-          <button type="button" class="role-tab" [class.active]="isOrgAdmin"
-                  (click)="form.get('role')?.setValue('ORG_ADMIN')">
-            For Companies
-          </button>
-          <button type="button" class="role-tab" [class.active]="isLeader"
-                  (click)="form.get('role')?.setValue('LEADER')">
-            For Leaders
-          </button>
-        </div>
-
         <div class="fld">
-          <label for="name">Full name</label>
+          <label for="name">Full name <span style="color:var(--error)">*</span></label>
           <input id="name" type="text" formControlName="name" placeholder="Your full name"
                  autocomplete="name" [class.err]="invalid('name')">
           @if (invalid('name')) { <span class="err-msg">Name is required.</span> }
         </div>
 
         <div class="fld">
-          <label for="email">Email address</label>
-          <input id="email" type="email" formControlName="email"
-                 placeholder="name@company.com" autocomplete="email"
-                 [class.err]="invalid('email')">
+          <label for="email">Email address <span style="color:var(--error)">*</span></label>
+          <div class="otp-row">
+            <input id="email" type="email" formControlName="email"
+                   placeholder="name@company.com" autocomplete="email"
+                   [class.err]="invalid('email')">
+            <button class="otp-btn" type="button" [disabled]="otpSending()" (click)="sendCode()">
+              {{ otpSending() ? 'Sending…' : (otpSent() ? 'Resend Code' : 'Send Code') }}
+            </button>
+          </div>
           @if (invalid('email')) { <span class="err-msg">Enter a valid email address.</span> }
+          @if (otpError()) { <span class="err-msg">{{ otpError() }}</span> }
+          @if (otpSent() && !otpError()) { <span class="hint">Code sent — check your inbox.</span> }
         </div>
 
-        @if (isOrgAdmin) {
+        <div class="fld">
+          <label for="otp">Verification code <span style="color:var(--error)">*</span></label>
+          <input id="otp" type="text" inputmode="numeric" formControlName="otp" placeholder="6-digit code"
+                 [class.err]="invalid('otp')">
+          @if (invalid('otp')) { <span class="err-msg">Enter the code sent to your email.</span> }
+        </div>
+
+        <div class="fld">
+          <label for="mobile">Mobile number <span style="color:var(--error)">*</span></label>
+          <div class="otp-row">
+            <select class="cc" formControlName="mobileCc" aria-label="Country code">
+              @for (c of countries; track c.iso2) {
+                <option [value]="c.dial">{{ c.dial }} {{ c.name }}</option>
+              }
+            </select>
+            <input id="mobile" type="tel" inputmode="numeric" maxlength="20" formControlName="mobile"
+                   placeholder="10-digit mobile number" (input)="onMobileInput($event)"
+                   [class.err]="invalid('mobile')">
+          </div>
+          @if (invalid('mobile')) { <span class="err-msg">Enter a valid 10-digit mobile number.</span> }
+        </div>
+
+        <div class="fld-row">
           <div class="fld">
-            <label for="orgName">Organisation name</label>
-            <input id="orgName" type="text" formControlName="organisationName"
-                   placeholder="Company / Organisation name">
+            <label for="country">Country <span style="color:var(--error)">*</span></label>
+            <select id="country" formControlName="country" [class.err]="invalid('country')" (change)="onCountryChange($event)">
+              <option value="" disabled>Select your country</option>
+              @for (c of countries; track c.iso2) {
+                <option [value]="c.name">{{ c.name }}</option>
+              }
+            </select>
+            @if (invalid('country')) { <span class="err-msg">Country is required.</span> }
           </div>
-          <div class="fld-row">
-            <div class="fld">
-              <label for="industry">Industry</label>
-              <input id="industry" type="text" formControlName="industry" placeholder="e.g. IT, Banking">
-            </div>
-            <div class="fld">
-              <label for="size">Organisation size</label>
-              <select id="size" formControlName="sizeCategory">
-                <option value="">Select size</option>
-                <option value="1-50">1–50 employees</option>
-                <option value="51-200">51–200</option>
-                <option value="201-500">201–500</option>
-                <option value="501-2000">501–2,000</option>
-                <option value="2000+">2,000+</option>
-              </select>
-            </div>
+          <div class="fld">
+            <label for="city">City <span style="color:var(--error)">*</span></label>
+            <select id="city" formControlName="city" [class.err]="invalid('city')">
+              <option value="" disabled>
+                {{ citiesLoading() ? 'Loading cities…' : (cityDisabled ? 'Select a country first' : 'Select your city') }}
+              </option>
+              @for (c of cityOptions(); track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+            @if (invalid('city')) { <span class="err-msg">City is required.</span> }
           </div>
-        }
+        </div>
 
         <div formGroupName="passwords">
           <div class="fld">
-            <label for="password">Password <span class="label-hint">min 8 characters</span></label>
+            <label for="password">Password <span style="color:var(--error)">*</span> <span class="label-hint">min 8 characters</span></label>
             <div class="pw-wrap">
               <input id="password" [type]="showPw() ? 'text' : 'password'"
                      formControlName="password" placeholder="••••••••"
@@ -81,7 +96,7 @@
             @if (pwInvalid('password')) { <span class="err-msg">Password must be at least 8 characters.</span> }
           </div>
           <div class="fld">
-            <label for="confirm">Confirm password</label>
+            <label for="confirm">Confirm password <span style="color:var(--error)">*</span></label>
             <input id="confirm" [type]="showPw() ? 'text' : 'password'"
                    formControlName="confirm" placeholder="••••••••"
                    autocomplete="new-password"
@@ -96,7 +111,7 @@
         <div class="terms-block">
           <label class="check-label">
             <input type="checkbox" formControlName="termsAccepted">
-            <span>I accept the HEAIL <a href="#" class="gold-link">Terms of Use</a> and <a href="#" class="gold-link">Privacy Policy</a>. I understand assessments are non-refundable once dispatched.</span>
+            <span>I accept the HEAIL <a routerLink="/terms" target="_blank" class="gold-link">Terms of Use</a> and <a routerLink="/privacy" target="_blank" class="gold-link">Privacy Policy</a>. I understand assessments are non-refundable once dispatched.</span>
           </label>
           @if (form.get('termsAccepted')?.invalid && form.get('termsAccepted')?.touched) {
             <span class="err-msg">You must accept the Terms to continue.</span>

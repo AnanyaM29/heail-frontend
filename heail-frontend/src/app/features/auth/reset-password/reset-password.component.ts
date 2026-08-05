@@ -3,7 +3,6 @@ import { FormBuilder, Validators, ReactiveFormsModule, AbstractControl, Validati
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
-import { MruleComponent } from '../../../shared/mrule.component';
 
 function passwordMatch(g: AbstractControl): ValidationErrors | null {
   return g.get('newPassword')?.value === g.get('confirm')?.value ? null : { mismatch: true };
@@ -12,7 +11,7 @@ function passwordMatch(g: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, HeailLogoComponent, MruleComponent],
+  imports: [ReactiveFormsModule, RouterLink, HeailLogoComponent],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.css'
 })

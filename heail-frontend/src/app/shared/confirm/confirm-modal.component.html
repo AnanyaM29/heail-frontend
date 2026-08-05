@@ -1,0 +1,13 @@
+@if (request(); as r) {
+  <div class="cm-overlay" (click)="onCancel()">
+    <div class="cm-panel" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+      @if (r.title) { <h3>{{ r.title }}</h3> }
+      <p>{{ r.message }}</p>
+      <div class="cm-actions">
+        <button class="cm-btn cm-btn-ghost" type="button" (click)="onCancel()">{{ r.cancelLabel ?? 'Cancel' }}</button>
+        <button class="cm-btn" [class.cm-btn-danger]="r.danger" [class.cm-btn-gold]="!r.danger"
+                type="button" (click)="onConfirm()">{{ r.confirmLabel ?? 'Confirm' }}</button>
+      </div>
+    </div>
+  </div>
+}

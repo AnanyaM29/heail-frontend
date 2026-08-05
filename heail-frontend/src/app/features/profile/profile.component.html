@@ -1,0 +1,152 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">My Account</div>
+  <h1>Update Profile</h1>
+  <p class="sub">Review your details, and make changes once you've confirmed it's really you.</p>
+</div></div>
+
+<section><div class="wrap" style="max-width:720px">
+
+  @if (loading()) {
+    <div style="text-align:center;padding:70px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+
+    @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+    @if (profile(); as p) {
+
+      <!-- ── Always-visible summary of current details ─────────────── -->
+      <div class="panel-head">
+        <h3>Your Details</h3>
+      </div>
+      <div class="formwrap" style="max-width:none;margin-top:0">
+        <div class="detail-grid">
+          <div class="detail"><span>Name</span><b>{{ p.name }}</b></div>
+          <div class="detail"><span>Email</span><b>{{ p.email }}</b></div>
+          <div class="detail"><span>Mobile</span><b>{{ p.mobile || '—' }}</b></div>
+          <div class="detail"><span>City</span><b>{{ p.city || '—' }}</b></div>
+          <div class="detail"><span>Country</span><b>{{ p.country || '—' }}</b></div>
+          <div class="detail"><span>Account Type</span><b>{{ p.role | titlecase }}</b></div>
+        </div>
+      </div>
+
+      <!-- ── Step 1: unlock editing ─────────────────────────────────── -->
+      @if (!unlocked()) {
+        <div class="panel-head" style="margin-top:36px">
+          <h3>Verify It's You</h3>
+          <p>To edit your profile, confirm the code we email to {{ p.email }}.</p>
+        </div>
+        <div class="formwrap" style="max-width:none;margin-top:0">
+          @if (!unlockOtpSent()) {
+            <button class="btn btn-navy" type="button" [disabled]="unlocking()" (click)="sendUnlockOtp()">
+              @if (unlocking()) { <span class="spinner"></span> } Send Verification Code
+            </button>
+          } @else {
+            <div class="fld">
+              <label for="unlockOtp">Verification code</label>
+              <div class="otp-row">
+                <input id="unlockOtp" type="text" inputmode="numeric" placeholder="6-digit code"
+                       [value]="unlockOtp()" (input)="unlockOtp.set($any($event.target).value)">
+                <button class="otp-btn" type="button" [disabled]="unlocking()" (click)="sendUnlockOtp()">Resend</button>
+              </div>
+              <p class="hint">Code sent — check {{ p.email }}.</p>
+            </div>
+            <button class="btn btn-gold" type="button" [disabled]="unlocking() || !unlockOtp().trim()" (click)="verifyUnlockOtp()">
+              @if (unlocking()) { <span class="spinner"></span> } Verify &amp; Unlock Editing
+            </button>
+          }
+          @if (unlockError()) { <div class="alert-err" role="alert" style="margin-top:16px">{{ unlockError() }}</div> }
+        </div>
+      }
+
+      <!-- ── Step 2: edit + save ───────────────────────────────────── -->
+      @if (unlocked()) {
+        <div class="panel-head" style="margin-top:36px">
+          <h3>Edit Your Details</h3>
+        </div>
+        <div class="formwrap" style="max-width:none;margin-top:0">
+
+          <div class="fld">
+            <label for="name">Full name</label>
+            <input id="name" type="text" [value]="name()" (input)="name.set($any($event.target).value)">
+          </div>
+
+          <div class="fld-row">
+            <div class="fld">
+              <label for="city">City</label>
+              <input id="city" type="text" [value]="city()" (input)="city.set($any($event.target).value)">
+            </div>
+            <div class="fld">
+              <label for="country">Country</label>
+              <input id="country" type="text" [value]="country()" (input)="country.set($any($event.target).value)">
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="fld">
+            <label for="email">Email address</label>
+            <input id="email" type="email" [value]="email()" (input)="onEmailEdited($any($event.target).value)">
+          </div>
+          @if (emailChanged()) {
+            <div class="verify-box">
+              @if (newEmailVerified() && newEmailVerifiedFor() === email().trim().toLowerCase()) {
+                <p class="hint" style="color:var(--success)">✓ New email verified.</p>
+              } @else if (!newEmailOtpSent()) {
+                <p class="hint">This is a new email — you'll need to confirm it.</p>
+                <button class="otp-btn" type="button" [disabled]="newEmailLoading()" (click)="sendNewEmailOtp()">
+                  Send Code to New Email
+                </button>
+              } @else {
+                <div class="otp-row">
+                  <input type="text" inputmode="numeric" placeholder="6-digit code"
+                         [value]="newEmailOtp()" (input)="newEmailOtp.set($any($event.target).value)">
+                  <button class="otp-btn" type="button" [disabled]="newEmailLoading()" (click)="verifyNewEmailOtp()">Verify</button>
+                </div>
+                <p class="hint">Code sent to {{ email() }}. <a (click)="sendNewEmailOtp()" style="cursor:pointer;color:var(--navy);font-weight:600">Resend</a></p>
+              }
+              @if (newEmailError()) { <span class="err-msg">{{ newEmailError() }}</span> }
+            </div>
+          }
+
+          <!-- Mobile -->
+          <div class="fld">
+            <label for="mobile">Mobile number</label>
+            <input id="mobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile"
+                   [value]="mobile()" (input)="onMobileEdited($event)">
+          </div>
+          @if (mobileChanged() && mobile().trim()) {
+            <div class="verify-box">
+              @if (newMobileVerified() && newMobileVerifiedFor() === mobile().trim()) {
+                <p class="hint" style="color:var(--success)">✓ New mobile number verified.</p>
+              } @else if (!newMobileOtpSent()) {
+                <p class="hint">This is a new mobile number — we'll email a code to {{ p.email }} to confirm it (no SMS gateway yet).</p>
+                <button class="otp-btn" type="button" [disabled]="newMobileLoading()" (click)="sendNewMobileOtp()">
+                  Send Confirmation Code
+                </button>
+              } @else {
+                <div class="otp-row">
+                  <input type="text" inputmode="numeric" placeholder="6-digit code"
+                         [value]="newMobileOtp()" (input)="newMobileOtp.set($any($event.target).value)">
+                  <button class="otp-btn" type="button" [disabled]="newMobileLoading()" (click)="verifyNewMobileOtp()">Verify</button>
+                </div>
+                <p class="hint">Code sent to {{ p.email }}. <a (click)="sendNewMobileOtp()" style="cursor:pointer;color:var(--navy);font-weight:600">Resend</a></p>
+              }
+              @if (newMobileError()) { <span class="err-msg">{{ newMobileError() }}</span> }
+            </div>
+          }
+
+          @if (saveError()) { <div class="alert-err" role="alert" style="margin-top:20px">{{ saveError() }}</div> }
+          @if (saved()) { <p class="hint" style="color:var(--success);margin-top:16px;font-weight:600">✓ Profile updated successfully.</p> }
+
+          <div style="margin-top:26px">
+            <button class="btn btn-gold no-elevate" type="button" [disabled]="!canSave() || saving()" (click)="save()">
+              @if (saving()) { <span class="spinner"></span> } Save Changes
+            </button>
+          </div>
+        </div>
+      }
+    }
+  }
+
+</div></section>

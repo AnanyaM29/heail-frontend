@@ -1,0 +1,105 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">My Dashboard</div>
+  <h1>Welcome {{ data()?.name ?  data()!.name : '' }}</h1>
+</div></div>
+
+<section><div class="wrap dash-wrap">
+
+  @if (loading()) {
+    <div style="text-align:center;padding:70px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+
+    @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+    @if (hasNothing()) {
+      <div class="udv">
+        <h3>Nothing here yet</h3>
+        <p>You don't have any HEAIL activity yet — as an organisation admin or as someone taking an assessment.</p>
+      </div>
+    }
+
+    <!-- ── Organisations this account administers ─────────────────── -->
+    @if (hasOrgs()) {
+      <div class="dash-sec">
+        <div class="eyebrow">Organisation Admin</div>
+        <h2 class="sec-title">Organisations You Administer</h2>
+        <p class="sec-sub">Diagnostic rounds you've purchased or set up for others to take.</p>
+
+        <div class="act-grid">
+          @for (o of data()!.organisationsAdministered; track o.order.id) {
+            <div class="actcard">
+              <div class="aud">{{ o.employees.length }} {{ o.employees.length === 1 ? 'Employee' : 'Employees' }}</div>
+              <h3>{{ o.order.product | titlecase }}</h3>
+              <p class="stat-line" [class]="'tone-' + statusTone(o.order.status)">{{ statusLabel(o.order.status) }}</p>
+              <p class="sub-line">
+                @if (o.order.status === 'PAID') { Purchased {{ (o.order.paidAt ?? o.order.createdAt) | date:'mediumDate' }} }
+                @else { Not yet paid — {{ (o.order.createdAt) | date:'mediumDate' }} }
+              </p>
+              <div class="card-actions">
+                <a class="go" routerLink="/dashboard/org" [queryParams]="{ order: o.order.id }">View Round →</a>
+                @if (o.order.status !== 'PAID') {
+                  <button type="button" class="go go-cancel" [disabled]="cancellingId() === o.order.id"
+                          (click)="cancelOrg(o.order.id, $event)">
+                    @if (cancellingId() === o.order.id) { Cancelling… } @else { Cancel }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── This account's own respondent progress in others' rounds ── -->
+    @if (hasRespondent()) {
+      <div class="dash-sec">
+        <div class="eyebrow">Respondent</div>
+        <h2 class="sec-title">Assessments You're Taking</h2>
+        <p class="sec-sub">Pulse rounds where you've been added as a respondent.</p>
+
+        <div class="act-grid">
+          @for (m of data()!.respondentMemberships; track m.orderId) {
+            <a class="actcard" routerLink="/pulse">
+              <div class="aud">{{ m.level }}</div>
+              <h3>{{ m.organisationName }}</h3>
+              <p class="stat-line" [class]="'tone-' + statusTone(m.invitationStatus)">{{ m.pulsesCompleted }} of {{ m.pulsesTotal }} Pulses complete</p>
+              <p class="sub-line">{{ statusLabel(m.invitationStatus) }}</p>
+              <span class="go">Continue →</span>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── This account's own Leader (Gita Leader) activity ─────────── -->
+    @if (hasLeader()) {
+      <div class="dash-sec">
+        <div class="eyebrow">Leader</div>
+        <h2 class="sec-title">Your Leader Assessment</h2>
+
+        <div class="act-grid">
+          @if (data()!.leaderInProgress; as s) {
+            <a class="actcard" [routerLink]="['/leader/assessment', s.sessionId]">
+              <div class="aud">Attempt {{ s.attemptNumber }}</div>
+              <h3>In Progress</h3>
+              <p class="stat-line tone-warn">{{ s.questions.length }} questions</p>
+              <span class="go">Resume →</span>
+            </a>
+          }
+          @for (r of data()!.leaderResults; track r.id) {
+            <a class="actcard" routerLink="/leader">
+              <div class="aud">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
+              <h3>{{ r.overallScore | number:'1.0-1' }} Score</h3>
+              <p class="stat-line" [class]="'tone-' + statusTone(r.band)">{{ statusLabel(r.band) }}</p>
+              <span class="go">View Result →</span>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+  }
+
+</div></section>

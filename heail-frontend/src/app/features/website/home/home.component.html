@@ -1,3 +1,25 @@
+<!-- TEMPORARY — global email kill switch, visible to all, no login required.
+     Remove this block along with HomeComponent's emailsEnabled/stopEmails()/
+     resumeEmails() once no longer needed. -->
+<div style="background:#111;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px;">
+  <span>Outbound email:
+    @if (emailsEnabled() === true) { <strong style="color:#4ade80;">ON</strong> }
+    @else if (emailsEnabled() === false) { <strong style="color:#f87171;">STOPPED</strong> }
+    @else { <span>checking…</span> }
+  </span>
+  <button type="button" [disabled]="emailToggleBusy() || emailsEnabled() === false"
+          (click)="stopEmails()"
+          style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">
+    Stop all emails
+  </button>
+  <button type="button" [disabled]="emailToggleBusy() || emailsEnabled() === true"
+          (click)="resumeEmails()"
+          style="background:#16a34a;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">
+    Resume emails
+  </button>
+  @if (emailToggleMessage()) { <span>{{ emailToggleMessage() }}</span> }
+</div>
+
 <!-- Hero -->
 <div class="hero">
   <div class="wrap">
@@ -34,7 +56,6 @@
 <!-- Doors -->
 <section class="doors" id="doorsAnchor">
   <div class="wrap">
-    <div class="eyebrow">Five Doors</div>
     <h2 class="sec-title">Where shall we begin?</h2>
     <p class="sec-sub">Every solution holds the same standard: accurate measurement first, human interpretation always, improvement you can re-measure.</p>
     <div class="doorgrid">
@@ -45,9 +66,9 @@
         <div class="go">Enter →</div>
       </a>
       <a class="door" routerLink="/for-leaders">
-        <div class="aud">For Leaders</div>
+        <div class="aud">For Aspiring Professionals</div>
         <h3>The Gita Leader</h3>
-        <p>"Fifty principles. One score. A year that changes you."</p>
+        <p>"A year that changes you."</p>
         <div class="go">Enter →</div>
       </a>
       <a class="door" routerLink="/for-hr">

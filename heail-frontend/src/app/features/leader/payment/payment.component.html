@@ -16,28 +16,33 @@
   @switch (stage()) {
 
     @case ('select') {
-      <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
+      <section style="padding-top:100px"><div class="wrap" style="max-width:1100px">
         <a class="backbtn" routerLink="/pricing">← Back</a>
-        <div class="eyebrow">For Leaders</div>
+        <div class="eyebrow">For Aspiring Professionals</div>
         <h2 class="sec-title">Leadership Diagnostics</h2>
-        <div class="formwrap" style="max-width:none">
-          <table class="seltable">
-            <tr><th>Diagnostic</th><th>Price</th><th></th></tr>
-            <tr>
-              <td>The Gita Leader — Classic Assessment (50 questions · ~30 minutes · score /250)</td>
-              <td>₹1,000 / $10</td>
-              <td><button class="btn btn-navy" type="button" style="padding:10px 18px" [disabled]="actionLoading()" (click)="select()">Select</button></td>
-            </tr>
-          </table>
-          <p style="font-size:13px;color:var(--mut);margin-top:14px">More diagnostics will be added here.</p>
+
+        <div class="plans">
+          <div class="planrow">
+            <div class="pinfo">
+              <h3>The Gita Leader — Classic Assessment</h3>
+              <p>50 questions · ~30 minutes · scored out of 250.</p>
+            </div>
+            <div class="pside">
+              <div class="pprice">₹1,000 / $10</div>
+              <button class="btn btn-navy" type="button" [disabled]="actionLoading()" (click)="select()">
+                @if (actionLoading()) { <span class="spinner"></span> } Select
+              </button>
+            </div>
+          </div>
         </div>
+        <p style="font-size:13px;color:var(--mut);margin-top:16px">More diagnostics will be added here.</p>
       </div></section>
     }
 
     @case ('details') {
       <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
         <a class="backbtn" routerLink="/pricing">← Back</a>
-        <div class="eyebrow">For Leaders · Leadership Diagnostics</div>
+        <div class="eyebrow">For Aspiring Professionals · Leadership Diagnostics</div>
         <h2 class="sec-title">A little about you.</h2>
         <div class="formwrap" style="margin-top:20px">
           <div class="fld">
@@ -59,14 +64,13 @@
 
     @case ('agreement') {
       <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
-        <a class="backbtn" routerLink="/pricing">← Back</a>
         <div class="eyebrow">Terms of Agreement · Leader</div>
         <h2 class="sec-title">Before you pay.</h2>
         <div class="formwrap" style="max-width:none">
-          <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee is non-refundable once assessment access is activated · answer honestly — your results depend on it · reminder emails run for 7 days; your access does not expire · results are personal to you and appear on your dashboard immediately on submission · each retake is a fresh purchase. Full terms are available in our <a routerLink="/terms" class="gold-link" style="text-decoration:underline">Terms of Use</a>.</p>
+          <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee covers the Classic Assessment (one sitting) and is non-refundable once the assessment link is issued · your answers and results are private to your account · a fresh attempt requires a new purchase.</p>
           <div class="fld consent" style="margin-top:18px">
-            <input type="checkbox" id="ldrAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
-            <label for="ldrAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
+            <input type="checkbox" id="leaderAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
+            <label for="leaderAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
           </div>
           <div style="text-align:center;margin-top:22px">
             <button class="btn btn-gold" type="button" [disabled]="!agreed() || actionLoading()" (click)="acceptAgreement()">
@@ -79,19 +83,16 @@
 
     @case ('payment') {
       <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
-        <a class="backbtn" routerLink="/pricing">← Back</a>
         <div class="eyebrow">Payment</div>
         <h2 class="sec-title">Complete your payment.</h2>
         <div class="formwrap" style="margin-top:20px;text-align:center">
           <p style="font-family:var(--disp);font-size:26px;margin-bottom:6px">Total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
-          <p style="font-size:12.5px;color:var(--mut);margin-bottom:20px">Base {{ order()!.currency }} {{ order()!.baseAmount | number:'1.2-2' }} + GST {{ order()!.currency }} {{ order()!.gstAmount | number:'1.2-2' }} · Non-refundable · Sandbox checkout, no real charge</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">UPI / QR</button>
-            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">Card</button>
-            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">Net Banking</button>
-            <button class="otp-btn" type="button" style="padding:12px 18px" [disabled]="actionLoading()" (click)="pay()">NEFT / IMPS</button>
-          </div>
-          <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by the payment gateway — HEAIL never sees your card details.</p>
+          <p style="font-size:12.5px;color:var(--mut);margin-bottom:20px">Base {{ order()!.currency }} {{ order()!.baseAmount | number:'1.2-2' }} + GST {{ order()!.currency }} {{ order()!.gstAmount | number:'1.2-2' }} · Non-refundable</p>
+          @if (actionLoading()) {
+            <div style="padding:20px"><span class="spinner"></span></div>
+          }
+          <div id="paypal-button-container" style="max-width:340px;margin:0 auto"></div>
+          <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by PayPal — HEAIL never sees your card details.</p>
         </div>
       </div></section>
     }
@@ -102,7 +103,9 @@
         <div class="eyebrow">Payment Successful</div>
         <h2 class="sec-title">Thank you for making payment.</h2>
         <p class="sec-sub" style="margin:0 auto">Please check your email and complete the test as soon as possible.</p>
-        <p class="hint" style="margin-top:14px">Receipt reference: {{ order()!.gatewayReference }}</p>
+        @if (order()!.gatewayReference) {
+          <p class="hint" style="margin-top:14px">Receipt reference: {{ order()!.gatewayReference }}</p>
+        }
         <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/leader">Go to Dashboard — Start Assessment</a></div>
       </div></section>
     }

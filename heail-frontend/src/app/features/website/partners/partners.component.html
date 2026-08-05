@@ -1,7 +1,7 @@
 <div class="phero"><div class="wrap">
   <div class="eyebrow">Partners</div>
   <h1>Grow with HEAIL in your city.</h1>
-  <p class="sub prose-j">Consultants, trainers, coaches, and HR agencies: introduce HEAIL to your local clients — we deliver centrally, you sell and relate. A partner kit, demo access, and commission on the revenue you source.</p>
+  <p class="sub prose-j">Consultants, trainers, coaches, and HR professionals: bring HEAIL's measurement-first transformation to the organisations and leaders around you — with our platform, our methodology, and our support behind you.</p>
 </div></div>
 
 <section><div class="wrap">
@@ -9,61 +9,109 @@
     <div class="card">
       <h3>What partners do</h3>
       <ul>
-        <li>Open doors to local organisations and leaders</li>
-        <li>Attach HEAIL screening to placement and consulting work</li>
-        <li>Facilitate debriefs and workshops after certification</li>
+        <li>Introduce HEAIL solutions to organisations and leaders in their city</li>
+        <li>Participate in local delivery of the 1-Year Leadership and Five-Layer Transformation programs — managing engagements locally and learning the HEAIL methodology from inside</li>
+        <li>Grow into certified facilitators of HEAIL debriefs and workshops</li>
       </ul>
     </div>
     <div class="card">
       <h3>What partners receive</h3>
       <ul>
-        <li>The HEAIL partner kit and pricing sheet</li>
-        <li>Demo access — one free Pulse, one free Gita Leader assessment</li>
-        <li>Commission on assessment and program revenue they source</li>
+        <li>The HEAIL partner kit and methodology orientation</li>
+        <li>Demo access — one Pulse and one Gita Leader assessment, on us</li>
+        <li>A share in the value of every engagement they bring and help deliver</li>
+        <li>A front seat in a growing transformation practice</li>
       </ul>
     </div>
   </div>
 
   <div class="formwrap">
     <h3 style="text-align:center;font-size:24px;margin-bottom:26px">Apply to join the HEAIL family</h3>
-    <div class="fld"><label for="pname">Name</label><input id="pname" type="text" placeholder="Your full name"></div>
-    <div class="fld"><label for="pcountry">Country</label><input id="pcountry" type="text" placeholder="Country"></div>
-    <div class="fld"><label for="pcity">City</label><input id="pcity" type="text" placeholder="City"></div>
+
+    @if (submitted()) {
+      <p class="hint" style="text-align:center;padding:20px 0">Thank you — your application has been received. We'll be in touch by email.</p>
+    } @else {
+
+    <div class="fld"><label for="pname">Name <span style="color:var(--error)">*</span></label>
+      <input id="pname" type="text" placeholder="Your full name" [value]="name()" [class.err]="nameInvalid"
+             (input)="name.set($any($event.target).value)">
+      @if (nameInvalid) { <span class="err-msg">Name is required.</span> }
+    </div>
+    <div class="fld"><label for="pcountry">Country <span style="color:var(--error)">*</span></label>
+      <select id="pcountry" [class.err]="countryInvalid" (change)="onCountryChange($event)">
+        <option value="" [selected]="!country()">Select your country</option>
+        @for (c of countries; track c.iso2) {
+          <option [value]="c.name" [selected]="c.name === country()">{{ c.name }}</option>
+        }
+      </select>
+      @if (countryInvalid) { <span class="err-msg">Country is required.</span> }
+    </div>
+    <div class="fld"><label for="pcity">City <span style="color:var(--error)">*</span></label>
+      <select id="pcity" [class.err]="cityInvalid" [disabled]="cityDisabled()" (change)="city.set($any($event.target).value)">
+        <option value="" [selected]="!city()">
+          {{ citiesLoading() ? 'Loading cities…' : (cityDisabled() ? 'Select a country first' : 'Select your city') }}
+        </option>
+        @for (c of cityOptions(); track c) {
+          <option [value]="c" [selected]="c === city()">{{ c }}</option>
+        }
+      </select>
+      @if (cityInvalid) { <span class="err-msg">City is required.</span> }
+    </div>
     <div class="fld">
-      <label for="pmob">Mobile Number</label>
+      <label for="pmob">Mobile Number <span style="color:var(--error)">*</span></label>
       <div class="otp-row">
-        <select class="cc" aria-label="Country code">
-          <option>+91</option><option>+1</option><option>+44</option>
-          <option>+971</option><option>+61</option><option>+65</option>
+        <select class="cc" aria-label="Country code" (change)="mobileCc.set($any($event.target).value)">
+          @for (c of countries; track c.iso2) {
+            <option [value]="c.dial" [selected]="c.dial === mobileCc()">{{ c.dial }} {{ c.name }}</option>
+          }
         </select>
-        <input id="pmob" type="tel" placeholder="Mobile number">
-        <button class="otp-btn" type="button">Send OTP</button>
+        <input id="pmob" type="tel" inputmode="numeric" maxlength="20" placeholder="10-digit mobile number"
+               [class.err]="mobileInvalid" (input)="onMobileInput($event)">
       </div>
-      <div class="hint">OTP-verified</div>
+      @if (mobileInvalid) { <span class="err-msg">Enter a valid 10-digit mobile number.</span> }
     </div>
     <div class="fld">
-      <label for="pemail">Email Address</label>
+      <label for="pemail">Email Address <span style="color:var(--error)">*</span></label>
       <div class="otp-row">
-        <input id="pemail" type="email" placeholder="name@company.com">
-        <button class="otp-btn" type="button">Send OTP</button>
+        <input id="pemail" type="email" placeholder="name@company.com" [value]="email()" [class.err]="emailInvalid"
+               (input)="email.set($any($event.target).value)">
+        <button class="otp-btn" type="button" [disabled]="otpSending()" (click)="sendCode()">
+          {{ otpSending() ? 'Sending…' : (otpSent() ? 'Resend Code' : 'Send OTP') }}
+        </button>
       </div>
-      <div class="hint">OTP-verified</div>
+      @if (emailInvalid) { <span class="err-msg">Enter a valid email address.</span> }
+      @if (otpError()) { <span class="err-msg">{{ otpError() }}</span> }
+      @if (otpSent() && !otpError()) { <span class="hint">Code sent — check your inbox.</span> }
     </div>
     <div class="fld">
-      <label for="pcv">Resume / Profile</label>
-      <input id="pcv" type="file" accept="application/pdf">
+      <label for="potp">Verification Code <span style="color:var(--error)">*</span></label>
+      <input id="potp" type="text" inputmode="numeric" placeholder="6-digit code" [value]="otp()" [class.err]="otpInvalid"
+             (input)="otp.set($any($event.target).value)">
+      @if (otpInvalid) { <span class="err-msg">Enter the code sent to your email.</span> }
+    </div>
+    <div class="fld">
+      <label for="pcv">Resume / Profile <span style="color:var(--error)">*</span></label>
+      <input id="pcv" type="file" accept="application/pdf" [class.err]="resumeInvalid" (change)="onResumeSelected($event)">
       <div class="hint">PDF only · under 500 KB</div>
+      @if (resumeInvalid) { <span class="err-msg">Please attach your resume.</span> }
     </div>
     <div class="fld consent">
-      <input type="checkbox" id="pconsent">
+      <input type="checkbox" id="pconsent" [checked]="consentGiven()" (change)="consentGiven.set($any($event.target).checked)">
       <label for="pconsent" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">
         I consent to HEAIL processing this information to evaluate my partner application, per the
         <a routerLink="/privacy" style="text-decoration:underline">Privacy Policy</a>.
       </label>
+      @if (consentInvalid) { <span class="err-msg">Consent is required to submit.</span> }
     </div>
+    @if (submitError()) {
+      <div class="alert-err" role="alert" style="margin-top:16px">{{ submitError() }}</div>
+    }
     <div style="text-align:center;margin-top:24px">
-      <button class="btn btn-gold" style="border:none" type="button">Submit Application</button>
+      <button class="btn btn-gold no-elevate" style="border:none" type="button" [disabled]="submitting()" (click)="submit()">
+        @if (submitting()) { <span class="spinner"></span> } Submit Application
+      </button>
     </div>
-    <div class="formnote">We measure partners before we appoint them — expect a screening call.</div>
+
+    }
   </div>
 </div></section>

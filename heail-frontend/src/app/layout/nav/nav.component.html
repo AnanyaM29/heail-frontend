@@ -1,8 +1,7 @@
 <nav>
   <div class="wrap navbar">
     <a class="logo" routerLink="/">
-      <span class="name">HEAIL</span>
-      <span class="tag">Human Experience + AI Logic</span>
+      <img src="/heail-logo.png" alt="HEAIL" class="logo-img">
     </a>
 
     <button class="hamb" (click)="toggleMenu()" aria-label="Menu">☰</button>
@@ -13,7 +12,7 @@
         <span class="ndrop" tabindex="0">Solutions <span class="caret">▼</span></span>
         <div class="dd">
           <a routerLink="/for-organisations" (click)="closeMenu()">For Organisations</a>
-          <a routerLink="/for-leaders" (click)="closeMenu()">For Leaders</a>
+          <a routerLink="/for-leaders" (click)="closeMenu()">For Aspiring Professionals</a>
           <a routerLink="/for-hr" (click)="closeMenu()">For HR Teams</a>
           <a routerLink="/for-students" (click)="closeMenu()">For Students <span class="soon">coming soon</span></a>
         </div>
@@ -22,12 +21,34 @@
       <li><a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a></li>
       <li><a routerLink="/partners" routerLinkActive="active" (click)="closeMenu()">Partners</a></li>
       <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact Us</a></li>
-      <li><button class="searchstub" type="button" title="Search (under development)">⌕</button></li>
+      <li class="has-dd search-item">
+        <button class="searchstub" type="button" title="Search" aria-label="Search" (click)="toggleSearch($event)">⌕</button>
+        @if (searchOpen()) {
+          <div class="dd search-dd" (click)="$event.stopPropagation()">
+            <input #searchInput class="search-input" type="text" placeholder="Search HEAIL…"
+                   [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+                   (keydown.escape)="closeSearch()">
+            @if (searchQuery().trim()) {
+              @if (searchResults().length) {
+                @for (r of searchResults(); track r.route + (r.fragment ?? '')) {
+                  <a class="search-result" (click)="goToResult(r)">
+                    <span class="sr-title">{{ r.title }}</span>
+                    <span class="sr-desc">{{ r.description }}</span>
+                  </a>
+                }
+              } @else {
+                <div class="search-empty">No results for "{{ searchQuery() }}"</div>
+              }
+            }
+          </div>
+        }
+      </li>
       @if (auth.isLoggedIn()) {
         <li class="has-dd nav-cta">
           <span class="ndrop" tabindex="0" style="color:var(--gold-bright)">Hello {{ firstName() }}<span class="caret">▼</span></span>
           <div class="dd">
             <a [routerLink]="auth.homePath()" (click)="closeMenu()">Dashboard</a>
+            <a routerLink="/profile" (click)="closeMenu()">Update Profile</a>
             <a (click)="logout()">Logout</a>
           </div>
         </li>
