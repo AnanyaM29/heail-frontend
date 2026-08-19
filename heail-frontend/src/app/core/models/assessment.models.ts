@@ -7,10 +7,15 @@ export interface Question {
   optionD: string;
 }
 
+export interface EntitlementResponse {
+  entitled: boolean;
+}
+
 export interface StartAssessmentResponse {
   sessionId: string;
   attemptNumber: number;
   questions: Question[];
+  deadlineAt: string | null;
 }
 
 export type SessionStatus = 'IN_PROGRESS' | 'COMPLETED';
@@ -21,6 +26,7 @@ export interface SessionResumeResponse {
   status: SessionStatus;
   questions: Question[];
   answeredOptions: Record<string, string>;
+  deadlineAt: string | null;
 }
 
 export interface AnswerResponse {

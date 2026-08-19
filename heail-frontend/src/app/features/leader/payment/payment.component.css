@@ -1,5 +1,5 @@
 .alert-err {
-  background: #FFF5F5; border: 1px solid #FEB2B2; border-left: 3px solid var(--error);
+  background: #FBF0ED; border: 1px solid #E6BDAF; border-left: 3px solid var(--error);
   color: var(--error); padding: 12px 14px; font-size: 14px; border-radius: 2px;
 }
 .gold-link { color: var(--gold); font-weight: 600; }

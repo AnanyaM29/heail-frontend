@@ -84,9 +84,14 @@ export class RegisterComponent {
     const emailCtrl = this.form.get('email')!;
     if (emailCtrl.invalid) { emailCtrl.markAsTouched(); return; }
 
+    const mobileCtrl = this.form.get('mobile')!;
+    const mobile = mobileCtrl.valid
+      ? (this.form.get('mobileCc')?.value ?? '') + mobileCtrl.value
+      : undefined;
+
     this.otpSending.set(true);
     this.otpError.set('');
-    this.auth.sendRegistrationOtp(emailCtrl.value as string).subscribe({
+    this.auth.sendRegistrationOtp(emailCtrl.value as string, mobile).subscribe({
       next: () => {
         this.otpSending.set(false);
         this.otpSent.set(true);

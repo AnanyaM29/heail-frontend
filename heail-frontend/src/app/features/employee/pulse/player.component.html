@@ -1,16 +1,37 @@
 <div class="phero"><div class="wrap">
   <div class="eyebrow">{{ pulseLabel() }}</div>
-  <h1>Question {{ index() + 1 }} of {{ total() }}</h1>
+  @if (showDirections()) {
+    <h1>Before You Begin</h1>
+  } @else {
+    <h1>Question {{ index() + 1 }} of {{ total() }}</h1>
+  }
 </div></div>
 
 <section><div class="wrap">
 
-  @if (loading()) {
+  @if (showDirections()) {
+    <div class="formwrap question-card">
+      <h3 style="margin-top:0">Directions for taking this assessment</h3>
+      <ul style="line-height:1.8">
+        <li>This covers all four Pulses — LeaderPulse, TalentPulse, SystemPulse and GrowthPulse. These directions apply to all of them; you won't see this screen again for the rest of the round.</li>
+        <li>Each Pulse is time-bound to <b>30 minutes</b>. A countdown is shown at the top once you start.</li>
+        <li>If you lose connection or close the window, you can resume once with your remaining time plus a 5-minute grace — but only once per Pulse, so avoid closing the window unnecessarily.</li>
+        <li>The test opens without navigation to other pages. Trying to leave or close the window will ask you to confirm before exiting.</li>
+        <li>Answer options are shown in a random order for you personally — read each one rather than relying on position.</li>
+      </ul>
+      <div class="nav-row">
+        <button type="button" class="btn btn-gold" (click)="beginAfterDirections()">I Understand — Start →</button>
+      </div>
+    </div>
+  } @else if (loading()) {
     <div class="formwrap" style="text-align:center;padding:60px 42px">
       <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
     </div>
   } @else {
 
+    @if (secondsLeft() !== null) {
+      <p class="progress-label" [style.color]="secondsLeft()! <= 60 ? '#b3261e' : null">Time remaining: {{ timeLabel() }}</p>
+    }
     <div class="progress-track"><div class="progress-fill" [style.width.%]="progressPct()"></div></div>
     <p class="progress-label">{{ answeredCount() }} of {{ total() }} answered</p>
 

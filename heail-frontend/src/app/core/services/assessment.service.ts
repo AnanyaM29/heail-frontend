@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
-  StartAssessmentResponse, SessionResumeResponse, AnswerResponse, LeaderResult
+  StartAssessmentResponse, SessionResumeResponse, AnswerResponse, LeaderResult, EntitlementResponse
 } from '../models/assessment.models';
 import { environment } from '../../../environments/environment';
 
@@ -13,6 +13,10 @@ export class AssessmentService {
 
   start() {
     return this.http.post<StartAssessmentResponse>(`${API}/start`, {});
+  }
+
+  entitlement() {
+    return this.http.get<EntitlementResponse>(`${API}/entitlement`);
   }
 
   current() {

@@ -42,8 +42,12 @@
           @if (actionLoading()) {
             <div style="padding:20px"><span class="spinner"></span></div>
           }
-          <div id="paypal-button-container-org" style="max-width:340px;margin:0 auto"></div>
-          <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by PayPal — HEAIL never sees your card details.</p>
+          @if (razorpayReady()) {
+            <button class="btn btn-gold" type="button" style="width:100%;max-width:340px" (click)="payWithRazorpay()">
+              Pay {{ data()!.order.currency }} {{ data()!.order.totalAmount | number:'1.2-2' }} Now
+            </button>
+          }
+          <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by Razorpay — HEAIL never sees your card details.</p>
         </div>
       </div></section>
     }

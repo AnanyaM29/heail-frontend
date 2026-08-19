@@ -14,4 +14,5 @@ export interface Order {
   paidAt?: string;
   createdAt: string;
   metadata?: Record<string, string>;
+  razorpayKeyId?: string;
 }

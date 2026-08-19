@@ -27,6 +27,8 @@ export class LeaderDashboardComponent implements OnInit {
   starting = signal(false);
   error = signal('');
   noEntitlement = signal(false);
+  entitled = signal(false);
+  entitlementChecked = signal(false);
 
   currentSession = signal<SessionResumeResponse | null>(null);
   results = signal<LeaderResult[]>([]);
@@ -48,10 +50,22 @@ export class LeaderDashboardComponent implements OnInit {
     this.starting.set(true);
     this.error.set('');
     this.noEntitlement.set(false);
+    // Opens in a new window on purpose — a timed, locked-down test window
+    // separate from the browsable main site (see testExitGuard/beforeunload
+    // in AssessmentPlayerComponent). Must call window.open() synchronously,
+    // inside this click handler, or browsers block it as an unrequested
+    // popup — the target URL isn't known yet, so open blank and redirect it
+    // once the session-start call comes back.
+    const testWindow = window.open('', '_blank');
     this.assessment.start().subscribe({
-      next: res => this.router.navigate(['/leader/assessment', res.sessionId]),
+      next: res => {
+        this.starting.set(false);
+        const url = this.router.createUrlTree(['/leader/assessment', res.sessionId]).toString();
+        if (testWindow) testWindow.location.href = url; else window.open(url, '_blank');
+      },
       error: (e: any) => {
         this.starting.set(false);
+        testWindow?.close();
         if (e?.status === 403) this.noEntitlement.set(true);
         else this.error.set(this.msg(e));
       }
@@ -60,7 +74,9 @@ export class LeaderDashboardComponent implements OnInit {
 
   resumeAssessment() {
     const s = this.currentSession();
-    if (s) this.router.navigate(['/leader/assessment', s.sessionId]);
+    if (!s) return;
+    const url = this.router.createUrlTree(['/leader/assessment', s.sessionId]).toString();
+    window.open(url, '_blank');
   }
 
   domainLabel(code: string) {
@@ -69,8 +85,22 @@ export class LeaderDashboardComponent implements OnInit {
 
   private loadResults() {
     this.assessment.results().subscribe({
-      next: r => { this.results.set(r); this.loading.set(false); },
+      next: r => {
+        this.results.set(r);
+        this.loading.set(false);
+        // No in-progress session and no results yet — this is the only case where
+        // "Start Assessment" could show, so confirm payment/entitlement before
+        // offering it rather than showing it optimistically.
+        if (!this.currentSession() && r.length === 0) this.checkEntitlement();
+      },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }
+    });
+  }
+
+  private checkEntitlement() {
+    this.assessment.entitlement().subscribe({
+      next: res => { this.entitled.set(res.entitled); this.entitlementChecked.set(true); },
+      error: () => { this.entitled.set(false); this.entitlementChecked.set(true); }
     });
   }
 

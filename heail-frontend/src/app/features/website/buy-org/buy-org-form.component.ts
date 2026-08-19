@@ -1,7 +1,9 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import * as XLSX from 'xlsx';
 import { OrgOrderService } from '../../../core/services/org-order.service';
 import { EmployeeRow, RowError } from '../../../core/models/org-order.models';
+import { AuthService } from '../../../core/services/auth.service';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_LEVELS = ['L', 'MM', 'E'];
@@ -44,8 +46,15 @@ function splitMobile(raw: string): { cc: string; number: string } {
 export class BuyOrgFormComponent implements OnInit {
   private orgOrders = inject(OrgOrderService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   industryOptions = INDUSTRY_OPTIONS;
+
+  // A plain org admin is only ever setting this up for their own account's
+  // organisation — no need to ask. A superadmin doing this on a client's
+  // behalf isn't tied to one, so the sheet gets an extra Company column and
+  // filling it in fills in "Organisation name" above automatically.
+  isSuperadmin = computed(() => this.auth.role() === 'SUPERADMIN');
 
   orderId = signal<string | null>(null);
   rows = signal<EmployeeRow[]>([{ name: '', email: '', mobileCc: '+91', mobile: '', level: 'L' }]);
@@ -81,6 +90,11 @@ export class BuyOrgFormComponent implements OnInit {
   get headcountInvalid() { return this.orgDetailsTouched() && (!this.orgHeadcount() || this.orgHeadcount()! < 1); }
 
   ngOnInit() {
+    this.loadOrder();
+  }
+
+  private loadOrder() {
+    this.loading.set(true);
     this.orgOrders.createOrGetOrder().subscribe({
       next: res => {
         this.orderId.set(res.order.id);
@@ -162,24 +176,38 @@ export class BuyOrgFormComponent implements OnInit {
     this.updateRow(i, 'mobile', digitsOnly);
   }
 
+  /** A real .xlsx workbook (not a renamed .csv) so double-clicking it always
+   *  opens Excel/Sheets rather than whatever the OS has associated with plain
+   *  text files. Superadmin gets an extra Company column, since — unlike an
+   *  org admin filling this in for their own account — the company isn't
+   *  already implied by who's logged in. */
   downloadTemplate() {
-    const csv = 'S.No,Name,Email,Mobile,Level\n1,Jane Doe,jane@company.com,9876543210,MM\n';
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'HEAIL_Employee_Template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    const header = this.isSuperadmin()
+      ? ['S.No', 'Company', 'Name', 'Email', 'Mobile', 'Level']
+      : ['S.No', 'Name', 'Email', 'Mobile', 'Level'];
+    const example = this.isSuperadmin()
+      ? [1, 'Acme Corp', 'Jane Doe', 'jane@company.com', '9876543210', 'MM']
+      : [1, 'Jane Doe', 'jane@company.com', '9876543210', 'MM'];
+
+    const sheet = XLSX.utils.aoa_to_sheet([header, example]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, 'Employees');
+    XLSX.writeFile(workbook, 'HEAIL_Employee_Template.xlsx');
   }
 
-  onCsvSelected(event: Event) {
+  onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+
+    const isExcel = /\.xlsx?$/i.test(file.name);
     const reader = new FileReader();
-    reader.onload = () => this.parseCsv(String(reader.result ?? ''));
-    reader.readAsText(file);
+    reader.onload = () => {
+      if (isExcel) this.parseWorkbook(reader.result as ArrayBuffer);
+      else this.parseCsv(String(reader.result ?? ''));
+    };
+    if (isExcel) reader.readAsArrayBuffer(file);
+    else reader.readAsText(file);
     input.value = '';
   }
 
@@ -209,20 +237,40 @@ export class BuyOrgFormComponent implements OnInit {
 
     // Header row is required, columns matched by name (order-independent) — not by fixed position.
     const headerCells = lines[0].split(',').map(c => c.trim().toLowerCase());
+    this.applyRows(headerCells, lines.slice(1).map(line => line.split(',').map(c => c.trim())));
+  }
+
+  private parseWorkbook(data: ArrayBuffer) {
+    this.csvError.set('');
+
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const grid: string[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false, defval: '' })
+      .map((row: any) => (row as any[]).map(cell => String(cell ?? '').trim()));
+
+    if (grid.length === 0) return;
+
+    const headerCells = grid[0].map(c => c.toLowerCase());
+    this.applyRows(headerCells, grid.slice(1));
+  }
+
+  /** Shared by both the CSV and Excel parsers — columns matched by header name,
+   *  order-independent, since a hand-edited sheet's column order can't be trusted. */
+  private applyRows(headerCells: string[], dataRows: string[][]) {
     const findCol = (...names: string[]) => headerCells.findIndex(h => names.includes(h));
 
     const nameIdx = findCol('name');
     const emailIdx = findCol('email');
     const mobileIdx = findCol('mobile', 'mobile (optional)');
     const levelIdx = findCol('level', 'type');
+    const companyIdx = findCol('company', 'organisation', 'organisation name');
 
     if (nameIdx === -1 || emailIdx === -1) {
-      this.csvError.set('Could not find "Name" and "Email" column headers. Please include the header row (S.No, Name, Email, Mobile, Level) — download the template below if needed.');
+      this.csvError.set('Could not find "Name" and "Email" column headers. Please include the header row — download the template below if needed.');
       return;
     }
 
-    const parsed: EmployeeRow[] = lines.slice(1).map(line => {
-      const cols = line.split(',').map(c => c.trim());
+    const parsed: EmployeeRow[] = dataRows.map(cols => {
       const rawMobile = mobileIdx !== -1 ? (cols[mobileIdx] ?? '') : '';
       const { cc, number } = splitMobile(rawMobile);
       return {
@@ -233,6 +281,14 @@ export class BuyOrgFormComponent implements OnInit {
         level: (levelIdx !== -1 ? (cols[levelIdx] ?? 'L') : 'L').toUpperCase()
       };
     });
+
+    // One round belongs to exactly one organisation, so a Company column (superadmin
+    // sheets only) just needs to fill in the "Organisation name" field above once —
+    // the first non-blank value found is used.
+    if (this.isSuperadmin() && companyIdx !== -1 && !this.organisationName().trim()) {
+      const company = dataRows.map(cols => cols[companyIdx]).find(v => v && v.trim());
+      if (company) this.organisationName.set(company.trim());
+    }
 
     this.rows.set(parsed);
     this.csvNotice.set(true);

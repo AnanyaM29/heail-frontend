@@ -1,34 +1,244 @@
 <div class="phero"><div class="wrap">
   <div class="eyebrow">Superadmin Console</div>
   <h1>Admin Tools</h1>
-  <p class="sub">Under construction — the full console (business views, action queue, CMS) arrives in a later phase.</p>
+  <p class="sub">Test activity, payments, and the full user roster across the platform — plus a quick way to force a password reset on any account.</p>
 </div></div>
 
-<section><div class="wrap">
-  <div class="formwrap" style="max-width:520px">
-    <h3 style="margin-bottom:6px">Resend password-reset email</h3>
-    <p style="color:var(--mut);font-size:14px;margin-bottom:20px">
-      Send a fresh OTP and reset link to any user's registered email — for support cases where an
-      invitation was missed, expired, or the user just needs a nudge.
-    </p>
+<section><div class="wrap dash-wrap">
 
-    <div class="fld">
-      <label for="userEmail">User email</label>
-      <input id="userEmail" type="email" placeholder="name@company.com"
-             [value]="email()" (input)="updateEmail($any($event.target).value)">
+  <div class="admin-tab-bar">
+    <button type="button" class="admin-tab" [class.active]="tab() === 'users'" (click)="selectTab('users')">Users</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'logins'" (click)="selectTab('logins')">Logins</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'tests'" (click)="selectTab('tests')">Tests</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'payments'" (click)="selectTab('payments')">Payments</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'reset'" (click)="selectTab('reset')">Reset Password</button>
+  </div>
+
+  <!-- ── Registered users, chronological ─────────────────────── -->
+  @if (tab() === 'users') {
+    @if (usersError()) { <div class="alert-err" role="alert">{{ usersError() }}</div> }
+
+    <div class="fld" style="max-width:360px;margin-bottom:16px">
+      <label for="userSearch">Search users</label>
+      <input id="userSearch" type="text" placeholder="Name, email, role, or organisation"
+             [value]="userSearch()" (input)="updateUserSearch($any($event.target).value)">
     </div>
 
-    @if (error()) {
-      <div role="alert" style="background:#FFF5F5;border:1px solid #FEB2B2;border-left:3px solid var(--error);color:var(--error);padding:12px 14px;font-size:14px;margin-bottom:16px;border-radius:2px">
-        {{ error() }}
+    <div class="dash-panel" style="overflow-x:auto">
+      @if (usersLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr>
+              <th>Registered</th><th>Name</th><th>Email</th><th>Role</th><th>Organisation</th><th>Last Login</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of pagedUsers(); track u.id) {
+              <tr>
+                <td>{{ u.createdAt | date:'mediumDate' }}</td>
+                <td class="emp-name">{{ u.name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.role }}</td>
+                <td>{{ u.organisationName || '—' }}</td>
+                <td>{{ u.lastLoginAt ? (u.lastLoginAt | date:'medium') : 'Never' }}</td>
+                <td>
+                  @if (u.active) { <span class="pstate pstate-done">Active</span> }
+                  @else { <span class="pstate pstate-failed">Blocked</span> }
+                </td>
+                <td>
+                  <button type="button" class="tog" (click)="goToResetWithEmail(u.email)">Reset</button>
+                  <button type="button" class="tog" [disabled]="blockingUserId() === u.id" (click)="toggleBlock(u)">
+                    {{ u.active ? 'Block' : 'Unblock' }}
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" style="text-align:center;color:var(--mut)">{{ userSearch().trim() ? 'No users match your search.' : 'No users yet.' }}</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (usersTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="usersPage() === 1" (click)="setPage(usersPage, usersPage() - 1, usersTotalPages())">Prev</button>
+            <span class="hint">Page {{ usersPage() }} of {{ usersTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="usersPage() === usersTotalPages()" (click)="setPage(usersPage, usersPage() + 1, usersTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── Logged-in users, chronological, last N months ───────── -->
+  @if (tab() === 'logins') {
+    @if (loginsError()) { <div class="alert-err" role="alert">{{ loginsError() }}</div> }
+
+    <div class="dash-panel" style="overflow-x:auto">
+      @if (loginsLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr><th>Last Login</th><th>Name</th><th>Email</th><th>Role</th><th>Organisation</th></tr>
+          </thead>
+          <tbody>
+            @for (u of pagedLogins(); track u.id) {
+              <tr>
+                <td>{{ u.lastLoginAt | date:'medium' }}</td>
+                <td class="emp-name">{{ u.name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.role }}</td>
+                <td>{{ u.organisationName || '—' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" style="text-align:center;color:var(--mut)">No logins in this window.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (loginsTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="loginsPage() === 1" (click)="setPage(loginsPage, loginsPage() - 1, loginsTotalPages())">Prev</button>
+            <span class="hint">Page {{ loginsPage() }} of {{ loginsTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="loginsPage() === loginsTotalPages()" (click)="setPage(loginsPage, loginsPage() + 1, loginsTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── Tests conducted, last N months ───────────────────────── -->
+  @if (tab() === 'tests') {
+    @if (testsError()) { <div class="alert-err" role="alert">{{ testsError() }}</div> }
+
+    <div class="dash-panel" style="overflow-x:auto">
+      @if (testsLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr><th>Started</th><th>User</th><th>Type</th><th>Organisation</th><th>Status</th><th>Completed</th></tr>
+          </thead>
+          <tbody>
+            @for (t of pagedTests(); track t.id) {
+              <tr>
+                <td>{{ t.startedAt | date:'medium' }}</td>
+                <td class="emp-name">{{ t.userName }}<span class="hint" style="display:block">{{ t.userEmail }}</span></td>
+                <td>{{ t.productCode }}{{ t.pulse ? ' · ' + t.pulse : '' }}</td>
+                <td>{{ t.organisationName || '—' }}</td>
+                <td>
+                  @if (t.status === 'COMPLETED') { <span class="pstate pstate-done">Completed</span> }
+                  @else { <span class="pstate pstate-progress">In progress</span> }
+                </td>
+                <td>{{ t.completedAt ? (t.completedAt | date:'medium') : '—' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" style="text-align:center;color:var(--mut)">No tests in this window.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (testsTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="testsPage() === 1" (click)="setPage(testsPage, testsPage() - 1, testsTotalPages())">Prev</button>
+            <span class="hint">Page {{ testsPage() }} of {{ testsTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="testsPage() === testsTotalPages()" (click)="setPage(testsPage, testsPage() + 1, testsTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── Payments, done and pending, last N months ────────────── -->
+  @if (tab() === 'payments') {
+    @if (paymentsError()) { <div class="alert-err" role="alert">{{ paymentsError() }}</div> }
+    @if (reminderMessage()) { <p class="hint" style="color:var(--success);margin-bottom:12px">{{ reminderMessage() }}</p> }
+
+    @if (selectedPaymentIds().size > 0) {
+      <div style="margin-bottom:16px">
+        <button type="button" class="tog" [disabled]="reminderSending()" (click)="sendBulkReminders()">
+          @if (reminderSending()) { <span class="spinner"></span> }
+          Send Reminder to Selected ({{ selectedPaymentIds().size }})
+        </button>
       </div>
     }
-    @if (sent()) {
-      <p class="hint" style="color:var(--success);margin-bottom:16px">Reset email sent, if that address exists in our system.</p>
-    }
 
-    <button class="btn btn-gold" type="button" style="width:100%" [disabled]="loading() || !email().trim()" (click)="sendResetEmail()">
-      @if (loading()) { <span class="spinner"></span> } Send Reset Email
-    </button>
-  </div>
+    <div class="dash-panel" style="overflow-x:auto">
+      @if (paymentsLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr><th></th><th>Created</th><th>User</th><th>Product</th><th>Amount</th><th>Status</th><th>Paid At</th><th>Invoice</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            @for (p of pagedPayments(); track p.id) {
+              <tr>
+                <td>
+                  @if (pending(p)) {
+                    <input type="checkbox" [checked]="selectedPaymentIds().has(p.id)" (change)="togglePaymentSelection(p.id)">
+                  }
+                </td>
+                <td>{{ p.draftAt | date:'medium' }}</td>
+                <td class="emp-name">{{ p.userName }}<span class="hint" style="display:block">{{ p.userEmail }}</span></td>
+                <td>{{ p.productCode }}</td>
+                <td>{{ p.currency }} {{ p.totalAmount | number:'1.2-2' }}</td>
+                <td>
+                  @if (p.status === 'PAID') { <span class="pstate pstate-done">Paid</span> }
+                  @else if (p.status === 'FAILED' || p.status === 'ABANDONED') { <span class="pstate pstate-failed">{{ p.status }}</span> }
+                  @else { <span class="pstate pstate-progress">Pending · {{ p.status }}</span> }
+                </td>
+                <td>{{ p.paidAt ? (p.paidAt | date:'medium') : '—' }}</td>
+                <td>{{ p.invoiceNumber || '—' }}</td>
+                <td>
+                  @if (pending(p)) {
+                    <button type="button" class="tog" [disabled]="reminderSending()" (click)="sendReminder(p)">Remind</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="9" style="text-align:center;color:var(--mut)">No orders in this window.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (paymentsTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="paymentsPage() === 1" (click)="setPage(paymentsPage, paymentsPage() - 1, paymentsTotalPages())">Prev</button>
+            <span class="hint">Page {{ paymentsPage() }} of {{ paymentsTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="paymentsPage() === paymentsTotalPages()" (click)="setPage(paymentsPage, paymentsPage() + 1, paymentsTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── Resend password-reset email ──────────────────────────── -->
+  @if (tab() === 'reset') {
+    <div class="formwrap" style="max-width:520px;margin-top:0">
+      <h3 style="margin-bottom:6px">Resend password-reset email</h3>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:20px">
+        Send a fresh OTP and reset link to any user's registered email — for support cases where an
+        invitation was missed, expired, or the user just needs a nudge.
+      </p>
+
+      <div class="fld">
+        <label for="userEmail">User email</label>
+        <input id="userEmail" type="email" placeholder="name@company.com"
+               [value]="email()" (input)="updateEmail($any($event.target).value)">
+      </div>
+
+      @if (error()) {
+        <div role="alert" style="background:#FBF0ED;border:1px solid #E6BDAF;border-left:3px solid var(--error);color:var(--error);padding:12px 14px;font-size:14px;margin-bottom:16px;border-radius:2px">
+          {{ error() }}
+        </div>
+      }
+      @if (sent()) {
+        <p class="hint" style="color:var(--success);margin-bottom:16px">Reset email sent, if that address exists in our system.</p>
+      }
+
+      <button class="btn btn-gold no-elevate" type="button" style="width:100%" [disabled]="loading() || !email().trim()" (click)="sendResetEmail()">
+        @if (loading()) { <span class="spinner"></span> } Send Reset Email
+      </button>
+    </div>
+  }
+
 </div></section>

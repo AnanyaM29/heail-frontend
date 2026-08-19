@@ -32,7 +32,7 @@ export class MyDashboardComponent implements OnInit {
   hasOrgs = computed(() => (this.data()?.organisationsAdministered.length ?? 0) > 0);
   hasRespondent = computed(() => (this.data()?.respondentMemberships.length ?? 0) > 0);
   hasLeader = computed(() =>
-    (this.data()?.leaderResults.length ?? 0) > 0 || !!this.data()?.leaderInProgress);
+    (this.data()?.leaderResults.length ?? 0) > 0 || !!this.data()?.leaderInProgress || !!this.data()?.leaderUnpaidOrder);
   hasNothing = computed(() =>
     !this.loading() && !this.hasOrgs() && !this.hasRespondent() && !this.hasLeader());
 

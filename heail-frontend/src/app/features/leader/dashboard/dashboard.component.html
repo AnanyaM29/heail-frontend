@@ -68,7 +68,9 @@
         <h3>Begin the Classic Assessment</h3>
         <p style="color:var(--mut)">Fifty situational questions, about thirty minutes, one sitting. Your results appear the moment you submit.</p>
 
-        @if (noEntitlement()) {
+        @if (!entitlementChecked()) {
+          <span class="spinner" style="margin-top:18px;width:22px;height:22px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+        } @else if (noEntitlement() || !entitled()) {
           <p class="hint" style="margin:16px 0">You'll need to purchase the assessment first.</p>
           <a class="btn btn-gold" routerLink="/pricing/buy-leader">Purchase Assessment</a>
         } @else {

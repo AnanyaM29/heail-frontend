@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { guestGuard, authGuard, leaderGuard, employeeGuard, superadminGuard } from './core/guards/auth.guard';
+import { testExitGuard } from './core/guards/test-exit.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
 export const routes: Routes = [
@@ -40,9 +41,7 @@ export const routes: Routes = [
       // respondent from reaching /pulse. Mirrors the backend's @PreAuthorize
       // loosening on the equivalent controllers.
       { path: 'pulse',     canActivate: [authGuard, employeeGuard], loadComponent: () => import('./features/employee/dashboard/dashboard.component').then(m => m.PulseDashboardComponent) },
-      { path: 'pulse/assessment/:pulseCode/:sessionId', canActivate: [authGuard, employeeGuard], loadComponent: () => import('./features/employee/pulse/player.component').then(m => m.PulsePlayerComponent) },
       { path: 'leader',    canActivate: [authGuard, leaderGuard], loadComponent: () => import('./features/leader/dashboard/dashboard.component').then(m => m.LeaderDashboardComponent) },
-      { path: 'leader/assessment/:sessionId', canActivate: [authGuard, leaderGuard], loadComponent: () => import('./features/leader/assessment/player.component').then(m => m.AssessmentPlayerComponent) },
     ]
   },
 
@@ -51,6 +50,13 @@ export const routes: Routes = [
   { path: 'register',        canActivate: [guestGuard], loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   { path: 'forgot-password', canActivate: [guestGuard], loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
   { path: 'reset-password',  loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
+
+  /* ── Assessment players (full-screen, no nav/footer — no way to browse to
+     other site pages while a timed test is in progress; opened in a new
+     browser window/tab from the dashboard). canDeactivate confirms before
+     any in-app navigation away while the test is live. ── */
+  { path: 'pulse/assessment/:pulseCode/:sessionId', canActivate: [authGuard, employeeGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/employee/pulse/player.component').then(m => m.PulsePlayerComponent) },
+  { path: 'leader/assessment/:sessionId', canActivate: [authGuard, leaderGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/leader/assessment/player.component').then(m => m.AssessmentPlayerComponent) },
 
   { path: '**', redirectTo: '' }
 ];

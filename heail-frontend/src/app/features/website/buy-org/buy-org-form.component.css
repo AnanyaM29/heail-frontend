@@ -22,7 +22,7 @@
   align-items: center;
   gap: 9px;
   padding: 11px 20px;
-  border: 1px solid #D9CFB6;
+  border: 1px solid var(--line-tan);
   background: #fff;
   color: var(--navy);
   font-family: var(--body);
@@ -51,7 +51,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid #D9CFB6;
+  border: 1px solid var(--line-tan);
   background: #fff;
   color: var(--navy);
   display: inline-flex;
@@ -95,7 +95,7 @@
 .selrow select {
   width: 100%;
   padding: 13px 14px;
-  border: 1px solid #D9CFB6;
+  border: 1px solid var(--line-tan);
   background: var(--ivory);
   font-family: var(--body);
   font-size: 15px;
@@ -106,7 +106,7 @@
 .selrow select:focus { outline: 2px solid var(--gold); background: #fff; }
 .selrow select { cursor: pointer; }
 
-.field-err { border-color: var(--error) !important; background: #FFF5F5 !important; }
+.field-err { border-color: var(--error) !important; background: #FBF0ED !important; }
 .field-err:focus { outline-color: var(--error) !important; }
 
 .mobile-cc-row { display: flex; gap: 6px; }
@@ -126,8 +126,8 @@
   transition: all .2s;
   flex-shrink: 0;
 }
-.rowdel { border: 1px solid #D9CFB6; background: #fff; color: var(--error); }
-.rowdel:hover:not(:disabled) { background: #FFF5F5; border-color: #FEB2B2; }
+.rowdel { border: 1px solid var(--line-tan); background: #fff; color: var(--error); }
+.rowdel:hover:not(:disabled) { background: #FBF0ED; border-color: #E6BDAF; }
 .rowdel:disabled { opacity: .3; cursor: not-allowed; }
 
 .rowadd { border: 1px solid var(--gold); background: var(--gold); color: var(--navy-deep); }

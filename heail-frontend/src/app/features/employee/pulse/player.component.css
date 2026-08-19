@@ -1,4 +1,4 @@
-.progress-track { max-width: 680px; margin: 0 auto 8px; height: 8px; background: #E6DCC4; border-radius: 4px; overflow: hidden; }
+.progress-track { max-width: 680px; margin: 0 auto 8px; height: 8px; background: var(--line-tan); border-radius: 4px; overflow: hidden; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); transition: width .3s; }
 .progress-label { max-width: 680px; margin: 0 auto 30px; text-align: right; font-size: 12px; color: var(--mut); letter-spacing: .08em; text-transform: uppercase; }
 
@@ -7,12 +7,12 @@
 
 .options { display: flex; flex-direction: column; gap: 12px; }
 .opt {
-  text-align: left; padding: 18px 20px; border: 1px solid #D9CFB6; background: #fff;
+  text-align: left; padding: 18px 20px; border: 1px solid var(--line-tan); background: #fff;
   font-family: var(--body); font-size: 15px; color: var(--ink); cursor: pointer; border-radius: 2px;
   transition: all .2s; line-height: 1.5; width: 100%;
 }
-.opt:hover { border-color: var(--gold); background: rgba(217,169,63,.06); }
-.opt.selected { border-color: var(--gold); background: rgba(217,169,63,.14); font-weight: 600; }
+.opt:hover { border-color: var(--gold); background: var(--gold-dim); }
+.opt.selected { border-color: var(--gold); background: var(--gold-dim); font-weight: 600; }
 
 /* Set apart from the four real answer choices — NA is a deliberate non-answer,
    not "just another option", and the report treats a high NA rate on a
@@ -20,13 +20,13 @@
 .opt-na {
   margin-top: 8px; border-style: dashed; color: var(--mut); font-size: 13.5px; font-style: italic;
 }
-.opt-na:hover { border-color: var(--mut); background: #FAFAFA; }
-.opt-na.selected { border-color: var(--mut); background: #F0F0F0; color: var(--ink); font-weight: 600; }
+.opt-na:hover { border-color: var(--mut); background: var(--ivory); }
+.opt-na.selected { border-color: var(--mut); background: var(--ivory2); color: var(--ink); font-weight: 600; }
 
 .nav-row { display: flex; justify-content: flex-end; margin-top: 32px; }
 
 .alert-err {
   max-width: 680px; margin: 0 auto 18px;
-  background: #FFF5F5; border: 1px solid #FEB2B2; border-left: 3px solid var(--error);
+  background: #FBF0ED; border: 1px solid #E6BDAF; border-left: 3px solid var(--error);
   color: var(--error); padding: 12px 14px; font-size: 14px; border-radius: 2px;
 }

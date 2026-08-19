@@ -3,20 +3,27 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { OrgOrderService } from '../../../core/services/org-order.service';
 import { OrgOrderResponse } from '../../../core/models/org-order.models';
-import { OrgMonitorResponse, OrgReportResponse, SectionRag, Band, Rag } from '../../../core/models/org-report.models';
+import { OrgMonitorResponse, OrgReportResponse, SectionRag, Band } from '../../../core/models/org-report.models';
 import { PulseCode } from '../../../core/models/pulse.models';
 
 const PULSE_ORDER: PulseCode[] = ['LEADER_PULSE', 'TALENT_PULSE', 'SYSTEM_PULSE', 'GROWTH_PULSE'];
 
 const PULSE_LABELS: Record<PulseCode, string> = {
-  LEADER_PULSE: 'LeaderPulse™',
-  TALENT_PULSE: 'TalentPulse™',
-  SYSTEM_PULSE: 'SystemPulse™',
-  GROWTH_PULSE: 'GrowthPulse™'
+  LEADER_PULSE: 'LeaderPulse',
+  TALENT_PULSE: 'TalentPulse',
+  SYSTEM_PULSE: 'SystemPulse',
+  GROWTH_PULSE: 'GrowthPulse'
 };
 
 const BAND_LABELS: Record<Band, string> = {
   emerging: 'Emerging', developing: 'Developing', established: 'Established', leading: 'Leading'
+};
+
+const BAND_DEFINITIONS: Record<Band, string> = {
+  emerging: 'Emerging (0–39) — early stage; foundational gaps still being addressed.',
+  developing: 'Developing (40–59) — building capability; meaningful progress underway.',
+  established: 'Established (60–79) — solid, consistent practice in place.',
+  leading: 'Leading (80–100) — best-practice level, a model for others.'
 };
 
 type SortMode = 'gap' | 'score';
@@ -99,11 +106,7 @@ export class OrgDashboardComponent implements OnInit {
 
   label(code: PulseCode) { return PULSE_LABELS[code]; }
   bandLabel(band: Band) { return BAND_LABELS[band]; }
-
-  ragClass(rag: Rag) { return 'rag rag-' + rag.toLowerCase().replace(/_/g, '-'); }
-  ragDialClass(rag: Rag) { return 'ragdial ragdial-' + rag.toLowerCase().replace(/_/g, '-'); }
-  rowClass(rag: Rag) { return 'row-' + rag.toLowerCase().replace(/_/g, '-'); }
-  ragLabel(rag: Rag) { return rag === 'INSUFFICIENT_DATA' ? 'Insufficient Data' : rag; }
+  bandTitle(band: Band) { return BAND_DEFINITIONS[band]; }
 
   /** Position (0-100) along the spine track for a level dot / gap span. */
   pct(v: number | null): number { return v == null ? 0 : Math.max(0, Math.min(100, v)); }

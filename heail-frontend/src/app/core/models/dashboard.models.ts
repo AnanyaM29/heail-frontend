@@ -23,5 +23,6 @@ export interface MyDashboard {
   organisationsAdministered: OrgOrderResponse[];
   leaderResults: LeaderResult[];
   leaderInProgress: SessionResumeResponse | null;
+  leaderUnpaidOrder: boolean;
   respondentMemberships: RespondentMembership[];
 }

@@ -19,8 +19,8 @@ export interface PartnerApplicationData {
 export class PartnerService {
   private http = inject(HttpClient);
 
-  sendOtp(email: string) {
-    return this.http.post<void>(`${API}/send-otp`, { email });
+  sendOtp(email: string, mobile?: string) {
+    return this.http.post<void>(`${API}/send-otp`, { email, mobile });
   }
 
   apply(data: PartnerApplicationData) {

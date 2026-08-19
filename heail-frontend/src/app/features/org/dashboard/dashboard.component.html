@@ -105,7 +105,7 @@
           <div class="overall-grid">
             <div class="bigscore">
               <div class="bigscore-v">{{ r.overallIndex }}</div>
-              <div class="bigscore-band">{{ bandLabel(r.overallBand) }}</div>
+              <div class="bigscore-band" [title]="bandTitle(r.overallBand)">{{ bandLabel(r.overallBand) }}</div>
               <div class="bigscore-of">index 0–100</div>
             </div>
             <div>
@@ -117,14 +117,11 @@
                   A divergence index isn't computable yet — no section currently clears the 5-respondents-per-level floor.
                 }
               </p>
-              <div class="ragdial-wrap" style="justify-content:flex-start;padding:6px 0 0">
-                <div [class]="ragDialClass(r.overallRag)" style="width:64px;height:64px;border-width:6px">
-                  <span class="ragdial-label" style="font-size:12px">{{ ragLabel(r.overallRag) }}</span>
-                </div>
-                <span class="hint" style="align-self:center;margin-left:14px">Legacy RAG band, shown for reference only — the index above is the primary value.</span>
-              </div>
             </div>
           </div>
+          <p class="hint band-legend" style="margin-top:12px">
+            <b>Emerging</b> 0–39 · <b>Developing</b> 40–59 · <b>Established</b> 60–79 · <b>Leading</b> 80–100
+          </p>
         </div>
 
         <!-- ── By Pulse ───────────────────────────────────────────────── -->
@@ -137,7 +134,7 @@
             <div class="pulse-rag-card pulse-card-v2">
               <p>{{ p.displayName }}</p>
               <div class="pulse-index">{{ p.index }}</div>
-              <div class="pulse-band">{{ bandLabel(p.band) }}</div>
+              <div class="pulse-band" [title]="bandTitle(p.band)">{{ bandLabel(p.band) }}</div>
               <dl class="pulse-dl">
                 <dt>Net gap (L − E)</dt><dd>{{ p.netGap !== null ? (p.netGap! > 0 ? '+' : '') + p.netGap : '—' }}</dd>
                 <dt>Divergence</dt><dd>{{ p.divergenceIndex ?? '—' }}</dd>

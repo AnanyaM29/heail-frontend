@@ -1,9 +1,9 @@
-footer { background: #060F20; color: #7E90A8; padding: 52px 0 40px; font-size: 13.5px; }
-.foot-top { display: flex; justify-content: space-between; gap: 26px; flex-wrap: wrap; align-items: flex-start; padding-bottom: 26px; border-bottom: 1px solid rgba(217,169,63,.14); }
+footer { background: var(--navy-deep); color: var(--on-dark-mut); padding: 52px 0 40px; font-size: 13.5px; }
+.foot-top { display: flex; justify-content: space-between; gap: 26px; flex-wrap: wrap; align-items: flex-start; padding-bottom: 26px; border-bottom: 1px solid var(--gold-dim); }
 .foot-logo-img { height: 88px; width: auto; }
-.foot .fsig { font-family: var(--disp); font-style: italic; color: #93A6C0; margin-top: 6px; font-size: 13px; letter-spacing: .06em; }
+.foot .fsig { font-family: var(--disp); font-style: italic; color: var(--on-dark); margin-top: 6px; font-size: 13px; letter-spacing: .06em; }
 .foot-links { display: flex; gap: 44px; flex-wrap: wrap; }
 .foot-links h5 { color: var(--gold); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 12px; }
-.foot-links a { display: block; color: #9FB0C6; text-decoration: none; padding: 4px 0; cursor: pointer; }
+.foot-links a { display: block; color: var(--on-dark-mut); text-decoration: none; padding: 4px 0; cursor: pointer; }
 .foot-links a:hover { color: var(--gold-bright); }
-.foot-bottom { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-top: 22px; font-size: 12.5px; color: #5F7290; }
+.foot-bottom { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-top: 22px; font-size: 12.5px; color: var(--on-dark-mut); opacity: .75; }

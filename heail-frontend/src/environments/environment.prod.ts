@@ -10,7 +10,8 @@
 // here needs to change either way.
 export const environment = {
   production: true,
-  apiBaseUrl: '',
-  // Public live/sandbox Client ID — safe to expose client-side, only the Secret is private.
-  paypalClientId: 'PAYPAL_CLIENT_ID_PLACEHOLDER'
+  apiBaseUrl: ''
+  // razorpayKeyId used to live here, but it's not secret — the backend now
+  // includes it in every order response (OrderResponse.razorpayKeyId), so the
+  // frontend doesn't need a separately-configured copy to keep in sync.
 };

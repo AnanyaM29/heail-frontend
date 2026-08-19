@@ -28,20 +28,20 @@
   border: 10px solid; position: relative;
 }
 .ragdial-label { font-family: var(--disp); font-size: 22px; font-weight: 700; text-align: center; line-height: 1.2; padding: 0 12px; }
-.ragdial-red { border-color: #FEB2B2; background: #FFF5F5; color: var(--error); }
-.ragdial-amber { border-color: #F6E05E; background: #FFFAF0; color: #B7791F; }
-.ragdial-green { border-color: #9AE6B4; background: #F0FFF4; color: var(--success); }
-.ragdial-insufficient-data { border-color: #E2D9C4; background: #F1EADA; color: var(--mut); }
+.ragdial-red { border-color: #E6BDAF; background: #FBF0ED; color: var(--error); }
+.ragdial-amber { border-color: #EACB9E; background: #FBF0E0; color: var(--accent-dark); }
+.ragdial-green { border-color: #B7DDC5; background: #EDF7F1; color: var(--success); }
+.ragdial-insufficient-data { border-color: var(--line-tan); background: var(--ivory2); color: var(--mut); }
 
 /* ── RAG chip (used in pulse cards + section table) ── */
 .rag {
   display: inline-block; padding: 7px 20px; border-radius: 999px;
   font-weight: 700; font-size: 13px; letter-spacing: .04em;
 }
-.rag-red { background: #FFF5F5; color: var(--error); border: 1px solid #FEB2B2; }
-.rag-amber { background: #FFFAF0; color: #B7791F; border: 1px solid #F6E05E; }
-.rag-green { background: #F0FFF4; color: var(--success); border: 1px solid #9AE6B4; }
-.rag-insufficient-data { background: #F1EADA; color: var(--mut); border: 1px solid #E2D9C4; }
+.rag-red { background: #FBF0ED; color: var(--error); border: 1px solid #E6BDAF; }
+.rag-amber { background: #FBF0E0; color: var(--accent-dark); border: 1px solid #EACB9E; }
+.rag-green { background: #EDF7F1; color: var(--success); border: 1px solid #B7DDC5; }
+.rag-insufficient-data { background: var(--ivory2); color: var(--mut); border: 1px solid var(--line-tan); }
 
 /* ── Pulse RAG cards ── */
 .pulse-rag-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -68,10 +68,10 @@
   border-radius: 3px; padding: 2px 7px; margin-left: 10px; vertical-align: middle;
 }
 .section-table .sc-count { color: var(--mut); }
-.section-table tr.row-red { border-left-color: var(--error); background: #FFFBFB; }
-.section-table tr.row-amber { border-left-color: #B7791F; background: #FFFDF8; }
-.section-table tr.row-green { border-left-color: var(--success); background: #FBFFFC; }
-.section-table tr.row-insufficient-data { border-left-color: #D9CFB6; }
+.section-table tr.row-red { border-left-color: var(--error); background: #FCF5F3; }
+.section-table tr.row-amber { border-left-color: var(--accent-dark); background: #FCF4E9; }
+.section-table tr.row-green { border-left-color: var(--success); background: #F2F8F4; }
+.section-table tr.row-insufficient-data { border-left-color: var(--line-tan); }
 
 /* ── Employee progress table ── */
 .monitor-table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -87,7 +87,7 @@
 .pstate { display: inline-block; font-weight: 700; font-size: 16px; }
 .pstate-done { color: var(--success); }
 .pstate-progress { color: var(--gold); }
-.pstate-notstarted { color: #C9BFA4; }
+.pstate-notstarted { color: #B7AF95; }
 
 /* ── Perception spine ── */
 .spine-lead { font-size: 14px; color: var(--mut); max-width: 70ch; line-height: 1.6; margin-bottom: 20px; }
@@ -103,7 +103,7 @@
 .legend { display: flex; gap: 18px; margin-left: auto; font-size: 12px; color: var(--mut); align-items: center; flex-wrap: wrap; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: -1px; }
 .legend .dot-l { background: var(--navy); }
-.legend .dot-mm { background: var(--steel, #8A97AE); }
+.legend .dot-mm { background: var(--steel, #97917C); }
 .legend .dot-e { background: var(--gold); }
 
 .spine { border: 1px solid var(--ivory2); border-radius: 4px; padding: 4px 0; }
@@ -122,7 +122,7 @@
 .track .span.hot { background: var(--error); opacity: .5; }
 .dot { position: absolute; top: 7px; width: 13px; height: 13px; border-radius: 50%; margin-left: -6.5px; border: 2px solid #fff; }
 .dot-l { background: var(--navy); z-index: 3; }
-.dot-mm { background: var(--steel, #8A97AE); z-index: 2; }
+.dot-mm { background: var(--steel, #97917C); z-index: 2; }
 .dot-e { background: var(--gold); z-index: 3; }
 
 .suppressed-track { display: flex; align-items: center; height: 26px; }

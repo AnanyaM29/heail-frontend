@@ -38,8 +38,10 @@
                 @else { Not yet paid — {{ (o.order.createdAt) | date:'mediumDate' }} }
               </p>
               <div class="card-actions">
-                <a class="go" routerLink="/dashboard/org" [queryParams]="{ order: o.order.id }">View Round →</a>
-                @if (o.order.status !== 'PAID') {
+                @if (o.order.status === 'PAID') {
+                  <a class="go" routerLink="/dashboard/org" [queryParams]="{ order: o.order.id }">View Round →</a>
+                } @else {
+                  <a class="go" [routerLink]="['/pricing/agreement-org', o.order.id]">Complete Payment →</a>
                   <button type="button" class="go go-cancel" [disabled]="cancellingId() === o.order.id"
                           (click)="cancelOrg(o.order.id, $event)">
                     @if (cancellingId() === o.order.id) { Cancelling… } @else { Cancel }
@@ -80,8 +82,16 @@
         <h2 class="sec-title">Your Leader Assessment</h2>
 
         <div class="act-grid">
+          @if (data()!.leaderUnpaidOrder) {
+            <a class="actcard" routerLink="/pricing/buy-leader">
+              <div class="aud">Leader Assessment</div>
+              <h3>Payment Pending</h3>
+              <p class="stat-line tone-warn">Not yet paid</p>
+              <span class="go">Complete Payment →</span>
+            </a>
+          }
           @if (data()!.leaderInProgress; as s) {
-            <a class="actcard" [routerLink]="['/leader/assessment', s.sessionId]">
+            <a class="actcard" [routerLink]="['/leader/assessment', s.sessionId]" target="_blank">
               <div class="aud">Attempt {{ s.attemptNumber }}</div>
               <h3>In Progress</h3>
               <p class="stat-line tone-warn">{{ s.questions.length }} questions</p>

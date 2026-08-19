@@ -10,8 +10,8 @@ const API = `${environment.apiBaseUrl}/api/v1/org/orders`;
 export class OrgOrderService {
   private http = inject(HttpClient);
 
-  createOrGetOrder() {
-    return this.http.post<OrgOrderResponse>(API, {});
+  createOrGetOrder(currency?: string) {
+    return this.http.post<OrgOrderResponse>(API, currency ? { currency } : {});
   }
 
   getOrder(id: string) {
@@ -42,12 +42,16 @@ export class OrgOrderService {
     return this.http.post<OrgOrderResponse>(`${API}/${id}/agreement`, { version });
   }
 
-  createPaypalOrder(id: string) {
-    return this.http.post<OrgOrderResponse>(`${API}/${id}/create-paypal-order`, {});
+  createRazorpayOrder(id: string) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/create-razorpay-order`, {});
   }
 
-  capturePaypalOrder(id: string, paypalOrderId: string) {
-    return this.http.post<OrgOrderResponse>(`${API}/${id}/capture-paypal-order`, { paypalOrderId });
+  verifyRazorpayPayment(id: string, payload: { razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string }) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/verify-razorpay-payment`, payload);
+  }
+
+  forceCompleteTestPayment(id: string) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/force-complete-test-payment`, {});
   }
 
   cancel(id: string) {

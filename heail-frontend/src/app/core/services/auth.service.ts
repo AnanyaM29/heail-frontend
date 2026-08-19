@@ -35,8 +35,8 @@ export class AuthService {
     );
   }
 
-  sendRegistrationOtp(email: string) {
-    return this.http.post<void>(`${API}/register/send-otp`, { email });
+  sendRegistrationOtp(email: string, mobile?: string) {
+    return this.http.post<void>(`${API}/register/send-otp`, { email, mobile });
   }
 
   forgotPassword(req: ForgotPasswordRequest) {

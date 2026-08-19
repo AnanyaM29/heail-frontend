@@ -23,13 +23,13 @@
   font-size: 22px;
   font-style: italic;
   font-weight: 500;
-  color: #D6E0F0;
+  color: var(--on-dark);
   line-height: 1.6;
 }
 
 .brand-sub {
   font-size: 14px;
-  color: #8FA2BE;
+  color: var(--on-dark-mut);
   letter-spacing: .04em;
   line-height: 1.8;
 }
@@ -96,7 +96,7 @@
 .fld select {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #D9CFB6;
+  border: 1px solid var(--line-tan);
   background: #fff;
   font-family: var(--body);
   font-size: 15px;
@@ -125,7 +125,7 @@
 /* Terms */
 .terms-block {
   background: var(--ivory2);
-  border: 1px solid #D9CFB6;
+  border: 1px solid var(--line-tan);
   border-left: 3px solid var(--gold);
   padding: 14px 16px;
   margin-bottom: 20px;
@@ -152,8 +152,8 @@
 .gold-link:hover { color: var(--gold-bright); }
 
 .alert-err {
-  background: #FFF5F5;
-  border: 1px solid #FEB2B2;
+  background: #FBF0ED;
+  border: 1px solid #E6BDAF;
   border-left: 3px solid var(--error);
   color: var(--error);
   padding: 12px 14px;

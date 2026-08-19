@@ -1,6 +1,6 @@
 .alert-err {
-  background: #FFF5F5;
-  border: 1px solid #FEB2B2;
+  background: #FBF0ED;
+  border: 1px solid #E6BDAF;
   border-left: 3px solid var(--error);
   color: var(--error);
   padding: 12px 14px;
@@ -23,7 +23,7 @@
    the site rather than a bolted-on admin panel. */
 .actcard {
   background: #fff;
-  border: 1px solid #E6DCC4;
+  border: 1px solid var(--line-tan);
   padding: 30px 26px 26px;
   position: relative;
   display: block;
@@ -41,14 +41,14 @@
   transition: transform .35s;
 }
 .actcard:hover::before { transform: scaleX(1); }
-.actcard:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(19,41,75,.12); }
+.actcard:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(21,15,46,.12); }
 
 .actcard .aud { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mut); font-weight: 600; }
 .actcard h3 { font-size: 24px; margin: 10px 0 6px; font-weight: 600; color: var(--navy-deep); }
 
-.actcard .stat-line { font-family: var(--disp); font-style: italic; font-size: 17.5px; line-height: 1.4; color: #7A6428; }
+.actcard .stat-line { font-family: var(--disp); font-style: italic; font-size: 17.5px; line-height: 1.4; color: var(--accent-dark); }
 .actcard .stat-line.tone-good { color: var(--success); }
-.actcard .stat-line.tone-warn { color: #9A7218; }
+.actcard .stat-line.tone-warn { color: var(--accent-dark); }
 .actcard .stat-line.tone-bad  { color: var(--error); }
 
 .actcard .sub-line { font-size: 13px; color: var(--mut); margin-top: 4px; }
@@ -74,7 +74,7 @@
 
 .actcard .go-cancel { color: var(--error); }
 .actcard:hover .go-cancel { color: var(--error); }
-.actcard .go-cancel:hover:not(:disabled) { color: #8B2323; }
+.actcard .go-cancel:hover:not(:disabled) { color: #8F3623; }
 .actcard .go-cancel:disabled { opacity: .5; cursor: not-allowed; }
 
 @media (max-width: 600px) {

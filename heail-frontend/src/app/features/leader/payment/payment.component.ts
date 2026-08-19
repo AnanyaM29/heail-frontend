@@ -3,7 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderService } from '../../../core/services/order.service';
-import { PaypalLoaderService } from '../../../core/services/paypal-loader.service';
+import { RazorpayLoaderService } from '../../../core/services/razorpay-loader.service';
 import { Order } from '../../../core/models/order.models';
 
 const AGREEMENT_VERSION = 'v1';
@@ -20,7 +20,7 @@ type Stage = 'select' | 'details' | 'agreement' | 'payment' | 'thankyou';
 export class LeaderPaymentComponent {
   auth = inject(AuthService);
   private orderService = inject(OrderService);
-  private paypalLoader = inject(PaypalLoaderService);
+  private razorpayLoader = inject(RazorpayLoaderService);
 
   order = signal<Order | null>(null);
   detailsDone = signal(false);
@@ -30,8 +30,13 @@ export class LeaderPaymentComponent {
 
   designation = signal('');
   organisationName = signal('');
+  razorpayReady = signal(false);
 
-  isLeader = computed(() => this.auth.role() === 'LEADER');
+  // No role gate here on purpose: the account's stored `role` is
+  // single-valued and gets overwritten as it picks up other products (e.g.
+  // an org admin who was originally a LEADER), so it can't be used to decide
+  // who's allowed to buy this product. Ownership/ordering is enforced by
+  // the backend (OrderService.requireOwnedOrder), same as the org flow.
 
   stage = computed<Stage>(() => {
     const o = this.order();
@@ -41,59 +46,93 @@ export class LeaderPaymentComponent {
     return this.detailsDone() ? 'agreement' : 'details';
   });
 
-  private paypalRendered = false;
-  private renderPaypalEffect = effect(() => {
+  private paymentInitiated = false;
+  private renderPaymentEffect = effect(() => {
     const o = this.order();
-    if (!o || this.stage() !== 'payment' || this.paypalRendered) return;
-    this.paypalRendered = true;
+    if (!o || this.stage() !== 'payment' || this.paymentInitiated) return;
+    this.paymentInitiated = true;
     this.beginPayment(o.id);
   });
 
-  // Creates the order first, then only renders PayPal's own button widget if
-  // the backend actually started a real gateway payment (PAYMENT_INITIATED).
-  // If PayPal is disabled server-side, createPaypalOrder() comes back already
-  // PAID — stage() flips to 'thankyou' on its own, no PayPal SDK ever loads.
+  // Creates the order first, then only starts the actual Razorpay checkout if
+  // the backend started a real payment (PAYMENT_INITIATED). If the gateway is
+  // disabled server-side, createRazorpayOrder() comes back already PAID —
+  // stage() flips to 'thankyou' on its own, no gateway SDK ever loads.
+  //
+  // createRazorpayOrder() only accepts AGREEMENT_ACCEPTED orders — if the caller
+  // already has a PAYMENT_INITIATED order (e.g. they started paying, left, and came
+  // back via a dashboard link), the order already loaded has everything needed
+  // (gatewayReference/razorpayKeyId are always present on the order response), so
+  // re-calling it would just 400. Skip straight to showing the Pay button instead.
   private beginPayment(orderId: string) {
+    const existing = this.order();
+    if (existing?.status === 'PAYMENT_INITIATED' && existing.gatewayReference) {
+      this.razorpayReady.set(true);
+      return;
+    }
+
     this.actionLoading.set(true);
     this.error.set('');
-    this.orderService.createPaypalOrder(orderId).subscribe({
+    this.orderService.createRazorpayOrder(orderId).subscribe({
       next: res => {
         this.order.set(res);
         this.actionLoading.set(false);
         if (res.status === 'PAYMENT_INITIATED' && res.gatewayReference) {
-          this.renderPaypalButtons(orderId, res.gatewayReference);
+          this.razorpayReady.set(true);
         }
       },
       error: (e: any) => {
         this.error.set(this.msg(e));
         this.actionLoading.set(false);
-        this.paypalRendered = false;
+        this.paymentInitiated = false;
       }
     });
   }
 
-  private renderPaypalButtons(orderId: string, paypalOrderId: string) {
-    this.paypalLoader.load().then(paypal => {
-      paypal.Buttons({
-        createOrder: () => Promise.resolve(paypalOrderId),
-        onApprove: (data: any) => {
+  /** Opens Razorpay's own Checkout overlay — called from a real click on the "Pay Now" button. */
+  payWithRazorpay() {
+    const o = this.order();
+    if (!o || !o.gatewayReference || !o.razorpayKeyId) return;
+    this.razorpayLoader.load().then(Razorpay => {
+      const rzp = new Razorpay({
+        key: o.razorpayKeyId,
+        amount: Math.round(o.totalAmount * 100),
+        currency: o.currency,
+        order_id: o.gatewayReference,
+        name: 'HEAIL',
+        description: 'Gita Leader — Classic Assessment',
+        handler: (response: any) => {
           this.actionLoading.set(true);
           this.error.set('');
-          this.orderService.capturePaypalOrder(orderId, data.orderID).subscribe({
+          this.orderService.verifyRazorpayPayment(o.id, {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature
+          }).subscribe({
             next: updated => { this.order.set(updated); this.actionLoading.set(false); },
-            error: (e: any) => {
-              this.error.set(this.msg(e));
-              this.actionLoading.set(false);
-              this.paypalRendered = false;
-            }
+            error: (e: any) => { this.error.set(this.msg(e)); this.actionLoading.set(false); }
           });
         },
-        onError: (err: any) => {
-          this.error.set('PayPal checkout error — please try again.');
-          console.error(err);
+        theme: { color: '#13294b' },
+        modal: {
+          ondismiss: () => {
+            // Test mode only (enforced server-side) — closing the overlay without
+            // paying completes the order anyway, since no real payment ever occurs.
+            this.actionLoading.set(true);
+            this.error.set('');
+            this.orderService.forceCompleteTestPayment(o.id).subscribe({
+              next: updated => { this.order.set(updated); this.actionLoading.set(false); },
+              error: (e: any) => { this.error.set(this.msg(e)); this.actionLoading.set(false); }
+            });
+          }
         }
-      }).render('#paypal-button-container');
-    }).catch(() => this.error.set('Could not load PayPal checkout. Please refresh and try again.'));
+      });
+      rzp.on('payment.failed', (resp: any) => {
+        this.error.set('Payment failed — please try again.');
+        console.error(resp);
+      });
+      rzp.open();
+    }).catch(() => this.error.set('Could not load Razorpay checkout. Please refresh and try again.'));
   }
 
   select() {

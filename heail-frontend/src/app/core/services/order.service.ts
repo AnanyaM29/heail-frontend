@@ -9,8 +9,8 @@ const API = `${environment.apiBaseUrl}/api/v1/leader/orders`;
 export class OrderService {
   private http = inject(HttpClient);
 
-  createOrGetOrder() {
-    return this.http.post<Order>(API, {});
+  createOrGetOrder(currency?: string) {
+    return this.http.post<Order>(API, currency ? { currency } : {});
   }
 
   getOrder(id: string) {
@@ -25,11 +25,15 @@ export class OrderService {
     return this.http.post<Order>(`${API}/${id}/agreement`, { version });
   }
 
-  createPaypalOrder(id: string) {
-    return this.http.post<Order>(`${API}/${id}/create-paypal-order`, {});
+  createRazorpayOrder(id: string) {
+    return this.http.post<Order>(`${API}/${id}/create-razorpay-order`, {});
   }
 
-  capturePaypalOrder(id: string, paypalOrderId: string) {
-    return this.http.post<Order>(`${API}/${id}/capture-paypal-order`, { paypalOrderId });
+  verifyRazorpayPayment(id: string, payload: { razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string }) {
+    return this.http.post<Order>(`${API}/${id}/verify-razorpay-payment`, payload);
+  }
+
+  forceCompleteTestPayment(id: string) {
+    return this.http.post<Order>(`${API}/${id}/force-complete-test-payment`, {});
   }
 }

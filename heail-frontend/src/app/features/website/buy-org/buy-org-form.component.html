@@ -3,10 +3,10 @@
   <div class="top-row">
     <a class="backbtn" routerLink="/pricing/buy-org">← Back</a>
     <div class="csv-actions">
-      <input #csvInput type="file" accept=".csv" style="display:none" (change)="onCsvSelected($event)">
+      <input #csvInput type="file" accept=".csv,.xlsx,.xls" style="display:none" (change)="onFileSelected($event)">
       <button class="csvbtn" type="button" (click)="csvInput.click()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>
-        Upload CSV
+        Upload Sheet
       </button>
       <button class="csvbtn" type="button" (click)="downloadTemplate()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -138,7 +138,7 @@
         <p style="color:var(--error);font-size:13px;margin-top:14px">{{ csvError() }}</p>
       }
       @if (csvNotice() && !csvError()) {
-        <p class="hint" style="margin-top:14px">CSV loaded — review the rows above before continuing.</p>
+        <p class="hint" style="margin-top:14px">Sheet loaded — review the rows above before continuing.</p>
       }
 
       <div style="text-align:center;margin-top:30px">

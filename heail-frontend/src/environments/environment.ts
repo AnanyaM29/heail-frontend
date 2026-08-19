@@ -3,7 +3,8 @@
 // default configuration — see angular.json's fileReplacements).
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8080',
-  // Public sandbox Client ID — safe to expose client-side, only the Secret is private.
-  paypalClientId: 'PAYPAL_SANDBOX_CLIENT_ID_PLACEHOLDER'
+  apiBaseUrl: 'http://localhost:8080'
+  // razorpayKeyId used to live here, but it's not secret — the backend now
+  // includes it in every order response (OrderResponse.razorpayKeyId), so the
+  // frontend doesn't need a separately-configured copy to keep in sync.
 };

@@ -80,9 +80,11 @@ export class PartnersComponent {
   sendCode() {
     if (!this.emailValid) { this.touched.set(true); return; }
 
+    const mobile = this.mobile().length === 10 ? this.mobileCc() + this.mobile() : undefined;
+
     this.otpSending.set(true);
     this.otpError.set('');
-    this.partners.sendOtp(this.email()).subscribe({
+    this.partners.sendOtp(this.email(), mobile).subscribe({
       next: () => {
         this.otpSending.set(false);
         this.otpSent.set(true);
