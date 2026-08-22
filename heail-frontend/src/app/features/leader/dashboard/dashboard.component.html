@@ -41,7 +41,18 @@
           <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrincipleText ?? latest()!.weakestPrinciple }}</div>
         </div>
         <div style="text-align:center;margin-top:28px">
-          <a class="btn btn-gold" routerLink="/pricing/buy-leader">Retake Assessment</a>
+          @if (!entitlementChecked()) {
+            <span class="spinner" style="width:22px;height:22px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+          } @else if (entitled()) {
+            <button class="btn btn-gold" [disabled]="starting()" (click)="startAssessment()">
+              @if (starting()) { <span class="spinner"></span> } Start New Assessment
+            </button>
+            @if (noEntitlement()) {
+              <p class="hint" style="margin-top:10px">That entitlement was already used — please purchase again.</p>
+            }
+          } @else {
+            <a class="btn btn-gold" routerLink="/pricing/buy-leader">Retake Assessment</a>
+          }
         </div>
       </div>
 
