@@ -14,10 +14,11 @@ export const routes: Routes = [
       { path: 'for-organisations', loadComponent: () => import('./features/website/org/org.component').then(m => m.OrgComponent) },
       { path: 'for-leaders',       loadComponent: () => import('./features/website/leaders/leaders.component').then(m => m.LeadersComponent) },
       { path: 'for-leaders/foundation', loadComponent: () => import('./features/website/gita/gita.component').then(m => m.GitaComponent) },
-      // The real HR product page — pick any of the 7 pillars, pay once, self-serve
-      // (same shape as Leader). Requires login since picking pillars creates a draft
-      // order server-side; used to be pure "coming soon" marketing copy.
-      { path: 'for-hr',            canActivate: [authGuard], loadComponent: () => import('./features/hr/select/hr-select.component').then(m => m.HrSelectComponent) },
+      // Marketing/solutions page for HR teams — copy only, no purchase flow.
+      { path: 'for-hr',            loadComponent: () => import('./features/website/hr-solutions/hr-solutions.component').then(m => m.HrSolutionsComponent) },
+      // Pick any of the 7 pillars, pay once, self-serve (same shape as Leader).
+      // Requires login since picking pillars creates a draft order server-side.
+      { path: 'pricing/buy-hr',    canActivate: [authGuard], loadComponent: () => import('./features/hr/select/hr-select.component').then(m => m.HrSelectComponent) },
       { path: 'pricing/buy-hr/:orderId', canActivate: [authGuard], loadComponent: () => import('./features/hr/payment/hr-payment.component').then(m => m.HrPaymentComponent) },
       { path: 'for-students',      loadComponent: () => import('./features/website/students/students.component').then(m => m.StudentsComponent) },
       { path: 'transformation',    loadComponent: () => import('./features/website/transformation/transformation.component').then(m => m.TransformationComponent) },

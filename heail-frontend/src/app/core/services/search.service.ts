@@ -20,7 +20,7 @@ const ENTRIES: SearchEntry[] = [
   { title: 'For Students', description: 'Know where you stand before the world tells you. Aptitude, readiness and level-based assessments — coming soon.', route: '/for-students' },
   { title: 'Transformation', description: 'The same four bottlenecks, in every organisation.', route: '/transformation' },
   { title: 'Pricing', description: 'Assessment prices, the Gita Leader Assessment, Pulse Diagnostic Suite, Leadership and Transformation programs, HR Solutions.', route: '/pricing' },
-  { title: 'HR Solutions Pricing', description: 'Share your JD. Select your assessments. Candidate screening and interview/HR-round assessments.', route: '/pricing', fragment: 'hrPricing' },
+  { title: 'HR Solutions Pricing', description: 'Pick from all 7 HR competency assessments and buy.', route: '/pricing/buy-hr' },
   { title: 'Partners', description: 'Grow with HEAIL in your city. Consultants, trainers, coaches, and HR professionals.', route: '/partners' },
   { title: 'Our Foundation', description: "Our foundation is not a method. It is a conviction. Why AI alone is not enough, why experience alone is not enough.", route: '/foundation' },
   { title: 'Contact Us', description: 'Talk to HEAIL. Write to us or message on WhatsApp.', route: '/contact' },

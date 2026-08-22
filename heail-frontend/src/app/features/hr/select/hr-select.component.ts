@@ -6,7 +6,7 @@ import { HrAssessment } from '../../../core/models/hr.models';
 
 /** The actual HR product page — pick any of the 7 pillars, pay once, self-serve
  *  (same "anyone can buy it" shape as the Leader flow, not an org-bulk round).
- *  Lives at /for-hr, replacing what used to be a "catalogue coming soon" page. */
+ *  Lives at /pricing/buy-hr — /for-hr is now the marketing/solutions page. */
 @Component({
   selector: 'app-hr-select',
   standalone: true,

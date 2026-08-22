@@ -28,6 +28,16 @@ export class NavComponent implements AfterViewChecked {
   toggleMenu() { this.menuOpen.update(v => !v); }
   closeMenu() { this.menuOpen.set(false); }
 
+  /** The Solutions/user-menu dropdowns are pure CSS (:hover, plus :focus-within
+   *  so keyboard users can open them without a mouse). Clicking the trigger or
+   *  any link inside leaves that element focused, and :focus-within doesn't
+   *  care that the mouse has since left — so without this, the dropdown stays
+   *  open until something else on the page steals focus. Blurring on click
+   *  hands control back to :hover alone once the click's done its job. */
+  blurActive() {
+    (document.activeElement as HTMLElement)?.blur();
+  }
+
   logout() { this.closeMenu(); this.auth.logout(); }
 
   toggleSearch(e: Event) {

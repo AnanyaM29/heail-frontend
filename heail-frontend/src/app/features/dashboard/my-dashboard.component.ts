@@ -53,7 +53,7 @@ export class MyDashboardComponent implements OnInit {
 
   // One row per pillar with any activity — entitled to take, mid-attempt, or
   // already has a result. A pillar nobody's ever bought or touched is left
-  // out entirely; browsing/buying happens on /for-hr instead.
+  // out entirely; browsing/buying happens on /pricing/buy-hr instead.
   hrRows = computed<HrRow[]>(() => {
     const d = this.data();
     if (!d) return [];
