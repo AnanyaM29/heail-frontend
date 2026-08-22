@@ -14,7 +14,11 @@ export const routes: Routes = [
       { path: 'for-organisations', loadComponent: () => import('./features/website/org/org.component').then(m => m.OrgComponent) },
       { path: 'for-leaders',       loadComponent: () => import('./features/website/leaders/leaders.component').then(m => m.LeadersComponent) },
       { path: 'for-leaders/foundation', loadComponent: () => import('./features/website/gita/gita.component').then(m => m.GitaComponent) },
-      { path: 'for-hr',            loadComponent: () => import('./features/website/hr/hr.component').then(m => m.HrComponent) },
+      // The real HR product page — pick any of the 7 pillars, pay once, self-serve
+      // (same shape as Leader). Requires login since picking pillars creates a draft
+      // order server-side; used to be pure "coming soon" marketing copy.
+      { path: 'for-hr',            canActivate: [authGuard], loadComponent: () => import('./features/hr/select/hr-select.component').then(m => m.HrSelectComponent) },
+      { path: 'pricing/buy-hr/:orderId', canActivate: [authGuard], loadComponent: () => import('./features/hr/payment/hr-payment.component').then(m => m.HrPaymentComponent) },
       { path: 'for-students',      loadComponent: () => import('./features/website/students/students.component').then(m => m.StudentsComponent) },
       { path: 'transformation',    loadComponent: () => import('./features/website/transformation/transformation.component').then(m => m.TransformationComponent) },
       { path: 'pricing',           loadComponent: () => import('./features/website/pricing/pricing.component').then(m => m.PricingComponent) },
@@ -42,6 +46,7 @@ export const routes: Routes = [
       // loosening on the equivalent controllers.
       { path: 'pulse',     canActivate: [authGuard, employeeGuard], loadComponent: () => import('./features/employee/dashboard/dashboard.component').then(m => m.PulseDashboardComponent) },
       { path: 'leader',    canActivate: [authGuard, leaderGuard], loadComponent: () => import('./features/leader/dashboard/dashboard.component').then(m => m.LeaderDashboardComponent) },
+      { path: 'hr/result/:resultId', canActivate: [authGuard], loadComponent: () => import('./features/hr/result/hr-result.component').then(m => m.HrResultComponent) },
     ]
   },
 
@@ -57,6 +62,7 @@ export const routes: Routes = [
      any in-app navigation away while the test is live. ── */
   { path: 'pulse/assessment/:pulseCode/:sessionId', canActivate: [authGuard, employeeGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/employee/pulse/player.component').then(m => m.PulsePlayerComponent) },
   { path: 'leader/assessment/:sessionId', canActivate: [authGuard, leaderGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/leader/assessment/player.component').then(m => m.AssessmentPlayerComponent) },
+  { path: 'hr/assessment/:sessionId', canActivate: [authGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/hr/assessment/hr-player.component').then(m => m.HrPlayerComponent) },
 
   { path: '**', redirectTo: '' }
 ];

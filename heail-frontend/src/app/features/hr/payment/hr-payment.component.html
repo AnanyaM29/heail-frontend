@@ -1,0 +1,69 @@
+@if (loading()) {
+  <section style="padding-top:120px"><div class="wrap" style="max-width:560px;text-align:center">
+    <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+  </div></section>
+} @else {
+
+@if (error()) {
+  <section style="padding-top:20px;padding-bottom:0"><div class="wrap" style="max-width:760px">
+    <div class="alert-err" role="alert">{{ error() }}</div>
+  </div></section>
+}
+
+@switch (stage()) {
+
+  @case ('agreement') {
+    <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
+      <a class="backbtn" routerLink="/for-hr">← Back</a>
+      <div class="eyebrow">Terms of Agreement · HR Competency Assessment</div>
+      <h2 class="sec-title">Before you pay.</h2>
+      <div class="formwrap" style="max-width:none">
+        <p style="font-family:var(--disp);font-size:22px;margin-bottom:6px">Total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
+        <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee covers the selected assessments (one sitting each) and is non-refundable once the assessment links are issued · your answers and results are private to your account · a fresh attempt on any pillar requires a new purchase.</p>
+        <div class="fld consent" style="margin-top:18px">
+          <input type="checkbox" id="hrAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
+          <label for="hrAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
+        </div>
+        <div style="text-align:center;margin-top:22px">
+          <button class="btn btn-gold" type="button" [disabled]="!agreed() || actionLoading()" (click)="acceptAgreement()">
+            @if (actionLoading()) { <span class="spinner"></span> } Proceed to Payment
+          </button>
+        </div>
+      </div>
+    </div></section>
+  }
+
+  @case ('payment') {
+    <section style="padding-top:100px"><div class="wrap" style="max-width:560px">
+      <div class="eyebrow">Payment</div>
+      <h2 class="sec-title">Complete your payment.</h2>
+      <div class="formwrap" style="margin-top:20px;text-align:center">
+        <p style="font-family:var(--disp);font-size:26px;margin-bottom:6px">Total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
+        <p style="font-size:12.5px;color:var(--mut);margin-bottom:20px">Base {{ order()!.currency }} {{ order()!.baseAmount | number:'1.2-2' }} + GST {{ order()!.currency }} {{ order()!.gstAmount | number:'1.2-2' }} · Non-refundable</p>
+        @if (actionLoading()) {
+          <div style="padding:20px"><span class="spinner"></span></div>
+        }
+        @if (razorpayReady()) {
+          <button class="btn btn-gold" type="button" style="width:100%;max-width:340px" (click)="payWithRazorpay()">
+            Pay {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }} Now
+          </button>
+        }
+        <p style="font-size:12px;color:var(--mut);margin-top:18px">Secured by Razorpay — HEAIL never sees your card details.</p>
+      </div>
+    </div></section>
+  }
+
+  @case ('thankyou') {
+    <section style="padding-top:120px"><div class="wrap" style="max-width:640px;text-align:center">
+      <div class="eyebrow">Payment Successful</div>
+      <h2 class="sec-title">Thank you for making payment.</h2>
+      <p class="sec-sub" style="margin:0 auto">Please check your email — you can start any of your purchased assessments right away.</p>
+      @if (order()!.gatewayReference) {
+        <p class="hint" style="margin-top:14px">Receipt reference: {{ order()!.gatewayReference }}</p>
+      }
+      <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/dashboard">Go to Dashboard — Start an Assessment</a></div>
+    </div></section>
+  }
+}
+
+}

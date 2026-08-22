@@ -1,5 +1,5 @@
 <div class="phero"><div class="wrap">
-  <div class="eyebrow">The Gita Leader — Classic Assessment</div>
+  <div class="eyebrow">HR Competency Assessment</div>
   @if (showDirections()) {
     <h1>Before You Begin</h1>
   } @else {
@@ -40,6 +40,7 @@
           <button type="button" class="opt" [class.selected]="currentSelected() === 'B'" (click)="select('B')">{{ q.optionB }}</button>
           <button type="button" class="opt" [class.selected]="currentSelected() === 'C'" (click)="select('C')">{{ q.optionC }}</button>
           <button type="button" class="opt" [class.selected]="currentSelected() === 'D'" (click)="select('D')">{{ q.optionD }}</button>
+          <button type="button" class="opt" [class.selected]="currentSelected() === 'E'" (click)="select('E')">{{ q.optionE }}</button>
         </div>
 
         <div class="nav-row">

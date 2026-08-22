@@ -1,0 +1,44 @@
+<div class="phero" style="padding:48px 0 30px"><div class="wrap">
+  <div class="eyebrow">HR Competency Assessment</div>
+  <h1>Your Result</h1>
+</div></div>
+
+<section style="padding-top:20px"><div class="wrap">
+
+  <a class="backbtn" routerLink="/dashboard">← Back to Dashboard</a>
+
+  @if (loading()) {
+    <div class="formwrap" style="text-align:center;padding:60px 42px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else {
+    @if (error()) {
+      <div class="alert-err" role="alert">{{ error() }}</div>
+    }
+    @if (result(); as r) {
+      <div class="formwrap result-card">
+        <div class="eyebrow" style="text-align:center">{{ r.assessmentName }} · Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
+        <div style="text-align:center">
+          <div class="overall-score">{{ r.overallScore }} <span>/ 150</span></div>
+        </div>
+
+        <div class="domain-grid">
+          @for (entry of skillCategoryEntries(); track entry[0]) {
+            <div class="domain-card">
+              <h4>{{ entry[0] }}</h4>
+              <p class="score">{{ entry[1] }}</p>
+            </div>
+          }
+        </div>
+
+        @if (r.strongestCompetencyName || r.weakestCompetencyName) {
+          <div class="principle-row">
+            <div><span class="lbl">Strongest competency</span>{{ r.strongestCompetencyName ?? r.strongestCompetency }}</div>
+            <div><span class="lbl">Weakest competency</span>{{ r.weakestCompetencyName ?? r.weakestCompetency }}</div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div></section>

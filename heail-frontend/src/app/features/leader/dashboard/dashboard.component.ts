@@ -46,22 +46,29 @@ export class LeaderDashboardComponent implements OnInit {
     });
   }
 
+  /** No toolbar/location/menu bar — a stripped-down popup window instead of a
+   *  normal tab, so there's no address bar to navigate away in and no tab
+   *  strip to switch out of. Sized to fill the screen so it reads as a
+   *  dedicated window rather than a small floating box. */
+  private static readonly LOCKDOWN_FEATURES =
+    `toolbar=no,location=no,menubar=no,status=no,directories=no,resizable=no,scrollbars=yes,` +
+    `width=${screen.availWidth},height=${screen.availHeight},left=0,top=0`;
+
   startAssessment() {
     this.starting.set(true);
     this.error.set('');
     this.noEntitlement.set(false);
-    // Opens in a new window on purpose — a timed, locked-down test window
-    // separate from the browsable main site (see testExitGuard/beforeunload
-    // in AssessmentPlayerComponent). Must call window.open() synchronously,
-    // inside this click handler, or browsers block it as an unrequested
-    // popup — the target URL isn't known yet, so open blank and redirect it
-    // once the session-start call comes back.
-    const testWindow = window.open('', '_blank');
+    // Opens in a locked-down window on purpose — separate from the browsable
+    // main site (see testExitGuard/beforeunload in AssessmentPlayerComponent).
+    // Must call window.open() synchronously, inside this click handler, or
+    // browsers block it as an unrequested popup — the target URL isn't known
+    // yet, so open blank and redirect it once the session-start call comes back.
+    const testWindow = window.open('', '_blank', LeaderDashboardComponent.LOCKDOWN_FEATURES);
     this.assessment.start().subscribe({
       next: res => {
         this.starting.set(false);
         const url = this.router.createUrlTree(['/leader/assessment', res.sessionId]).toString();
-        if (testWindow) testWindow.location.href = url; else window.open(url, '_blank');
+        if (testWindow) testWindow.location.href = url; else window.open(url, '_blank', LeaderDashboardComponent.LOCKDOWN_FEATURES);
       },
       error: (e: any) => {
         this.starting.set(false);
@@ -76,7 +83,7 @@ export class LeaderDashboardComponent implements OnInit {
     const s = this.currentSession();
     if (!s) return;
     const url = this.router.createUrlTree(['/leader/assessment', s.sessionId]).toString();
-    window.open(url, '_blank');
+    window.open(url, '_blank', LeaderDashboardComponent.LOCKDOWN_FEATURES);
   }
 
   domainLabel(code: string) {

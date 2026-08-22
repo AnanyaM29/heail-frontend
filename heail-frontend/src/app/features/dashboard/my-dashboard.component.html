@@ -110,6 +110,48 @@
       </div>
     }
 
+    <!-- ── This account's HR Competency Assessment activity ─────────── -->
+    @if (hasHr()) {
+      <div class="dash-sec">
+        <div class="eyebrow">HR</div>
+        <h2 class="sec-title">Your HR Competency Assessments</h2>
+
+        <div class="act-grid">
+          @for (row of hrRows(); track row.assessment.id) {
+            <div class="actcard">
+              <div class="aud">{{ row.assessment.questionCount }} questions · ~{{ row.assessment.timeMinutes }} min</div>
+              <h3>{{ row.assessment.name }}</h3>
+
+              @if (row.inProgress) {
+                <p class="stat-line tone-warn">Attempt {{ row.inProgress.attemptNumber }} — in progress</p>
+                <div class="card-actions"><button type="button" class="go" (click)="resumeHr(row.inProgress)">Resume →</button></div>
+              } @else {
+                @if (row.latestResult; as r) {
+                  <p class="stat-line">{{ r.overallScore }} / 150</p>
+                  <p class="sub-line">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</p>
+                  <div class="card-actions">
+                    <a class="go" [routerLink]="['/hr/result', r.id]">View Result →</a>
+                    @if (row.assessment.entitled) {
+                      <button type="button" class="go" [disabled]="startingHr() === row.assessment.id" (click)="startHr(row.assessment.id)">
+                        {{ startingHr() === row.assessment.id ? 'Starting…' : 'Start New Attempt →' }}
+                      </button>
+                    }
+                  </div>
+                } @else if (row.assessment.entitled) {
+                  <p class="stat-line tone-good">Ready to start</p>
+                  <div class="card-actions">
+                    <button type="button" class="go" [disabled]="startingHr() === row.assessment.id" (click)="startHr(row.assessment.id)">
+                      {{ startingHr() === row.assessment.id ? 'Starting…' : 'Start Assessment →' }}
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
   }
 
 </div></section>

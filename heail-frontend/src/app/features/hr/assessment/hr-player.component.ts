@@ -1,23 +1,25 @@
 import { Component, OnInit, OnDestroy, signal, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AssessmentService } from '../../../core/services/assessment.service';
-import { Question } from '../../../core/models/assessment.models';
+import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
+import { HrQuestion } from '../../../core/models/hr.models';
 
-// Directions are shown once before a respondent's first-ever attempt at this
-// assessment — not repeated on retakes. Keyed by a flag in localStorage.
-const DIRECTIONS_SEEN_KEY = 'heail_leader_directions_seen';
+// Directions are shown once before a respondent's first-ever attempt at any HR
+// pillar — not repeated on retakes or across pillars. Keyed by a flag in localStorage.
+const DIRECTIONS_SEEN_KEY = 'heail_hr_directions_seen';
 
+/** Same locked-down, no-timer test player as AssessmentPlayerComponent (Leader),
+ *  generalized to 5 options (A-E) instead of 4. */
 @Component({
-  selector: 'app-assessment-player',
+  selector: 'app-hr-player',
   standalone: true,
   imports: [],
-  templateUrl: './player.component.html',
-  styleUrl: './player.component.css'
+  templateUrl: './hr-player.component.html',
+  styleUrl: './hr-player.component.css'
 })
-export class AssessmentPlayerComponent implements OnInit, OnDestroy {
+export class HrPlayerComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private assessment = inject(AssessmentService);
+  private assessment = inject(HrAssessmentService);
 
   sessionId = this.route.snapshot.paramMap.get('sessionId')!;
 
@@ -25,7 +27,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   error = signal('');
   submitting = signal(false);
 
-  questions = signal<Question[]>([]);
+  questions = signal<HrQuestion[]>([]);
   answers = signal<Record<string, string>>({});
   index = signal(0);
 
@@ -49,6 +51,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     const q = this.current();
     return q ? this.answers()[q.questionId] ?? null : null;
   });
+
   ngOnInit() {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
     if (!this.showDirections()) this.loadQuestions();
@@ -93,7 +96,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     this.assessment.resume(this.sessionId).subscribe({
       next: res => {
         if (res.status === 'COMPLETED') {
-          this.router.navigate(['/leader']);
+          this.router.navigate(['/dashboard']);
           return;
         }
         this.questions.set(res.questions);
@@ -127,7 +130,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     this.submitting.set(true);
     this.error.set('');
     this.assessment.submit(this.sessionId).subscribe({
-      next: () => { this.testActive = false; this.exitLockdown(); this.router.navigate(['/leader']); },
+      next: () => { this.testActive = false; this.exitLockdown(); this.router.navigate(['/dashboard']); },
       error: (e: any) => { this.submitting.set(false); this.error.set(this.msg(e)); }
     });
   }

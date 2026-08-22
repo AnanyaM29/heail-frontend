@@ -1,10 +1,18 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { DatePipe, DecimalPipe, TitleCasePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { OrgOrderService } from '../../core/services/org-order.service';
+import { HrAssessmentService } from '../../core/services/hr-assessment.service';
 import { MyDashboard } from '../../core/models/dashboard.models';
+import { HrAssessment, HrResult, HrSessionResumeResponse } from '../../core/models/hr.models';
 import { ConfirmService } from '../../shared/confirm/confirm.service';
+
+interface HrRow {
+  assessment: HrAssessment;
+  latestResult: HrResult | null;
+  inProgress: HrSessionResumeResponse | null;
+}
 
 /** Unified "home" for a logged-in account: shows every HEAIL activity tied to
  *  this person — organisations they administer, their own respondent progress
@@ -23,18 +31,49 @@ export class MyDashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private orgOrders = inject(OrgOrderService);
   private confirmSvc = inject(ConfirmService);
+  private hrAssessments = inject(HrAssessmentService);
+  private router = inject(Router);
+
+  // No toolbar/location/menu bar — a stripped-down popup window instead of a
+  // normal tab, matching the Leader test player's lockdown window.
+  private static readonly LOCKDOWN_FEATURES =
+    `toolbar=no,location=no,menubar=no,status=no,directories=no,resizable=no,scrollbars=yes,` +
+    `width=${screen.availWidth},height=${screen.availHeight},left=0,top=0`;
 
   loading = signal(true);
   error = signal('');
   data = signal<MyDashboard | null>(null);
   cancellingId = signal<string | null>(null);
+  startingHr = signal<number | null>(null);
 
   hasOrgs = computed(() => (this.data()?.organisationsAdministered.length ?? 0) > 0);
   hasRespondent = computed(() => (this.data()?.respondentMemberships.length ?? 0) > 0);
   hasLeader = computed(() =>
     (this.data()?.leaderResults.length ?? 0) > 0 || !!this.data()?.leaderInProgress || !!this.data()?.leaderUnpaidOrder);
+
+  // One row per pillar with any activity — entitled to take, mid-attempt, or
+  // already has a result. A pillar nobody's ever bought or touched is left
+  // out entirely; browsing/buying happens on /for-hr instead.
+  hrRows = computed<HrRow[]>(() => {
+    const d = this.data();
+    if (!d) return [];
+
+    const latestByAssessment = new Map<number, HrResult>();
+    for (const r of d.hrResults) {
+      const existing = latestByAssessment.get(r.assessmentId);
+      if (!existing || new Date(r.createdAt) > new Date(existing.createdAt)) latestByAssessment.set(r.assessmentId, r);
+    }
+    const inProgressByAssessment = new Map<number, HrSessionResumeResponse>();
+    for (const s of d.hrInProgress) inProgressByAssessment.set(s.assessmentId, s);
+
+    return d.hrAssessments
+      .map(a => ({ assessment: a, latestResult: latestByAssessment.get(a.id) ?? null, inProgress: inProgressByAssessment.get(a.id) ?? null }))
+      .filter(row => row.assessment.entitled || row.latestResult || row.inProgress);
+  });
+  hasHr = computed(() => this.hrRows().length > 0);
+
   hasNothing = computed(() =>
-    !this.loading() && !this.hasOrgs() && !this.hasRespondent() && !this.hasLeader());
+    !this.loading() && !this.hasOrgs() && !this.hasRespondent() && !this.hasLeader() && !this.hasHr());
 
   ngOnInit() {
     this.load();
@@ -66,6 +105,33 @@ export class MyDashboardComponent implements OnInit {
     this.orgOrders.cancel(orderId).subscribe({
       next: () => { this.cancellingId.set(null); this.load(); },
       error: (e: any) => { this.cancellingId.set(null); this.error.set(this.msg(e)); }
+    });
+  }
+
+  resumeHr(session: HrSessionResumeResponse) {
+    const url = this.router.createUrlTree(['/hr/assessment', session.sessionId]).toString();
+    window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
+  }
+
+  startHr(assessmentId: number) {
+    if (this.startingHr()) return;
+    this.startingHr.set(assessmentId);
+    this.error.set('');
+    // Must call window.open() synchronously, inside this click handler, or
+    // browsers block it as an unrequested popup — open blank and redirect it
+    // once the session-start call comes back.
+    const testWindow = window.open('', '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
+    this.hrAssessments.start(assessmentId).subscribe({
+      next: res => {
+        this.startingHr.set(null);
+        const url = this.router.createUrlTree(['/hr/assessment', res.sessionId]).toString();
+        if (testWindow) testWindow.location.href = url; else window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
+      },
+      error: (e: any) => {
+        this.startingHr.set(null);
+        testWindow?.close();
+        this.error.set(this.msg(e));
+      }
     });
   }
 

@@ -1,5 +1,6 @@
 import { OrgOrderResponse } from './org-order.models';
 import { LeaderResult, SessionResumeResponse } from './assessment.models';
+import { HrAssessment, HrResult, HrSessionResumeResponse } from './hr.models';
 
 /** One organisation's pulse round the caller has been invited into as a
  *  respondent — separate from any round they might administer themselves. */
@@ -25,4 +26,7 @@ export interface MyDashboard {
   leaderInProgress: SessionResumeResponse | null;
   leaderUnpaidOrder: boolean;
   respondentMemberships: RespondentMembership[];
+  hrAssessments: HrAssessment[];
+  hrResults: HrResult[];
+  hrInProgress: HrSessionResumeResponse[];
 }

@@ -9,7 +9,7 @@
     <ul class="navlinks" [class.open]="menuOpen()">
       <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">Home</a></li>
       <li class="has-dd">
-        <span class="ndrop" tabindex="0">Solutions <span class="caret">▼</span></span>
+        <span class="ndrop" tabindex="0" (click)="$any($event.currentTarget).blur()">Solutions <span class="caret">▼</span></span>
         <div class="dd">
           <a routerLink="/for-organisations" (click)="closeMenu()">For Organisations</a>
           <a routerLink="/for-leaders" (click)="closeMenu()">For Aspiring Professionals</a>
@@ -45,7 +45,7 @@
       </li>
       @if (auth.isLoggedIn()) {
         <li class="has-dd nav-cta">
-          <span class="ndrop" tabindex="0" style="color:var(--gold-bright)">Hello {{ firstName() }}<span class="caret">▼</span></span>
+          <span class="ndrop" tabindex="0" style="color:var(--gold-bright)" (click)="$any($event.currentTarget).blur()">Hello {{ firstName() }}<span class="caret">▼</span></span>
           <div class="dd">
             <a [routerLink]="auth.homePath()" (click)="closeMenu()">Dashboard</a>
             <a routerLink="/profile" (click)="closeMenu()">Update Profile</a>

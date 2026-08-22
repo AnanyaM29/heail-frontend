@@ -1,0 +1,44 @@
+/* Mirrors LeaderDashboardComponent's result-card styling exactly, so a Leader
+ * result and an HR result read as the same kind of thing. */
+
+.backbtn {
+  display: inline-block; margin-bottom: 20px; font-size: 13px; color: var(--mut);
+  text-decoration: none; letter-spacing: .04em;
+}
+.backbtn:hover { color: var(--navy); }
+
+.result-card { max-width: 860px; }
+
+.overall-score { font-family: var(--disp); font-size: 52px; color: var(--navy-deep); font-weight: 700; }
+.overall-score span { font-size: 20px; color: var(--mut); font-weight: 400; }
+
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  margin-top: 36px;
+}
+.domain-card {
+  min-width: 0;
+  background: #fff; border: 1px solid var(--line-tan); padding: 20px 14px;
+  text-align: center; border-radius: 2px;
+}
+.domain-card h4 {
+  font-family: var(--disp); font-size: 14.5px; font-weight: 600;
+  line-height: 1.3; overflow-wrap: break-word;
+}
+.domain-card .score { font-size: 15px; color: var(--gold); font-weight: 700; margin-top: 8px; }
+
+.principle-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;
+}
+.principle-row > div {
+  background: var(--ivory); border: 1px solid var(--line-tan); border-radius: 2px;
+  padding: 18px 20px; text-align: left;
+  font-family: var(--disp); font-style: italic; font-size: 16px; line-height: 1.45; color: var(--navy-deep);
+}
+.principle-row .lbl { display: block; font-family: var(--body); font-style: normal; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); margin-bottom: 8px; }
+
+@media (max-width: 640px) {
+  .principle-row { grid-template-columns: 1fr; }
+}
