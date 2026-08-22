@@ -2,9 +2,9 @@ import { Component, OnInit, signal, computed, inject, WritableSignal } from '@an
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
-import { AdminPayment, AdminTestSession, AdminUser } from '../../../core/models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../../../core/models/admin.models';
 
-type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins';
+type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners';
 
 const PAGE_SIZE = 25;
 
@@ -101,6 +101,15 @@ export class AdminConsoleComponent implements OnInit {
   loginsTotalPages = computed(() => totalPages(this.logins().length));
   pagedLogins = computed(() => pageSlice(this.logins(), this.loginsPage()));
 
+  // ── Partner applications, chronological ──────────────────────
+  partners = signal<AdminPartner[]>([]);
+  partnersLoading = signal(false);
+  partnersError = signal('');
+  partnersLoaded = false;
+  partnersPage = signal(1);
+  partnersTotalPages = computed(() => totalPages(this.partners().length));
+  pagedPartners = computed(() => pageSlice(this.partners(), this.partnersPage()));
+
   setPage(pageSignal: WritableSignal<number>, page: number, totalPages: number) {
     pageSignal.set(Math.min(Math.max(1, page), totalPages));
   }
@@ -111,6 +120,7 @@ export class AdminConsoleComponent implements OnInit {
     if (t === 'payments' && !this.paymentsLoaded) this.loadPayments();
     if (t === 'users' && !this.usersLoaded) this.loadUsers();
     if (t === 'logins' && !this.loginsLoaded) this.loadLogins();
+    if (t === 'partners' && !this.partnersLoaded) this.loadPartners();
   }
 
   loadTests() {
@@ -157,6 +167,56 @@ export class AdminConsoleComponent implements OnInit {
       error: (e: any) => {
         this.loginsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load login activity.');
         this.loginsLoading.set(false);
+      }
+    });
+  }
+
+  loadPartners() {
+    this.partnersLoading.set(true);
+    this.partnersError.set('');
+    this.admin.partners().subscribe({
+      next: rows => { this.partners.set(rows); this.partnersPage.set(1); this.partnersLoading.set(false); this.partnersLoaded = true; },
+      error: (e: any) => {
+        this.partnersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load partner applications.');
+        this.partnersLoading.set(false);
+      }
+    });
+  }
+
+  // ── Resume download — fetched as a blob so the request carries the admin's
+  //    auth header; a plain <a href> to the API would hit it unauthenticated. ──
+  downloadingResumeId = signal<string | null>(null);
+
+  downloadResume(p: AdminPartner) {
+    if (!p.hasResume || this.downloadingResumeId()) return;
+    this.downloadingResumeId.set(p.id);
+    this.admin.partnerResume(p.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = p.resumeFileName || `${p.name}-resume`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.downloadingResumeId.set(null);
+      },
+      error: (e: any) => {
+        this.downloadingResumeId.set(null);
+        // responseType 'blob' means error bodies come back as a Blob too, not
+        // parsed JSON — read it as text ourselves to surface the backend's
+        // actual message (e.g. "resume file is missing from storage") instead
+        // of a generic fallback.
+        if (e?.error instanceof Blob) {
+          e.error.text().then((text: string) => {
+            try {
+              this.partnersError.set(JSON.parse(text)?.message ?? 'Could not download this resume.');
+            } catch {
+              this.partnersError.set('Could not download this resume.');
+            }
+          }).catch(() => this.partnersError.set('Could not download this resume.'));
+        } else {
+          this.partnersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not download this resume.');
+        }
       }
     });
   }

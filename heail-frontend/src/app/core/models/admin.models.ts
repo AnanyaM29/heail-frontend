@@ -27,6 +27,19 @@ export interface AdminPayment {
   paidAt: string | null;
 }
 
+export interface AdminPartner {
+  id: string;
+  name: string;
+  country: string | null;
+  city: string | null;
+  mobile: string | null;
+  email: string;
+  consentGiven: boolean;
+  resumeFileName: string | null;
+  hasResume: boolean;
+  createdAt: string;
+}
+
 export interface AdminUser {
   id: string;
   name: string;

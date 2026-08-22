@@ -11,6 +11,7 @@
     <button type="button" class="admin-tab" [class.active]="tab() === 'logins'" (click)="selectTab('logins')">Logins</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'tests'" (click)="selectTab('tests')">Tests</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'payments'" (click)="selectTab('payments')">Payments</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'partners'" (click)="selectTab('partners')">Partners</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'reset'" (click)="selectTab('reset')">Reset Password</button>
   </div>
 
@@ -205,6 +206,56 @@
             <button type="button" class="tog" [disabled]="paymentsPage() === 1" (click)="setPage(paymentsPage, paymentsPage() - 1, paymentsTotalPages())">Prev</button>
             <span class="hint">Page {{ paymentsPage() }} of {{ paymentsTotalPages() }}</span>
             <button type="button" class="tog" [disabled]="paymentsPage() === paymentsTotalPages()" (click)="setPage(paymentsPage, paymentsPage() + 1, paymentsTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── Partner applications, chronological ──────────────────── -->
+  @if (tab() === 'partners') {
+    @if (partnersError()) { <div class="alert-err" role="alert">{{ partnersError() }}</div> }
+
+    <div class="dash-panel" style="overflow-x:auto">
+      @if (partnersLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr><th>Applied</th><th>Name</th><th>Email</th><th>Mobile</th><th>Location</th><th>Consent</th><th>Resume</th></tr>
+          </thead>
+          <tbody>
+            @for (p of pagedPartners(); track p.id) {
+              <tr>
+                <td>{{ p.createdAt | date:'medium' }}</td>
+                <td class="emp-name">{{ p.name }}</td>
+                <td>{{ p.email }}</td>
+                <td>{{ p.mobile || '—' }}</td>
+                <td>{{ p.city && p.country ? p.city + ', ' + p.country : (p.city || p.country || '—') }}</td>
+                <td>
+                  @if (p.consentGiven) { <span class="pstate pstate-done">Given</span> }
+                  @else { <span class="pstate pstate-failed">Not given</span> }
+                </td>
+                <td>
+                  @if (p.hasResume) {
+                    <button type="button" class="resume-link" [disabled]="downloadingResumeId() === p.id" (click)="downloadResume(p)">
+                      {{ downloadingResumeId() === p.id ? 'Downloading…' : (p.resumeFileName || 'Download') }}
+                    </button>
+                  } @else {
+                    <span class="hint">—</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" style="text-align:center;color:var(--mut)">No partner applications yet.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (partnersTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="partnersPage() === 1" (click)="setPage(partnersPage, partnersPage() - 1, partnersTotalPages())">Prev</button>
+            <span class="hint">Page {{ partnersPage() }} of {{ partnersTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="partnersPage() === partnersTotalPages()" (click)="setPage(partnersPage, partnersPage() + 1, partnersTotalPages())">Next</button>
           </div>
         }
       }

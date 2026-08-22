@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AdminPayment, AdminTestSession, AdminUser } from '../models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/admin/dashboard`;
@@ -39,5 +39,13 @@ export class AdminService {
 
   sendPaymentReminders(orderIds: string[]) {
     return this.http.post(`${API}/orders/send-payment-reminders`, orderIds);
+  }
+
+  partners() {
+    return this.http.get<AdminPartner[]>(`${API}/partners`);
+  }
+
+  partnerResume(id: string) {
+    return this.http.get(`${API}/partners/${id}/resume`, { responseType: 'blob' });
   }
 }
