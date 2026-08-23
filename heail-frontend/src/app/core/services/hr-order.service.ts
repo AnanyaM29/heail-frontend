@@ -5,7 +5,6 @@ import { CandidateRow, HrCandidateDto, HrOrderResponse, ReallocationRequest } fr
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/hr/orders`;
-const CANDIDATES_API = `${environment.apiBaseUrl}/api/v1/hr/candidates`;
 
 @Injectable({ providedIn: 'root' })
 export class HrOrderService {
@@ -31,12 +30,14 @@ export class HrOrderService {
     return this.http.get<HrCandidateDto[]>(`${API}/candidates/mine`);
   }
 
-  requestReallocation(candidateId: string, body: ReallocationRequest) {
-    return this.http.post<void>(`${CANDIDATES_API}/${candidateId}/request-reallocation`, body);
+  /** Both return a fresh DRAFT order with one candidate already on it — the
+   *  caller routes straight to /pricing/buy-hr/{id} to pay. */
+  createRetakeOrder(candidateId: string) {
+    return this.http.post<Order>(`${API}/candidates/${candidateId}/retake`, {});
   }
 
-  requestRetake(candidateId: string) {
-    return this.http.post<void>(`${CANDIDATES_API}/${candidateId}/request-retake`, {});
+  createReallocationOrder(candidateId: string, body: ReallocationRequest) {
+    return this.http.post<Order>(`${API}/candidates/${candidateId}/reallocate`, body);
   }
 
   acceptAgreement(id: string, version: string) {

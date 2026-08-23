@@ -40,24 +40,6 @@ export interface AdminPartner {
   createdAt: string;
 }
 
-export interface AdminHrRequest {
-  id: string;
-  type: 'REALLOCATION' | 'RETAKE';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  orderId: string;
-  buyerName: string;
-  buyerEmail: string;
-  candidateId: string;
-  candidateName: string;
-  candidateEmail: string;
-  newName: string | null;
-  newDob: string | null;
-  newEmail: string | null;
-  newMobile: string | null;
-  newStartDate: string | null;
-  createdAt: string;
-}
-
 export interface AdminUser {
   id: string;
   name: string;

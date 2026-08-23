@@ -1,11 +1,17 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HrOrderService } from '../../../core/services/hr-order.service';
 import { HrCandidateDto, ReallocationRequest } from '../../../core/models/hr-candidate.models';
 
 /** Buyer-facing tracking view — every candidate ever registered across every
  *  paid HR order, their invite status, and results once completed. Reached
- *  from the payment thank-you page and (once added) the dashboard. */
+ *  from the payment thank-you page and the dashboard.
+ *
+ *  Reallocation and retake are both self-service paid actions — "Reallocate"/
+ *  "Retake" here just spins up a fresh single-candidate order for the same
+ *  pillars and routes into the normal payment flow (see
+ *  HrOrderService.createReallocationOrder/createRetakeOrder on the backend);
+ *  there's no admin approval step anymore. */
 @Component({
   selector: 'app-my-candidates',
   standalone: true,
@@ -15,13 +21,14 @@ import { HrCandidateDto, ReallocationRequest } from '../../../core/models/hr-can
 })
 export class MyCandidatesComponent implements OnInit {
   private hrOrders = inject(HrOrderService);
+  private router = inject(Router);
 
   loading = signal(true);
   error = signal('');
   candidates = signal<HrCandidateDto[]>([]);
 
   reallocatingId = signal<string | null>(null);
-  reallocateForm = signal<ReallocationRequest>({ newName: '', newDob: '', newEmail: '', newMobile: '', newStartDate: '' });
+  reallocateForm = signal<ReallocationRequest>({ newName: '', newDob: '', newEmail: '', newMobile: '' });
   actionBusy = signal<string | null>(null);
   actionMessage = signal('');
 
@@ -52,7 +59,7 @@ export class MyCandidatesComponent implements OnInit {
 
   openReallocate(c: HrCandidateDto) {
     this.reallocatingId.set(c.id);
-    this.reallocateForm.set({ newName: '', newDob: '', newEmail: '', newMobile: '', newStartDate: '' });
+    this.reallocateForm.set({ newName: '', newDob: '', newEmail: '', newMobile: '' });
   }
 
   cancelReallocate() {
@@ -65,31 +72,23 @@ export class MyCandidatesComponent implements OnInit {
 
   submitReallocation(candidateId: string) {
     const form = this.reallocateForm();
-    if (!form.newName.trim() || !form.newEmail.trim() || !form.newDob || !form.newStartDate) {
-      this.actionMessage.set('Fill in all fields for the replacement candidate.');
+    if (!form.newName.trim() || !form.newEmail.trim() || !form.newDob) {
+      this.actionMessage.set('Fill in the replacement candidate\'s name, DOB and email.');
       return;
     }
     this.actionBusy.set(candidateId);
     this.actionMessage.set('');
-    this.hrOrders.requestReallocation(candidateId, form).subscribe({
-      next: () => {
-        this.actionBusy.set(null);
-        this.reallocatingId.set(null);
-        this.actionMessage.set('Reallocation request submitted — you\'ll be notified once it\'s reviewed.');
-        this.load();
-      },
+    this.hrOrders.createReallocationOrder(candidateId, form).subscribe({
+      next: order => this.router.navigate(['/pricing/buy-hr', order.id]),
       error: (e: any) => { this.actionBusy.set(null); this.actionMessage.set(this.msg(e)); }
     });
   }
 
-  requestRetake(candidateId: string) {
+  retake(candidateId: string) {
     this.actionBusy.set(candidateId);
     this.actionMessage.set('');
-    this.hrOrders.requestRetake(candidateId).subscribe({
-      next: () => {
-        this.actionBusy.set(null);
-        this.actionMessage.set('Retake request submitted — you\'ll be notified once it\'s reviewed.');
-      },
+    this.hrOrders.createRetakeOrder(candidateId).subscribe({
+      next: order => this.router.navigate(['/pricing/buy-hr', order.id]),
       error: (e: any) => { this.actionBusy.set(null); this.actionMessage.set(this.msg(e)); }
     });
   }

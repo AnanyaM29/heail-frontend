@@ -53,23 +53,4 @@ export interface ReallocationRequest {
   newDob: string;
   newEmail: string;
   newMobile: string;
-  newStartDate: string;
-}
-
-export interface HrCandidateRequestDto {
-  id: string;
-  type: 'REALLOCATION' | 'RETAKE';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  orderId: string;
-  buyerName: string;
-  buyerEmail: string;
-  candidateId: string;
-  candidateName: string;
-  candidateEmail: string;
-  newName: string | null;
-  newDob: string | null;
-  newEmail: string | null;
-  newMobile: string | null;
-  newStartDate: string | null;
-  createdAt: string;
 }
