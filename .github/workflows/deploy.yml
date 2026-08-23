@@ -33,8 +33,14 @@ jobs:
             cd ~/heail
             docker compose build backend frontend
 
-            echo "=== Restarting application ==="
-            docker compose up -d
+            echo "=== Stopping existing application ==="
+            docker compose down --remove-orphans || true
+
+            echo "=== Removing any stale containers ==="
+            docker compose rm -f -s -v || true
+
+            echo "=== Starting application ==="
+            docker compose up -d --remove-orphans
 
             echo "=== Checking containers ==="
             docker compose ps
