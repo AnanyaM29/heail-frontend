@@ -1,16 +1,19 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
 import { HrOrderService } from '../../../core/services/hr-order.service';
 import { HrAssessment } from '../../../core/models/hr.models';
 
-/** The actual HR product page — pick any of the 7 pillars, pay once, self-serve
- *  (same "anyone can buy it" shape as the Leader flow, not an org-bulk round).
- *  Lives at /pricing/buy-hr — /for-hr is now the marketing/solutions page. */
+/** Step 1 of the HR product flow — pick which of the 7 pillars this order
+ *  covers. Every candidate registered on the next step (candidates-entry)
+ *  takes every pillar picked here; the buyer never takes these themselves.
+ *  A pillar stays selectable no matter how many times it's already been
+ *  bought — each purchase is for a fresh batch of candidates, not the buyer.
+ *  Lives at /pricing/buy-hr — /for-hr is the marketing/solutions page. */
 @Component({
   selector: 'app-hr-select',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './hr-select.component.html',
   styleUrl: './hr-select.component.css'
 })
@@ -35,7 +38,9 @@ export class HrSelectComponent implements OnInit {
   }
 
   toggle(a: HrAssessment) {
-    if (a.entitled) return; // already owned — the card's own "Go take it" link handles this instead
+    // No "already purchased" gate — a buyer routinely buys the same pillar
+    // again for a new batch of candidates, so prior purchases never block
+    // re-selecting it here (entitlements belong to candidates, not the buyer).
     this.selectedIds.update(current => {
       const next = new Set(current);
       next.has(a.id) ? next.delete(a.id) : next.add(a.id);
@@ -48,7 +53,7 @@ export class HrSelectComponent implements OnInit {
     this.continuing.set(true);
     this.error.set('');
     this.hrOrders.selectAssessments(Array.from(this.selectedIds())).subscribe({
-      next: order => { this.continuing.set(false); this.router.navigate(['/pricing/buy-hr', order.id]); },
+      next: order => { this.continuing.set(false); this.router.navigate(['/pricing/buy-hr', order.id, 'candidates']); },
       error: (e: any) => { this.continuing.set(false); this.error.set(this.msg(e)); }
     });
   }

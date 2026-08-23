@@ -1,0 +1,37 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">Your Assessments</div>
+  <h1>Ready when you are.</h1>
+  <p class="sub">Each is 30 questions, timed at 30 minutes, completed in a single sitting. Pick one below to begin.</p>
+</div></div>
+
+<section><div class="wrap">
+  @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+
+  @if (loading()) {
+    <div style="text-align:center;padding:60px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else if (cards().length === 0) {
+    <p style="text-align:center;color:var(--mut)">No assessments are currently assigned to you.</p>
+  } @else {
+    <div class="act-grid">
+      @for (card of cards(); track card.assessment.id) {
+        <div class="actcard" [class.hr-pick-owned]="card.completed">
+          <div class="aud">{{ card.assessment.questionCount }} questions · ~{{ card.assessment.timeMinutes }} min</div>
+          <h3>{{ card.assessment.name }}</h3>
+
+          @if (card.completed) {
+            <p class="stat-line tone-good">Completed</p>
+          } @else {
+            <div class="card-actions">
+              <button class="btn btn-navy" type="button" [disabled]="starting() !== null" (click)="go(card)">
+                @if (starting() === card.assessment.id) { <span class="spinner"></span> }
+                {{ card.sessionId ? 'Resume' : 'Start' }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div></section>

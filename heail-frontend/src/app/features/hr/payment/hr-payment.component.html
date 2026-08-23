@@ -14,12 +14,12 @@
 
   @case ('agreement') {
     <section style="padding-top:100px"><div class="wrap" style="max-width:760px">
-      <a class="backbtn" routerLink="/pricing/buy-hr">← Back</a>
+      <a class="backbtn" [routerLink]="['/pricing/buy-hr', orderId, 'candidates']">← Back</a>
       <div class="eyebrow">Terms of Agreement · HR Competency Assessment</div>
       <h2 class="sec-title">Before you pay.</h2>
       <div class="formwrap" style="max-width:none">
         <p style="font-family:var(--disp);font-size:22px;margin-bottom:6px">Total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
-        <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee covers the selected assessments (one sitting each) and is non-refundable once the assessment links are issued · your answers and results are private to your account · a fresh attempt on any pillar requires a new purchase.</p>
+        <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: each candidate's link stays active for 7 calendar days from their assessment start date, then expires permanently — a new license is needed to reassign it · all purchases are strictly non-refundable · results and scorecards go to you, the buyer, only — never to the candidate · if a candidate hasn't started within 7 days of payment, you may request to reallocate their credit to someone else, subject to HEAIL review.</p>
         <div class="fld consent" style="margin-top:18px">
           <input type="checkbox" id="hrAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
           <label for="hrAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>
@@ -57,11 +57,11 @@
     <section style="padding-top:120px"><div class="wrap" style="max-width:640px;text-align:center">
       <div class="eyebrow">Payment Successful</div>
       <h2 class="sec-title">Thank you for making payment.</h2>
-      <p class="sec-sub" style="margin:0 auto">Please check your email — you can start any of your purchased assessments right away.</p>
+      <p class="sec-sub" style="margin:0 auto">Each candidate has been emailed their own access link. Track invitation status and results as they come in from your dashboard.</p>
       @if (order()!.gatewayReference) {
         <p class="hint" style="margin-top:14px">Receipt reference: {{ order()!.gatewayReference }}</p>
       }
-      <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/dashboard">Go to Dashboard — Start an Assessment</a></div>
+      <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/dashboard/hr-candidates">Track My Candidates</a></div>
     </div></section>
   }
 }

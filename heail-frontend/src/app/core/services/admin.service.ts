@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../models/admin.models';
+import { AdminHrRequest, AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/admin/dashboard`;
@@ -47,5 +47,17 @@ export class AdminService {
 
   partnerResume(id: string) {
     return this.http.get(`${API}/partners/${id}/resume`, { responseType: 'blob' });
+  }
+
+  hrRequests() {
+    return this.http.get<AdminHrRequest[]>(`${API}/hr-requests`);
+  }
+
+  approveHrRequest(id: string) {
+    return this.http.post(`${API}/hr-requests/${id}/approve`, {});
+  }
+
+  rejectHrRequest(id: string, note?: string) {
+    return this.http.post(`${API}/hr-requests/${id}/reject`, note ? { note } : {});
   }
 }

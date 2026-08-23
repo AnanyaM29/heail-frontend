@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Order } from '../models/order.models';
+import { CandidateRow, HrCandidateDto, HrOrderResponse, ReallocationRequest } from '../models/hr-candidate.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/hr/orders`;
+const CANDIDATES_API = `${environment.apiBaseUrl}/api/v1/hr/candidates`;
 
 @Injectable({ providedIn: 'root' })
 export class HrOrderService {
@@ -15,6 +17,26 @@ export class HrOrderService {
 
   getOrder(id: string) {
     return this.http.get<Order>(`${API}/${id}`);
+  }
+
+  getOrderWithCandidates(id: string) {
+    return this.http.get<HrOrderResponse>(`${API}/${id}/candidates`);
+  }
+
+  setCandidates(id: string, rows: CandidateRow[]) {
+    return this.http.put<HrOrderResponse>(`${API}/${id}/candidates`, rows);
+  }
+
+  listMyCandidates() {
+    return this.http.get<HrCandidateDto[]>(`${API}/candidates/mine`);
+  }
+
+  requestReallocation(candidateId: string, body: ReallocationRequest) {
+    return this.http.post<void>(`${CANDIDATES_API}/${candidateId}/request-reallocation`, body);
+  }
+
+  requestRetake(candidateId: string) {
+    return this.http.post<void>(`${CANDIDATES_API}/${candidateId}/request-retake`, {});
   }
 
   acceptAgreement(id: string, version: string) {

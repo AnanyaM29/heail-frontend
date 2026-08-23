@@ -2,9 +2,9 @@ import { Component, OnInit, signal, computed, inject, WritableSignal } from '@an
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../../../core/models/admin.models';
+import { AdminHrRequest, AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../../../core/models/admin.models';
 
-type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners';
+type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners' | 'hrRequests';
 
 const PAGE_SIZE = 25;
 
@@ -110,6 +110,16 @@ export class AdminConsoleComponent implements OnInit {
   partnersTotalPages = computed(() => totalPages(this.partners().length));
   pagedPartners = computed(() => pageSlice(this.partners(), this.partnersPage()));
 
+  // ── HR candidate reallocation/retake requests, pending only ──
+  hrRequests = signal<AdminHrRequest[]>([]);
+  hrRequestsLoading = signal(false);
+  hrRequestsError = signal('');
+  hrRequestsLoaded = false;
+  hrRequestsPage = signal(1);
+  hrRequestsTotalPages = computed(() => totalPages(this.hrRequests().length));
+  pagedHrRequests = computed(() => pageSlice(this.hrRequests(), this.hrRequestsPage()));
+  hrRequestBusyId = signal<string | null>(null);
+
   setPage(pageSignal: WritableSignal<number>, page: number, totalPages: number) {
     pageSignal.set(Math.min(Math.max(1, page), totalPages));
   }
@@ -121,6 +131,7 @@ export class AdminConsoleComponent implements OnInit {
     if (t === 'users' && !this.usersLoaded) this.loadUsers();
     if (t === 'logins' && !this.loginsLoaded) this.loadLogins();
     if (t === 'partners' && !this.partnersLoaded) this.loadPartners();
+    if (t === 'hrRequests' && !this.hrRequestsLoaded) this.loadHrRequests();
   }
 
   loadTests() {
@@ -179,6 +190,48 @@ export class AdminConsoleComponent implements OnInit {
       error: (e: any) => {
         this.partnersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load partner applications.');
         this.partnersLoading.set(false);
+      }
+    });
+  }
+
+  loadHrRequests() {
+    this.hrRequestsLoading.set(true);
+    this.hrRequestsError.set('');
+    this.admin.hrRequests().subscribe({
+      next: rows => { this.hrRequests.set(rows); this.hrRequestsPage.set(1); this.hrRequestsLoading.set(false); this.hrRequestsLoaded = true; },
+      error: (e: any) => {
+        this.hrRequestsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load HR requests.');
+        this.hrRequestsLoading.set(false);
+      }
+    });
+  }
+
+  approveHrRequest(r: AdminHrRequest) {
+    if (this.hrRequestBusyId()) return;
+    this.hrRequestBusyId.set(r.id);
+    this.admin.approveHrRequest(r.id).subscribe({
+      next: () => {
+        this.hrRequests.update(rows => rows.filter(row => row.id !== r.id));
+        this.hrRequestBusyId.set(null);
+      },
+      error: (e: any) => {
+        this.hrRequestsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not approve this request.');
+        this.hrRequestBusyId.set(null);
+      }
+    });
+  }
+
+  rejectHrRequest(r: AdminHrRequest) {
+    if (this.hrRequestBusyId()) return;
+    this.hrRequestBusyId.set(r.id);
+    this.admin.rejectHrRequest(r.id).subscribe({
+      next: () => {
+        this.hrRequests.update(rows => rows.filter(row => row.id !== r.id));
+        this.hrRequestBusyId.set(null);
+      },
+      error: (e: any) => {
+        this.hrRequestsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not reject this request.');
+        this.hrRequestBusyId.set(null);
       }
     });
   }

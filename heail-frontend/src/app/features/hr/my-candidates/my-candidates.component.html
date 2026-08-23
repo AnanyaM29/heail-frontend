@@ -1,0 +1,74 @@
+<div class="phero"><div class="wrap">
+  <div class="eyebrow">HR Solutions</div>
+  <h1>Your Candidates.</h1>
+  <p class="sub">Invitation status and results for everyone you've registered, across every order.</p>
+</div></div>
+
+<section><div class="wrap">
+  @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
+  @if (actionMessage()) { <p class="hint" style="text-align:center;margin-bottom:20px">{{ actionMessage() }}</p> }
+
+  @if (loading()) {
+    <div style="text-align:center;padding:60px">
+      <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
+    </div>
+  } @else if (candidates().length === 0) {
+    <p style="text-align:center;color:var(--mut)">No candidates registered yet. <a routerLink="/pricing/buy-hr">Buy assessments</a> to get started.</p>
+  } @else {
+    <div style="display:flex;flex-direction:column;gap:18px">
+      @for (c of candidates(); track c.id) {
+        <div class="formwrap" style="max-width:none;text-align:left;padding:26px 30px">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:baseline">
+            <div>
+              <h3 style="font-family:var(--disp);font-size:19px;font-weight:600">{{ c.name }}</h3>
+              <p style="font-size:13px;color:var(--mut)">{{ c.email }} · Start date {{ c.assessmentStartDate }}</p>
+            </div>
+            <span class="pstate" [class.pstate-done]="c.status === 'ACCESSED'" [class.pstate-progress]="c.status === 'SENT'" [class.pstate-failed]="c.status === 'EXPIRED' || c.status === 'REALLOCATED'">
+              {{ statusLabel(c.status) }}
+            </span>
+          </div>
+
+          @if (c.results.length > 0) {
+            <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px">
+              @for (r of c.results; track r.assessmentId) {
+                <span style="font-size:12.5px;background:var(--ivory2);padding:6px 12px;border-radius:20px">{{ r.assessmentName }}: <b>{{ r.overallScore }}</b></span>
+              }
+            </div>
+          }
+
+          @if (c.canRequestReallocation || c.canRequestRetake) {
+            <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+              @if (c.canRequestReallocation && reallocatingId() !== c.id) {
+                <button class="csvbtn" type="button" (click)="openReallocate(c)">Request Reallocation</button>
+              }
+              @if (c.canRequestRetake) {
+                <button class="csvbtn" type="button" [disabled]="actionBusy() === c.id" (click)="requestRetake(c.id)">
+                  @if (actionBusy() === c.id) { <span class="spinner"></span> } Request Retake
+                </button>
+              }
+            </div>
+          }
+
+          @if (reallocatingId() === c.id) {
+            <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line-tan)">
+              <p class="panel-label" style="margin-bottom:14px">Replacement candidate's details</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+                <input placeholder="Full name" [value]="reallocateForm().newName" (input)="updateForm('newName', $any($event.target).value)">
+                <input type="date" [max]="today" [value]="reallocateForm().newDob" (input)="updateForm('newDob', $any($event.target).value)">
+                <input type="email" placeholder="Email" [value]="reallocateForm().newEmail" (input)="updateForm('newEmail', $any($event.target).value)">
+                <input placeholder="Mobile" [value]="reallocateForm().newMobile" (input)="updateForm('newMobile', $any($event.target).value)">
+                <input type="date" [min]="today" [value]="reallocateForm().newStartDate" (input)="updateForm('newStartDate', $any($event.target).value)">
+              </div>
+              <div style="margin-top:14px;display:flex;gap:10px">
+                <button class="btn btn-navy" type="button" [disabled]="actionBusy() === c.id" (click)="submitReallocation(c.id)">
+                  @if (actionBusy() === c.id) { <span class="spinner"></span> } Submit Request
+                </button>
+                <button class="csvbtn" type="button" (click)="cancelReallocate()">Cancel</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div></section>

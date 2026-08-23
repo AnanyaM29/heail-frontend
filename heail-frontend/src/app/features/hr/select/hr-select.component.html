@@ -17,17 +17,11 @@
       @for (a of assessments(); track a.id) {
         <div class="actcard hr-pick"
              [class.hr-pick-selected]="selectedIds().has(a.id)"
-             [class.hr-pick-owned]="a.entitled"
              (click)="toggle(a)">
           <div class="aud">{{ a.questionCount }} questions · ~{{ a.timeMinutes }} min</div>
           <h3>{{ a.name }}</h3>
 
-          @if (a.entitled) {
-            <p class="stat-line tone-good">Already purchased</p>
-            <div class="card-actions">
-              <a class="go" routerLink="/dashboard" (click)="$event.stopPropagation()">Go take it →</a>
-            </div>
-          } @else if (selectedIds().has(a.id)) {
+          @if (selectedIds().has(a.id)) {
             <p class="stat-line">Selected ✓</p>
           } @else {
             <p class="stat-line hr-pick-hint">Tap to select</p>

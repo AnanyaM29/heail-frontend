@@ -19,7 +19,10 @@ export const routes: Routes = [
       // Pick any of the 7 pillars, pay once, self-serve (same shape as Leader).
       // Requires login since picking pillars creates a draft order server-side.
       { path: 'pricing/buy-hr',    canActivate: [authGuard], loadComponent: () => import('./features/hr/select/hr-select.component').then(m => m.HrSelectComponent) },
+      { path: 'pricing/buy-hr/:orderId/candidates', canActivate: [authGuard], loadComponent: () => import('./features/hr/candidates-entry/candidates-entry.component').then(m => m.CandidatesEntryComponent) },
       { path: 'pricing/buy-hr/:orderId', canActivate: [authGuard], loadComponent: () => import('./features/hr/payment/hr-payment.component').then(m => m.HrPaymentComponent) },
+      // Public — a candidate's emailed access-token link, no HEAIL account needed.
+      { path: 'hr/candidate/:token', loadComponent: () => import('./features/hr/candidate-landing/candidate-landing.component').then(m => m.CandidateLandingComponent) },
       { path: 'for-students',      loadComponent: () => import('./features/website/students/students.component').then(m => m.StudentsComponent) },
       { path: 'transformation',    loadComponent: () => import('./features/website/transformation/transformation.component').then(m => m.TransformationComponent) },
       { path: 'pricing',           loadComponent: () => import('./features/website/pricing/pricing.component').then(m => m.PricingComponent) },
@@ -41,6 +44,7 @@ export const routes: Routes = [
       // than one of these at once (see DashboardController/DashboardService).
       { path: 'dashboard',     canActivate: [authGuard], loadComponent: () => import('./features/dashboard/my-dashboard.component').then(m => m.MyDashboardComponent) },
       { path: 'dashboard/org', canActivate: [authGuard], loadComponent: () => import('./features/org/dashboard/dashboard.component').then(m => m.OrgDashboardComponent) },
+      { path: 'dashboard/hr-candidates', canActivate: [authGuard], loadComponent: () => import('./features/hr/my-candidates/my-candidates.component').then(m => m.MyCandidatesComponent) },
       // NOTE: leaderGuard/employeeGuard now only check isAuthenticated() — a
       // strict role check here would block, e.g., an org admin who is also a
       // respondent from reaching /pulse. Mirrors the backend's @PreAuthorize
@@ -48,6 +52,8 @@ export const routes: Routes = [
       { path: 'pulse',     canActivate: [authGuard, employeeGuard], loadComponent: () => import('./features/employee/dashboard/dashboard.component').then(m => m.PulseDashboardComponent) },
       { path: 'leader',    canActivate: [authGuard, leaderGuard], loadComponent: () => import('./features/leader/dashboard/dashboard.component').then(m => m.LeaderDashboardComponent) },
       { path: 'hr/result/:resultId', canActivate: [authGuard], loadComponent: () => import('./features/hr/result/hr-result.component').then(m => m.HrResultComponent) },
+      // Where a candidate lands right after redeeming their access-token link.
+      { path: 'hr/my-assessments', canActivate: [authGuard], loadComponent: () => import('./features/hr/my-assessments/my-assessments.component').then(m => m.MyAssessmentsComponent) },
     ]
   },
 

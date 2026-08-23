@@ -12,6 +12,7 @@
     <button type="button" class="admin-tab" [class.active]="tab() === 'tests'" (click)="selectTab('tests')">Tests</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'payments'" (click)="selectTab('payments')">Payments</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'partners'" (click)="selectTab('partners')">Partners</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'hrRequests'" (click)="selectTab('hrRequests')">HR Requests</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'reset'" (click)="selectTab('reset')">Reset Password</button>
   </div>
 
@@ -256,6 +257,54 @@
             <button type="button" class="tog" [disabled]="partnersPage() === 1" (click)="setPage(partnersPage, partnersPage() - 1, partnersTotalPages())">Prev</button>
             <span class="hint">Page {{ partnersPage() }} of {{ partnersTotalPages() }}</span>
             <button type="button" class="tog" [disabled]="partnersPage() === partnersTotalPages()" (click)="setPage(partnersPage, partnersPage() + 1, partnersTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── HR candidate reallocation/retake requests, pending only ── -->
+  @if (tab() === 'hrRequests') {
+    @if (hrRequestsError()) { <div class="alert-err" role="alert">{{ hrRequestsError() }}</div> }
+
+    <div class="dash-panel" style="overflow-x:auto">
+      @if (hrRequestsLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr><th>Requested</th><th>Type</th><th>Buyer</th><th>Candidate</th><th>Replacement details</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            @for (r of pagedHrRequests(); track r.id) {
+              <tr>
+                <td>{{ r.createdAt | date:'medium' }}</td>
+                <td><span class="pstate" [class.pstate-progress]="r.type === 'REALLOCATION'" [class.pstate-done]="r.type === 'RETAKE'">{{ r.type }}</span></td>
+                <td class="emp-name">{{ r.buyerName }}<br><span class="hint">{{ r.buyerEmail }}</span></td>
+                <td>{{ r.candidateName }}<br><span class="hint">{{ r.candidateEmail }}</span></td>
+                <td>
+                  @if (r.type === 'REALLOCATION') {
+                    {{ r.newName }}<br><span class="hint">{{ r.newEmail }} · starts {{ r.newStartDate }}</span>
+                  } @else {
+                    <span class="hint">—</span>
+                  }
+                </td>
+                <td style="white-space:nowrap">
+                  <button type="button" class="resume-link" [disabled]="hrRequestBusyId() === r.id" (click)="approveHrRequest(r)">Approve</button>
+                  &nbsp;·&nbsp;
+                  <button type="button" class="resume-link" style="color:var(--error)" [disabled]="hrRequestBusyId() === r.id" (click)="rejectHrRequest(r)">Reject</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" style="text-align:center;color:var(--mut)">No pending requests.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (hrRequestsTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="hrRequestsPage() === 1" (click)="setPage(hrRequestsPage, hrRequestsPage() - 1, hrRequestsTotalPages())">Prev</button>
+            <span class="hint">Page {{ hrRequestsPage() }} of {{ hrRequestsTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="hrRequestsPage() === hrRequestsTotalPages()" (click)="setPage(hrRequestsPage, hrRequestsPage() + 1, hrRequestsTotalPages())">Next</button>
           </div>
         }
       }
