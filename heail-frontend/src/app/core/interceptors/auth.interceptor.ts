@@ -18,7 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // instead. Login/auth calls themselves (e.g. a wrong password) are
       // excluded since a 401 there is a normal, expected form error.
       if (error instanceof HttpErrorResponse && error.status === 401 && !req.url.includes('/api/v1/auth/')) {
-        router.navigate(['/login']);
+        router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
       }
       return throwError(() => error);
     })

@@ -55,7 +55,7 @@ export class PricingComponent {
 
   private requireLogin(): boolean {
     if (this.auth.isLoggedIn()) return true;
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
     return false;
   }
 

@@ -64,7 +64,7 @@ export class HrSelectComponent implements OnInit {
 
   continue() {
     if (this.selectedCount() === 0 || this.continuing()) return;
-    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login']); return; }
+    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } }); return; }
     this.continuing.set(true);
     this.error.set('');
     this.hrOrders.selectAssessments(Array.from(this.selectedIds())).subscribe({

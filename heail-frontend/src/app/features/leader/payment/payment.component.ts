@@ -142,7 +142,7 @@ export class LeaderPaymentComponent {
   }
 
   select() {
-    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login']); return; }
+    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } }); return; }
     this.actionLoading.set(true);
     this.error.set('');
     this.orderService.createOrGetOrder().subscribe({

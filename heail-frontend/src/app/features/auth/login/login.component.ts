@@ -1,6 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
 
@@ -15,6 +15,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   form = this.fb.group({
     email:    ['', [Validators.required, Validators.email]],
@@ -30,7 +31,15 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
     this.auth.login(this.form.getRawValue() as any).subscribe({
-      next: () => this.auth.routeByRole(),
+      next: () => {
+        // If we got here mid-purchase (redirected to log in before
+        // continuing), go back to exactly that instead of the role's
+        // default homepage (which sends a SUPERADMIN to /admin, stranding
+        // them away from what they were actually doing).
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        if (returnUrl) this.router.navigateByUrl(returnUrl);
+        else this.auth.routeByRole();
+      },
       error: (e: any) => {
         this.error.set(e?.error?.message ?? 'Invalid email or password.');
         this.loading.set(false);
