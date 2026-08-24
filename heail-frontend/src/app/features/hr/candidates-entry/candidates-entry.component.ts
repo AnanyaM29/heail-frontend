@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, Input, Output, EventEmitter } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { HrOrderService } from '../../../core/services/hr-order.service';
@@ -38,7 +38,12 @@ export class CandidatesEntryComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  orderId = this.route.snapshot.paramMap.get('orderId')!;
+  orderId!: string;
+
+  @Input() orderIdOverride: string | null = null;
+  @Input() embedded = false;
+  @Output() candidatesSaved = new EventEmitter<void>();
+  @Output() back = new EventEmitter<void>();
 
   pillarNames = signal<string[]>([]);
   pricePerUnit = signal<number>(0);
@@ -55,6 +60,7 @@ export class CandidatesEntryComponent implements OnInit {
   today = new Date().toISOString().slice(0, 10);
 
   ngOnInit() {
+    this.orderId = this.orderIdOverride ?? this.route.snapshot.paramMap.get('orderId')!;
     this.hrOrders.getOrderWithCandidates(this.orderId).subscribe({
       next: res => {
         this.pillarNames.set(res.selectedAssessmentNames);
@@ -252,7 +258,10 @@ export class CandidatesEntryComponent implements OnInit {
 
     this.submitting.set(true);
     this.hrOrders.setCandidates(this.orderId, payloadRows).subscribe({
-      next: () => this.router.navigate(['/pricing/buy-hr', this.orderId]),
+      next: () => {
+        if (this.embedded) this.candidatesSaved.emit();
+        else this.router.navigate(['/pricing/buy-hr', this.orderId]);
+      },
       error: (e: any) => {
         this.submitting.set(false);
         if (e?.error?.rowErrors) this.rowErrors.set(e.error.rowErrors);

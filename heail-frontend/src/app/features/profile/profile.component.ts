@@ -1,8 +1,10 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileResponse } from '../../core/models/profile.models';
+import { COUNTRIES } from '../../shared/countries';
 
 /**
  * Self-service "Update Profile" page. Editing is gated in two layers:
@@ -25,6 +27,9 @@ import { ProfileResponse } from '../../core/models/profile.models';
 export class ProfileComponent implements OnInit {
   private profileSvc = inject(ProfileService);
   private auth = inject(AuthService);
+  private http = inject(HttpClient);
+
+  countries = COUNTRIES;
 
   loading = signal(true);
   error = signal('');
@@ -43,6 +48,9 @@ export class ProfileComponent implements OnInit {
   country = signal('');
   email = signal('');
   mobile = signal('');
+  cityOptions = signal<string[]>([]);
+  citiesLoading = signal(false);
+  cityDisabled = signal(true);
 
   emailChanged = computed(() => this.unlocked() && this.email().trim().toLowerCase() !== (this.profile()?.email ?? ''));
   mobileChanged = computed(() => this.unlocked() && this.mobile().trim() !== (this.profile()?.mobile ?? ''));
@@ -86,8 +94,34 @@ export class ProfileComponent implements OnInit {
         this.email.set(p.email);
         this.mobile.set(p.mobile ?? '');
         this.loading.set(false);
+        if (p.country) this.loadCitiesFor(p.country);
       },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }
+    });
+  }
+
+  // ── Country/city dropdown (same country→city cascade as the Partners page) ──
+  onCountryChange(event: Event) {
+    const countryName = (event.target as HTMLSelectElement).value;
+    this.country.set(countryName);
+    this.city.set('');
+    this.cityOptions.set([]);
+    this.cityDisabled.set(true);
+    if (countryName) this.loadCitiesFor(countryName);
+  }
+
+  private loadCitiesFor(countryName: string) {
+    const country = this.countries.find(c => c.name === countryName);
+    if (!country) return;
+
+    this.citiesLoading.set(true);
+    this.http.get<string[]>(`/data/cities/${country.iso2}.json`).subscribe({
+      next: cities => {
+        this.cityOptions.set(cities);
+        this.citiesLoading.set(false);
+        this.cityDisabled.set(false);
+      },
+      error: () => { this.cityOptions.set([]); this.citiesLoading.set(false); }
     });
   }
 

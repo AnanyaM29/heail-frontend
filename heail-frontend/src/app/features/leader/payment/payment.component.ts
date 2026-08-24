@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed, effect } from '@angular/core';
+import { Component, signal, inject, computed, effect, Input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -21,6 +21,11 @@ export class LeaderPaymentComponent {
   auth = inject(AuthService);
   private orderService = inject(OrderService);
   private razorpayLoader = inject(RazorpayLoaderService);
+
+  /** Set when embedded inline on the pricing page — the 'select' stage's
+   *  back link emits instead of navigating, since there's no real /pricing
+   *  route change happening underneath it. */
+  @Input() embedded = false;
 
   order = signal<Order | null>(null);
   detailsDone = signal(false);

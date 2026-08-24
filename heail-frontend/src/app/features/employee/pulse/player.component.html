@@ -29,11 +29,7 @@
     </div>
   } @else {
 
-    @if (secondsLeft() !== null) {
-      <p class="progress-label" [style.color]="secondsLeft()! <= 60 ? '#b3261e' : null">Time remaining: {{ timeLabel() }}</p>
-    }
     <div class="progress-track"><div class="progress-fill" [style.width.%]="progressPct()"></div></div>
-    <p class="progress-label">{{ answeredCount() }} of {{ total() }} answered</p>
 
     @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
 

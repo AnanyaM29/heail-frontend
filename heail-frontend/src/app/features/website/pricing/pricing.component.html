@@ -3,49 +3,75 @@
   <h1>Pricing</h1>
   <p class="sub">Assessment prices are published. Program engagements are scoped to your context and quoted on request.</p>
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px">
-    <a class="btn btn-gold" routerLink="/pricing/buy-org">For Organisations</a>
-    <a class="btn btn-ghost" routerLink="/pricing/buy-leader">For Aspiring Professionals</a>
-    <a class="btn btn-ghost" routerLink="/pricing/buy-hr">For HR Solutions</a>
-    <a class="btn btn-ghost" routerLink="/for-students">For Students</a>
+    <button type="button" class="btn" [class.btn-gold]="activeTab()==='org'" [class.btn-ghost]="activeTab()!=='org'" (click)="setTab('org')">For Organisations</button>
+    <button type="button" class="btn" [class.btn-gold]="activeTab()==='leader'" [class.btn-ghost]="activeTab()!=='leader'" (click)="setTab('leader')">For Aspiring Professionals</button>
+    <button type="button" class="btn" [class.btn-gold]="activeTab()==='hr'" [class.btn-ghost]="activeTab()!=='hr'" (click)="setTab('hr')">For HR Solutions</button>
+    <button type="button" class="btn" [class.btn-gold]="activeTab()==='students'" [class.btn-ghost]="activeTab()!=='students'" (click)="setTab('students')">For Students</button>
   </div>
 </div></div>
-<section><div class="wrap">
-  <div class="pricegrid">
-    <div class="price">
-      <h4>The Gita Leader Assessment</h4>
-      <div class="amt">₹1,000 <span style="font-size:17px;color:var(--mut)">/ $10</span></div>
-      <div class="per">per assessment</div>
-      <p>Your results on your Personal Dashboard. Results lead to a one-year Transformation Journey.</p>
-      <a class="btn btn-navy" routerLink="/pricing/buy-leader">Make Payment</a>
+
+@if (activeTab()==='leader') {
+  <app-leader-payment [embedded]="true" />
+}
+
+@if (activeTab()==='hr') {
+  @if (hrStage() === 'select') {
+    <app-hr-select [embedded]="true" (orderSelected)="onHrOrderSelected($event)" />
+  }
+  @if (hrStage() === 'candidates' && hrOrderId()) {
+    <app-candidates-entry [embedded]="true" [orderIdOverride]="hrOrderId()" (candidatesSaved)="onHrCandidatesSaved()" (back)="onHrCandidatesBack()" />
+  }
+  @if (hrStage() === 'payment' && hrOrderId()) {
+    <app-hr-payment [embedded]="true" [orderIdOverride]="hrOrderId()" (back)="onHrPaymentBack()" />
+  }
+}
+
+@if (activeTab()==='org') {
+  @if (orgStage() === 'form') {
+    <app-buy-org-form [embedded]="true" (orderCreated)="onOrgOrderCreated($event)" (cancelled)="onOrgCancelled()" />
+  } @else if (orgStage() === 'agreement' && orgOrderId()) {
+    <app-agreement-org [embedded]="true" [orderIdOverride]="orgOrderId()" (back)="onOrgAgreementBack()" />
+  } @else {
+    <section><div class="wrap">
+      <div class="pricegrid">
+        <div class="price">
+          <h4>Pulse Diagnostic Suite</h4>
+          <div class="amt">₹1,000 <span style="font-size:17px;color:var(--mut)">/ $10</span></div>
+          <div class="per">per employee · all four Pulses included</div>
+          <p>LeaderPulse, TalentPulse, SystemPulse, GrowthPulse — with the consolidated Gap Dashboard.</p>
+          <button type="button" class="btn btn-navy" (click)="startOrg()">Make Payment</button>
+        </div>
+        <div class="price">
+          <h4>1-Year Leadership Program</h4>
+          <div class="amt req">On request</div>
+          <div class="per">12 months · 1:1</div>
+          <p>Lead with influence, not authority. Build trust, empower teams, deliver results, and inspire commitment.</p>
+          <a class="btn btn-navy" routerLink="/contact">Request a quote</a>
+        </div>
+        <div class="price">
+          <h4>Five-Layer Transformation Program</h4>
+          <div class="amt req">On request</div>
+          <div class="per">Organisation-wide</div>
+          <p>Scoped after your diagnostic — because prescribing before measuring is exactly what we refuse to do.</p>
+          <a class="btn btn-navy" routerLink="/contact">Request a quote</a>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:30px;font-size:13px;color:var(--mut)">All prices exclusive of applicable taxes. GST-compliant invoices issued for every purchase.</p>
+    </div></section>
+  }
+}
+
+@if (activeTab()==='students') {
+  <section><div class="wrap">
+    <div class="pricegrid">
+      <div class="price">
+        <h4>Student Solutions</h4>
+        <div class="amt req">Coming soon</div>
+        <div class="per">For institutions &amp; individuals</div>
+        <p>Level-based aptitude and readiness assessments, designed to the same standard.</p>
+        <a class="btn btn-navy" routerLink="/for-students">Preview</a>
+      </div>
     </div>
-    <div class="price">
-      <h4>Pulse Diagnostic Suite</h4>
-      <div class="amt">₹1,000 <span style="font-size:17px;color:var(--mut)">/ $10</span></div>
-      <div class="per">per employee · all four Pulses included</div>
-      <p>LeaderPulse, TalentPulse, SystemPulse, GrowthPulse — with the consolidated Gap Dashboard.</p>
-      <a class="btn btn-navy" routerLink="/pricing/buy-org">Make Payment</a>
-    </div>
-    <div class="price">
-      <h4>1-Year Leadership Program</h4>
-      <div class="amt req">On request</div>
-      <div class="per">12 months · 1:1</div>
-      <p>Lead with influence, not authority. Build trust, empower teams, deliver results, and inspire commitment.</p>
-      <a class="btn btn-navy" routerLink="/contact">Request a quote</a>
-    </div>
-    <div class="price">
-      <h4>Five-Layer Transformation Program</h4>
-      <div class="amt req">On request</div>
-      <div class="per">Organisation-wide</div>
-      <p>Scoped after your diagnostic — because prescribing before measuring is exactly what we refuse to do.</p>
-      <a class="btn btn-navy" routerLink="/contact">Request a quote</a>
-    </div>
-    <div class="price">
-      <h4>Student Solutions</h4>
-      <div class="amt req">Coming soon</div>
-      <div class="per">For institutions &amp; individuals</div>
-      <p>Level-based aptitude and readiness assessments, designed to the same standard.</p>
-      <a class="btn btn-navy" routerLink="/for-students">Preview</a>
-    </div>
-  </div>
-  <p style="text-align:center;margin-top:30px;font-size:13px;color:var(--mut)">All prices exclusive of applicable taxes. GST-compliant invoices issued for every purchase.</p>
-</div></section>
+    <p style="text-align:center;margin-top:30px;font-size:13px;color:var(--mut)">All prices exclusive of applicable taxes. GST-compliant invoices issued for every purchase.</p>
+  </div></section>
+}

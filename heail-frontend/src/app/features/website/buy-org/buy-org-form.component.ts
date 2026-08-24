@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, signal, inject, computed, Input, Output, EventEmitter } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { OrgOrderService } from '../../../core/services/org-order.service';
@@ -55,6 +55,13 @@ export class BuyOrgFormComponent implements OnInit {
   // behalf isn't tied to one, so the sheet gets an extra Company column and
   // filling it in fills in "Organisation name" above automatically.
   isSuperadmin = computed(() => this.auth.role() === 'SUPERADMIN');
+
+  /** Set when embedded inline on the pricing page — emits instead of
+   *  navigating, so the pricing page can swap in the next stage itself
+   *  without the URL ever changing. */
+  @Input() embedded = false;
+  @Output() orderCreated = new EventEmitter<string>();
+  @Output() cancelled = new EventEmitter<void>();
 
   orderId = signal<string | null>(null);
   rows = signal<EmployeeRow[]>([{ name: '', email: '', mobileCc: '+91', mobile: '', level: 'L' }]);
@@ -375,7 +382,10 @@ export class BuyOrgFormComponent implements OnInit {
         }
 
         this.orgOrders.setEmployees(id, payloadRows).subscribe({
-          next: () => this.router.navigate(['/pricing/agreement-org', id]),
+          next: () => {
+            if (this.embedded) this.orderCreated.emit(id);
+            else this.router.navigate(['/pricing/agreement-org', id]);
+          },
           error: (e: any) => {
             this.submitting.set(false);
             if (e?.error?.rowErrors) this.rowErrors.set(e.error.rowErrors);

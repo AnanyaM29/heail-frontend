@@ -7,10 +7,12 @@
 @switch (stage()) {
 
   @case ('select') {
-    <section style="padding-top:100px"><div class="wrap" style="max-width:1100px">
-      <a class="backbtn" routerLink="/pricing">← Back</a>
-      <div class="eyebrow">For Aspiring Professionals</div>
-      <h2 class="sec-title">Leadership Diagnostics</h2>
+    <section [style.padding-top]="embedded ? null : '100px'"><div class="wrap" [style.max-width]="embedded ? null : '1100px'">
+      @if (!embedded) {
+        <a class="backbtn" routerLink="/pricing">← Back</a>
+        <div class="eyebrow">For Aspiring Professionals</div>
+        <h2 class="sec-title">Leadership Diagnostics</h2>
+      }
 
       <div class="plans">
         <div class="planrow">

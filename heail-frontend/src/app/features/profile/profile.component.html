@@ -74,12 +74,24 @@
 
           <div class="fld-row">
             <div class="fld">
-              <label for="city">City</label>
-              <input id="city" type="text" [value]="city()" (input)="city.set($any($event.target).value)">
+              <label for="country">Country</label>
+              <select id="country" (change)="onCountryChange($event)">
+                <option value="" [selected]="!country()">Select your country</option>
+                @for (c of countries; track c.iso2) {
+                  <option [value]="c.name" [selected]="c.name === country()">{{ c.name }}</option>
+                }
+              </select>
             </div>
             <div class="fld">
-              <label for="country">Country</label>
-              <input id="country" type="text" [value]="country()" (input)="country.set($any($event.target).value)">
+              <label for="city">City</label>
+              <select id="city" [disabled]="cityDisabled()" (change)="city.set($any($event.target).value)">
+                <option value="" [selected]="!city()">
+                  {{ citiesLoading() ? 'Loading cities…' : (cityDisabled() ? 'Select a country first' : 'Select your city') }}
+                </option>
+                @for (c of cityOptions(); track c) {
+                  <option [value]="c" [selected]="c === city()">{{ c }}</option>
+                }
+              </select>
             </div>
           </div>
 

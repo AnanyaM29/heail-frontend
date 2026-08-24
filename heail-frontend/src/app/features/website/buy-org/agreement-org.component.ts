@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, inject, computed, effect, Input, Output, EventEmitter } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrgOrderService } from '../../../core/services/org-order.service';
@@ -20,7 +20,13 @@ export class AgreementOrgComponent implements OnInit {
   private orgOrders = inject(OrgOrderService);
   private razorpayLoader = inject(RazorpayLoaderService);
 
-  orderId = this.route.snapshot.paramMap.get('id')!;
+  /** Overrides the route param when embedded inline on the pricing page
+   *  (there's no :id route segment there). */
+  @Input() orderIdOverride: string | null = null;
+  @Input() embedded = false;
+  @Output() back = new EventEmitter<void>();
+
+  orderId!: string;
 
   data = signal<OrgOrderResponse | null>(null);
   loading = signal(true);
@@ -125,6 +131,7 @@ export class AgreementOrgComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.orderId = this.orderIdOverride ?? this.route.snapshot.paramMap.get('id')!;
     this.orgOrders.getOrder(this.orderId).subscribe({
       next: res => { this.data.set(res); this.loading.set(false); },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }

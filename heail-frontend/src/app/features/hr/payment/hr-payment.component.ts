@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, inject, computed, effect, Input, Output, EventEmitter } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -26,7 +26,11 @@ export class HrPaymentComponent implements OnInit {
   private orderService = inject(HrOrderService);
   private razorpayLoader = inject(RazorpayLoaderService);
 
-  orderId = this.route.snapshot.paramMap.get('orderId')!;
+  orderId!: string;
+
+  @Input() orderIdOverride: string | null = null;
+  @Input() embedded = false;
+  @Output() back = new EventEmitter<void>();
 
   order = signal<Order | null>(null);
   loading = signal(true);
@@ -52,6 +56,7 @@ export class HrPaymentComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.orderId = this.orderIdOverride ?? this.route.snapshot.paramMap.get('orderId')!;
     this.orderService.getOrder(this.orderId).subscribe({
       next: o => { this.order.set(o); this.loading.set(false); },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }

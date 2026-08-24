@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
 import { HrOrderService } from '../../../core/services/hr-order.service';
@@ -21,6 +21,9 @@ export class HrSelectComponent implements OnInit {
   private hrAssessments = inject(HrAssessmentService);
   private hrOrders = inject(HrOrderService);
   private router = inject(Router);
+
+  @Input() embedded = false;
+  @Output() orderSelected = new EventEmitter<string>();
 
   loading = signal(true);
   error = signal('');
@@ -53,7 +56,11 @@ export class HrSelectComponent implements OnInit {
     this.continuing.set(true);
     this.error.set('');
     this.hrOrders.selectAssessments(Array.from(this.selectedIds())).subscribe({
-      next: order => { this.continuing.set(false); this.router.navigate(['/pricing/buy-hr', order.id, 'candidates']); },
+      next: order => {
+        this.continuing.set(false);
+        if (this.embedded) this.orderSelected.emit(order.id);
+        else this.router.navigate(['/pricing/buy-hr', order.id, 'candidates']);
+      },
       error: (e: any) => { this.continuing.set(false); this.error.set(this.msg(e)); }
     });
   }

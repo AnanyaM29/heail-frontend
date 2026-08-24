@@ -1,7 +1,11 @@
 <section style="padding-top:100px"><div class="wrap" style="max-width:1100px">
 
   <div class="top-row">
-    <a class="backbtn" routerLink="/pricing/buy-org">← Back</a>
+    @if (embedded) {
+      <a class="backbtn" role="button" (click)="cancelled.emit()">← Back</a>
+    } @else {
+      <a class="backbtn" routerLink="/pricing/buy-org">← Back</a>
+    }
     <div class="csv-actions">
       <input #csvInput type="file" accept=".csv,.xlsx,.xls" style="display:none" (change)="onFileSelected($event)">
       <button class="csvbtn" type="button" (click)="csvInput.click()">
