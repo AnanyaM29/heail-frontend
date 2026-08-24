@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { COUNTRIES } from '../../../shared/countries';
 import { ContactService } from '../../../core/services/contact.service';
@@ -57,6 +57,25 @@ export class ContactComponent {
     const digitsOnly = input.value.replace(/\D/g, '').slice(0, 10);
     input.value = digitsOnly;
     this.mobile.set(digitsOnly);
+  }
+
+  static readonly MAX_MESSAGE_WORDS = 200;
+
+  messageWordCount = computed(() => {
+    const trimmed = this.message().trim();
+    return trimmed ? trimmed.split(/\s+/).length : 0;
+  });
+
+  onMessageInput(event: Event) {
+    const textarea = event.target as HTMLTextAreaElement;
+    const words = textarea.value.split(/\s+/).filter(Boolean);
+    if (words.length > ContactComponent.MAX_MESSAGE_WORDS) {
+      const truncated = words.slice(0, ContactComponent.MAX_MESSAGE_WORDS).join(' ');
+      textarea.value = truncated;
+      this.message.set(truncated);
+    } else {
+      this.message.set(textarea.value);
+    }
   }
 
   get emailValid() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email()); }

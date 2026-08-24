@@ -74,8 +74,9 @@
       @if (cityInvalid) { <span class="err-msg">City is required.</span> }
     </div>
     <div class="fld"><label for="cmsg">Message for HEAIL <span style="color:var(--error)">*</span></label>
-      <textarea id="cmsg" rows="4" placeholder="How can we help?" [class.err]="messageInvalid"
-                (input)="message.set($any($event.target).value)">{{ message() }}</textarea>
+      <textarea id="cmsg" rows="4" placeholder="How can we help? (max 200 words)" [class.err]="messageInvalid"
+                (input)="onMessageInput($event)">{{ message() }}</textarea>
+      <div class="hint" style="text-align:right">{{ messageWordCount() }} / 200 words</div>
       @if (messageInvalid) { <span class="err-msg">Message is required.</span> }
     </div>
     @if (submitError()) {

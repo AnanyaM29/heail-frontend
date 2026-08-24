@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
 import { HrOrderService } from '../../../core/services/hr-order.service';
 import { HrAssessment } from '../../../core/models/hr.models';
+import { AuthService } from '../../../core/services/auth.service';
 
 /** Step 1 of the HR product flow — pick which of the 7 pillars this order
  *  covers. Every candidate registered on the next step (candidates-entry)
@@ -21,6 +22,7 @@ export class HrSelectComponent implements OnInit {
   private hrAssessments = inject(HrAssessmentService);
   private hrOrders = inject(HrOrderService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   @Input() embedded = false;
   @Output() orderSelected = new EventEmitter<string>();
@@ -53,6 +55,7 @@ export class HrSelectComponent implements OnInit {
 
   continue() {
     if (this.selectedCount() === 0 || this.continuing()) return;
+    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login']); return; }
     this.continuing.set(true);
     this.error.set('');
     this.hrOrders.selectAssessments(Array.from(this.selectedIds())).subscribe({

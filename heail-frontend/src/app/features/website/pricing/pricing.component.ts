@@ -42,8 +42,12 @@ export class PricingComponent {
   hrStage = signal<HrStage>('select');
   hrOrderId = signal<string | null>(null);
 
+  // No login required just to browse — every tab's prices/pillars/details are
+  // public. Login is only enforced at the actual "continue" action for each
+  // flow (Org's startOrg() here; Leader/HR check inside their own components,
+  // since those show their real content immediately under the tab with no
+  // separate "Make Payment" click to gate on).
   setTab(tab: PricingTab) {
-    if ((tab === 'leader' || tab === 'hr') && !this.requireLogin()) return;
     this.activeTab.set(tab);
     if (tab === 'hr') { this.hrStage.set('select'); this.hrOrderId.set(null); }
     if (tab === 'org') { this.orgStage.set('none'); this.orgOrderId.set(null); }

@@ -1,6 +1,6 @@
 import { Component, signal, inject, computed, effect, Input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderService } from '../../../core/services/order.service';
 import { RazorpayLoaderService } from '../../../core/services/razorpay-loader.service';
@@ -21,6 +21,7 @@ export class LeaderPaymentComponent {
   auth = inject(AuthService);
   private orderService = inject(OrderService);
   private razorpayLoader = inject(RazorpayLoaderService);
+  private router = inject(Router);
 
   /** Set when embedded inline on the pricing page — the 'select' stage's
    *  back link emits instead of navigating, since there's no real /pricing
@@ -141,6 +142,7 @@ export class LeaderPaymentComponent {
   }
 
   select() {
+    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login']); return; }
     this.actionLoading.set(true);
     this.error.set('');
     this.orderService.createOrGetOrder().subscribe({
