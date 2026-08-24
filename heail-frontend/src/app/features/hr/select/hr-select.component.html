@@ -22,7 +22,7 @@
           <div class="amt">₹{{ PILLAR_PRICE | number }}</div>
           <div class="per">per candidate</div>
           <p>{{ a.questionCount }} questions · ~{{ a.timeMinutes }} min</p>
-          <button type="button" class="btn" [class.btn-navy]="selectedIds().has(a.id)" [class.btn-ghost]="!selectedIds().has(a.id)" (click)="toggle(a)">
+          <button type="button" class="btn no-elevate" [class.btn-navy]="selectedIds().has(a.id)" [class.btn-ghost]="!selectedIds().has(a.id)" (click)="toggle(a)">
             {{ selectedIds().has(a.id) ? 'Selected ✓' : 'Tap to select' }}
           </button>
         </div>
@@ -32,7 +32,7 @@
     <div class="hr-select-bar">
       <p class="hint">{{ selectedCount() }} pillar{{ selectedCount() === 1 ? '' : 's' }} selected</p>
       <div class="total-amt">₹{{ estimatedPricePerCandidate() | number }} <span style="font-size:14px;font-weight:600;color:var(--mut)">per candidate</span></div>
-      <button class="btn btn-gold" type="button" [disabled]="selectedCount() === 0 || continuing()" (click)="continue()">
+      <button class="btn btn-gold no-elevate" type="button" [disabled]="selectedCount() === 0 || continuing()" (click)="continue()">
         @if (continuing()) { <span class="spinner"></span> } Continue
       </button>
     </div>
