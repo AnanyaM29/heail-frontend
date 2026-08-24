@@ -23,7 +23,6 @@ export const routes: Routes = [
       { path: 'pricing/buy-hr/:orderId', canActivate: [authGuard], loadComponent: () => import('./features/hr/payment/hr-payment.component').then(m => m.HrPaymentComponent) },
       // Public — a candidate's emailed access-token link, no HEAIL account needed.
       { path: 'hr/candidate/:token', loadComponent: () => import('./features/hr/candidate-landing/candidate-landing.component').then(m => m.CandidateLandingComponent) },
-      { path: 'for-students',      loadComponent: () => import('./features/website/students/students.component').then(m => m.StudentsComponent) },
       { path: 'transformation',    loadComponent: () => import('./features/website/transformation/transformation.component').then(m => m.TransformationComponent) },
       { path: 'pricing',           loadComponent: () => import('./features/website/pricing/pricing.component').then(m => m.PricingComponent) },
       { path: 'pricing/buy-leader', canActivate: [authGuard], loadComponent: () => import('./features/leader/payment/payment.component').then(m => m.LeaderPaymentComponent) },

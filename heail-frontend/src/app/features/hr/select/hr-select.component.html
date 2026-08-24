@@ -15,25 +15,23 @@
       <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
     </div>
   } @else {
-    <div class="act-grid">
+    <div class="pricegrid">
       @for (a of assessments(); track a.id) {
-        <div class="actcard hr-pick"
-             [class.hr-pick-selected]="selectedIds().has(a.id)"
-             (click)="toggle(a)">
-          <div class="aud">{{ a.questionCount }} questions · ~{{ a.timeMinutes }} min</div>
-          <h3>{{ a.name }}</h3>
-
-          @if (selectedIds().has(a.id)) {
-            <p class="stat-line">Selected ✓</p>
-          } @else {
-            <p class="stat-line hr-pick-hint">Tap to select</p>
-          }
+        <div class="price" [class.hr-pick-selected]="selectedIds().has(a.id)">
+          <h4>{{ a.name }}</h4>
+          <div class="amt">₹{{ PILLAR_PRICE | number }}</div>
+          <div class="per">per candidate</div>
+          <p>{{ a.questionCount }} questions · ~{{ a.timeMinutes }} min</p>
+          <button type="button" class="btn" [class.btn-navy]="selectedIds().has(a.id)" [class.btn-ghost]="!selectedIds().has(a.id)" (click)="toggle(a)">
+            {{ selectedIds().has(a.id) ? 'Selected ✓' : 'Tap to select' }}
+          </button>
         </div>
       }
     </div>
 
     <div class="hr-select-bar">
-      <p class="hint">{{ selectedCount() }} selected</p>
+      <p class="hint">{{ selectedCount() }} pillar{{ selectedCount() === 1 ? '' : 's' }} selected</p>
+      <div class="total-amt">₹{{ estimatedPricePerCandidate() | number }} <span style="font-size:14px;font-weight:600;color:var(--mut)">per candidate</span></div>
       <button class="btn btn-gold" type="button" [disabled]="selectedCount() === 0 || continuing()" (click)="continue()">
         @if (continuing()) { <span class="spinner"></span> } Continue
       </button>

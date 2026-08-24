@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, computed, inject, Input, Output, EventEmitter } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
 import { HrOrderService } from '../../../core/services/hr-order.service';
@@ -14,7 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-hr-select',
   standalone: true,
-  imports: [],
+  imports: [DecimalPipe],
   templateUrl: './hr-select.component.html',
   styleUrl: './hr-select.component.css'
 })
@@ -27,6 +28,13 @@ export class HrSelectComponent implements OnInit {
   @Input() embedded = false;
   @Output() orderSelected = new EventEmitter<string>();
 
+  /** Matches the price shown elsewhere for HR on the pricing page — real
+   *  pricing is looked up server-side once an order exists (see
+   *  HrOrderService.HR_PILLAR_PRICING_CODE), but that call requires login.
+   *  This is just so an anonymous visitor can see roughly what they'd be
+   *  spending before deciding whether to log in and continue. */
+  readonly PILLAR_PRICE = 1000;
+
   loading = signal(true);
   error = signal('');
   assessments = signal<HrAssessment[]>([]);
@@ -34,6 +42,7 @@ export class HrSelectComponent implements OnInit {
   continuing = signal(false);
 
   selectedCount = computed(() => this.selectedIds().size);
+  estimatedPricePerCandidate = computed(() => this.selectedCount() * this.PILLAR_PRICE);
 
   ngOnInit() {
     this.hrAssessments.assessments().subscribe({

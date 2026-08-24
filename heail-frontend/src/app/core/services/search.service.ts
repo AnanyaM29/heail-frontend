@@ -17,7 +17,6 @@ const ENTRIES: SearchEntry[] = [
   { title: 'For Aspiring Professionals · The Gita Leader', description: 'Fifty timeless management principles, five domains, one honest score, and a year-long path to change it.', route: '/for-leaders' },
   { title: 'The Foundation of The Gita Leader', description: 'Built on a 5,000-year-old conversation.', route: '/for-leaders/foundation' },
   { title: 'For HR Teams', description: "Start with your job description. We'll build the measurement around it. Screening with judgement, not just filters.", route: '/for-hr' },
-  { title: 'For Students', description: 'Know where you stand before the world tells you. Aptitude, readiness and level-based assessments — coming soon.', route: '/for-students' },
   { title: 'Transformation', description: 'The same four bottlenecks, in every organisation.', route: '/transformation' },
   { title: 'Pricing', description: 'Assessment prices, the Gita Leader Assessment, Pulse Diagnostic Suite, Leadership and Transformation programs, HR Solutions.', route: '/pricing' },
   { title: 'HR Solutions Pricing', description: 'Pick from all 7 HR competency assessments and buy.', route: '/pricing/buy-hr' },

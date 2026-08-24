@@ -8,7 +8,7 @@ import { HrSelectComponent } from '../../hr/select/hr-select.component';
 import { CandidatesEntryComponent } from '../../hr/candidates-entry/candidates-entry.component';
 import { HrPaymentComponent } from '../../hr/payment/hr-payment.component';
 
-export type PricingTab = 'org' | 'leader' | 'hr' | 'students';
+export type PricingTab = 'org' | 'leader' | 'hr';
 type OrgStage = 'none' | 'form' | 'agreement';
 type HrStage = 'select' | 'candidates' | 'payment';
 

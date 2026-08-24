@@ -6,7 +6,6 @@
     <button type="button" class="btn" [class.btn-gold]="activeTab()==='org'" [class.btn-ghost]="activeTab()!=='org'" (click)="setTab('org')">For Organisations</button>
     <button type="button" class="btn" [class.btn-gold]="activeTab()==='leader'" [class.btn-ghost]="activeTab()!=='leader'" (click)="setTab('leader')">For Aspiring Professionals</button>
     <button type="button" class="btn" [class.btn-gold]="activeTab()==='hr'" [class.btn-ghost]="activeTab()!=='hr'" (click)="setTab('hr')">For HR Solutions</button>
-    <button type="button" class="btn" [class.btn-gold]="activeTab()==='students'" [class.btn-ghost]="activeTab()!=='students'" (click)="setTab('students')">For Students</button>
   </div>
 </div></div>
 
@@ -52,19 +51,4 @@
       <p style="text-align:center;margin-top:30px;font-size:13px;color:var(--mut)">All prices exclusive of applicable taxes. GST-compliant invoices issued for every purchase.</p>
     </div></section>
   }
-}
-
-@if (activeTab()==='students') {
-  <section><div class="wrap">
-    <div class="pricegrid">
-      <div class="price">
-        <h4>Student Solutions</h4>
-        <div class="amt req">Coming soon</div>
-        <div class="per">For institutions &amp; individuals</div>
-        <p>Level-based aptitude and readiness assessments, designed to the same standard.</p>
-        <a class="btn btn-navy" routerLink="/for-students">Preview</a>
-      </div>
-    </div>
-    <p style="text-align:center;margin-top:30px;font-size:13px;color:var(--mut)">All prices exclusive of applicable taxes. GST-compliant invoices issued for every purchase.</p>
-  </div></section>
 }
