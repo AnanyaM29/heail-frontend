@@ -103,26 +103,34 @@ section { padding: 88px 0; }
 .ph h4 { font-family: var(--disp); font-size: 24px; margin: 8px 0 12px; font-weight: 600; }
 .ph p { font-size: 14px; color: var(--mut); }
 
-/* intro video (org/leader marketing pages) — sits inside the hero itself,
-   beside the heading. Plays ambient (autoplay/muted/loop, no native browser
-   controls bar — that raw black player chrome is what made it look bolted
-   on) with one small custom button for fullscreen, same visual language as
-   the rest of the site instead of default browser UI. */
-.phero-split { display: grid; grid-template-columns: 1fr 260px; gap: 36px; align-items: center; justify-items: end; }
-.intro-video-frame { position: relative; width: 260px; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 54px rgba(0,0,0,.4); line-height: 0; }
-.intro-video { width: 100%; display: block; }
-.intro-video-controls { position: absolute; bottom: 10px; right: 10px; display: flex; gap: 8px; }
+/* intro video (org/leader marketing pages) — a band of its own above the
+   dark hero, no text on it at all (the video already has "HEAIL / Human
+   Experience + AI Logic" baked into its own opening title card, which
+   collided with the page's own heading when text was overlaid on top of
+   it). The hero with its heading follows below, unchanged.
+   aspect-ratio:16/9 matches these source videos exactly, so object-fit:
+   contain has nothing to letterbox — no empty bars, no cropping either.
+   Autoplay/muted/loop starts on its own; the play/pause + mute buttons are
+   there for anyone who wants to control it, not required to get it going. */
+.intro-video-band {
+  position: relative; width: 100%; max-width: 960px; margin: 0 auto; aspect-ratio: 16 / 9;
+  overflow: hidden; line-height: 0;
+  background: radial-gradient(1000px 520px at 75% -20%, var(--navy-glow) 0%, var(--navy-deep) 60%);
+}
+.intro-video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.intro-video-band::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+}
+.intro-video-controls { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 8px; }
 .intro-video-controls button {
-  width: 30px; height: 30px;
+  width: 34px; height: 34px;
   border-radius: 50%; border: 1px solid rgba(255,255,255,.25);
   background: rgba(10,8,26,.55); backdrop-filter: blur(4px);
   display: flex; align-items: center; justify-content: center;
   color: var(--gold-bright); cursor: pointer; transition: background .2s; padding: 0;
 }
 .intro-video-controls button:hover { background: rgba(10,8,26,.85); }
-@media (max-width: 960px) {
-  .phero-split { grid-template-columns: 1fr; gap: 28px; }
-}
 
 /* pricing */
 .pricegrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 48px; }

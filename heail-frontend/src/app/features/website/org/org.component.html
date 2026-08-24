@@ -1,31 +1,35 @@
+<div class="intro-video-band">
+  <video #orgVid class="intro-video" [muted]="videoMuted()" autoplay loop playsinline preload="auto"
+         (play)="videoPlaying.set(true)" (pause)="videoPlaying.set(false)">
+    <source src="/videos/org-intro.mp4" type="video/mp4">
+  </video>
+  <div class="intro-video-controls">
+    <button type="button" aria-label="Mute or unmute" (click)="videoMuted.set(!videoMuted())">
+      @if (videoMuted()) {
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+      } @else {
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+        </svg>
+      }
+    </button>
+    <button type="button" aria-label="Play or pause" (click)="orgVid.paused ? orgVid.play() : orgVid.pause()">
+      @if (videoPlaying()) {
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      } @else {
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+      }
+    </button>
+  </div>
+</div>
+
 <div class="phero">
-  <div class="wrap phero-split">
-    <div>
-      <div class="eyebrow">Solutions · For Organisations</div>
-      <h1>Every organisation transforms.<br>Few transform on purpose.</h1>
-      <p class="sub prose-j">A journey in three movements: diagnose with precision, decide with evidence, transform with discipline.</p>
-    </div>
-    <div class="intro-video-frame">
-      <video #orgVid class="intro-video" [muted]="true" autoplay loop playsinline preload="auto"
-             (play)="videoPlaying.set(true)" (pause)="videoPlaying.set(false)"
-             (fullscreenchange)="orgVid.controls = !!orgVid.ownerDocument.fullscreenElement; orgVid.muted = !orgVid.ownerDocument.fullscreenElement">
-        <source src="/videos/org-intro.mp4" type="video/mp4">
-      </video>
-      <div class="intro-video-controls">
-        <button type="button" aria-label="Play or pause" (click)="orgVid.paused ? orgVid.play() : orgVid.pause()">
-          @if (videoPlaying()) {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          } @else {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
-          }
-        </button>
-        <button type="button" aria-label="View fullscreen" (click)="orgVid.controls = true; orgVid.muted = false; orgVid.requestFullscreen()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+  <div class="wrap">
+    <div class="eyebrow">Solutions · For Organisations</div>
+    <h1>Every organisation transforms.<br>Few transform on purpose.</h1>
+    <p class="sub prose-j">A journey in three movements: diagnose with precision, decide with evidence, transform with discipline.</p>
   </div>
 </div>
 
