@@ -28,7 +28,6 @@
   } @else {
 
     <div class="progress-track"><div class="progress-fill" [style.width.%]="progressPct()"></div></div>
-    <p class="progress-label">{{ answeredCount() }} of {{ total() }} answered</p>
 
     @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
 

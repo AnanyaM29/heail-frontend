@@ -37,6 +37,14 @@ export class AdminService {
     return this.http.post(`${API}/orders/${orderId}/send-payment-reminder`, {});
   }
 
+  resendInvoice(orderId: string) {
+    return this.http.post(`${API}/orders/${orderId}/resend-invoice`, {});
+  }
+
+  resendResults(userId: string) {
+    return this.http.post(`${API}/users/${userId}/resend-results`, {});
+  }
+
   sendPaymentReminders(orderIds: string[]) {
     return this.http.post(`${API}/orders/send-payment-reminders`, orderIds);
   }

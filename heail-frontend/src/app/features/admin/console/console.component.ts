@@ -61,8 +61,10 @@ export class AdminConsoleComponent implements OnInit {
   testsTotalPages = computed(() => totalPages(this.tests().length));
   pagedTests = computed(() => pageSlice(this.tests(), this.testsPage()));
 
-  // ── Payments (last N months) ─────────────────────────────────
-  paymentsMonths = signal(12);
+  // ── Payments (last N months) — 24 so admin can always see, and resend
+  //    the invoice for, any paid order from the last two years (matching
+  //    the backend's own resend-invoice window). ────────────────────
+  paymentsMonths = signal(24);
   payments = signal<AdminPayment[]>([]);
   paymentsLoading = signal(false);
   paymentsError = signal('');
@@ -303,6 +305,42 @@ export class AdminConsoleComponent implements OnInit {
       error: (e: any) => {
         this.paymentsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not send reminders.');
         this.reminderSending.set(false);
+      }
+    });
+  }
+
+  // ── Resend an invoice for any paid order (last two years) ────────
+  invoiceSendingId = signal<string | null>(null);
+  invoiceMessage = signal('');
+
+  sendInvoice(p: AdminPayment) {
+    if (this.invoiceSendingId()) return;
+    this.invoiceSendingId.set(p.id);
+    this.invoiceMessage.set('');
+    this.paymentsError.set('');
+    this.admin.resendInvoice(p.id).subscribe({
+      next: () => { this.invoiceMessage.set(`Invoice sent to ${p.userEmail}.`); this.invoiceSendingId.set(null); },
+      error: (e: any) => {
+        this.paymentsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not send invoice.');
+        this.invoiceSendingId.set(null);
+      }
+    });
+  }
+
+  // ── Resend results (Leader report or Org report, whichever the user has) ──
+  resultsSendingId = signal<string | null>(null);
+  resultsMessage = signal('');
+
+  sendResults(u: AdminUser) {
+    if (this.resultsSendingId()) return;
+    this.resultsSendingId.set(u.id);
+    this.resultsMessage.set('');
+    this.usersError.set('');
+    this.admin.resendResults(u.id).subscribe({
+      next: () => { this.resultsMessage.set(`Results sent to ${u.email}.`); this.resultsSendingId.set(null); },
+      error: (e: any) => {
+        this.usersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not resend results.');
+        this.resultsSendingId.set(null);
       }
     });
   }

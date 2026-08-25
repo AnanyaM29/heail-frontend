@@ -9,6 +9,7 @@ export interface AdminTestSession {
   attemptNumber: number;
   startedAt: string;
   completedAt: string | null;
+  questionIds: string[];
 }
 
 export interface AdminPayment {
