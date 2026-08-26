@@ -42,6 +42,10 @@ export class OrgOrderService {
     return this.http.post<OrgOrderResponse>(`${API}/${id}/agreement`, { version });
   }
 
+  applyCoupon(id: string, code: string) {
+    return this.http.post<OrgOrderResponse>(`${API}/${id}/apply-coupon`, { code });
+  }
+
   createRazorpayOrder(id: string) {
     return this.http.post<OrgOrderResponse>(`${API}/${id}/create-razorpay-order`, {});
   }

@@ -12,6 +12,7 @@
     <button type="button" class="admin-tab" [class.active]="tab() === 'tests'" (click)="selectTab('tests')">Tests</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'payments'" (click)="selectTab('payments')">Payments</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'partners'" (click)="selectTab('partners')">Partners</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'coupons'" (click)="selectTab('coupons')">Coupons</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'reset'" (click)="selectTab('reset')">Reset Password</button>
   </div>
 
@@ -273,6 +274,83 @@
     </div>
   }
 
+
+  <!-- ── Discount coupons ──────────────────────────────────────── -->
+  @if (tab() === 'coupons') {
+    @if (couponsError()) { <div class="alert-err" role="alert">{{ couponsError() }}</div> }
+
+    <div class="formwrap" style="max-width:520px;margin-top:0">
+      <h3 style="margin-bottom:6px">Generate a discount coupon</h3>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:20px">An 8-character code redeemable once, by any user, for a 0–100% discount on Leader, Org, or HR orders. Expires 7 days after generation, and is used up permanently the moment it's redeemed. A 100% coupon skips Razorpay entirely and generates no invoice — access is granted directly.</p>
+      <div class="fld">
+        <label for="couponPercent">Discount %</label>
+        <input id="couponPercent" type="number" min="0" max="100" [value]="newCouponPercent()" (input)="newCouponPercent.set($any($event.target).valueAsNumber)">
+      </div>
+      <div class="fld">
+        <label for="couponEmail">Send to email <span class="label-hint" style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--mut)">(optional)</span></label>
+        <input id="couponEmail" type="email" placeholder="Leave blank for a code anyone can redeem" [value]="newCouponEmail()" (input)="newCouponEmail.set($any($event.target).value)">
+        <p style="font-size:12px;color:var(--mut);margin-top:6px">If set, HEAIL emails the code to this address and only this email can redeem it.</p>
+      </div>
+      <div style="text-align:center;margin-top:18px">
+        <button type="button" class="btn btn-gold" [disabled]="couponGenerating()" (click)="generateCoupon()">
+          @if (couponGenerating()) { <span class="spinner"></span> } Generate Coupon
+        </button>
+      </div>
+      @if (lastGeneratedCode()) {
+        <p style="text-align:center;margin-top:16px;font-family:var(--disp);font-size:20px;color:var(--navy)">{{ lastGeneratedCode() }}</p>
+      }
+    </div>
+
+    <div class="dash-panel" style="overflow-x:auto;margin-top:24px">
+      @if (couponsLoading()) {
+        <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else {
+        <table class="monitor-table admin-table">
+          <thead>
+            <tr><th>Code</th><th>Discount</th><th>Created</th><th>Expires</th><th>Sent To</th><th>Status</th><th>Used By</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (c of pagedCoupons(); track c.id) {
+              <tr>
+                <td class="emp-name">{{ c.code }}</td>
+                <td>{{ c.discountPercent }}%</td>
+                <td>{{ c.createdAt | date:'medium' }}</td>
+                <td>{{ c.expiresAt | date:'medium' }}</td>
+                <td>{{ c.sentToEmail || '—' }}</td>
+                <td>
+                  @switch (couponStatus(c)) {
+                    @case ('Used') { <span class="pstate pstate-done">Used</span> }
+                    @case ('Revoked') { <span class="pstate pstate-failed">Revoked</span> }
+                    @case ('Expired') { <span class="pstate pstate-failed">Expired</span> }
+                    @default { <span class="pstate">Active</span> }
+                  }
+                </td>
+                <td>{{ c.usedByEmail || '—' }}</td>
+                <td>
+                  @if (couponStatus(c) === 'Active') {
+                    <button type="button" class="resume-link no-elevate" [disabled]="revokingCode() === c.code" (click)="revokeCoupon(c)">
+                      {{ revokingCode() === c.code ? 'Revoking…' : 'Revoke' }}
+                    </button>
+                  } @else {
+                    <span class="hint">—</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" style="text-align:center;color:var(--mut)">No coupons generated yet.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (couponsTotalPages() > 1) {
+          <div class="pagination">
+            <button type="button" class="tog" [disabled]="couponsPage() === 1" (click)="setPage(couponsPage, couponsPage() - 1, couponsTotalPages())">Prev</button>
+            <span class="hint">Page {{ couponsPage() }} of {{ couponsTotalPages() }}</span>
+            <button type="button" class="tog" [disabled]="couponsPage() === couponsTotalPages()" (click)="setPage(couponsPage, couponsPage() + 1, couponsTotalPages())">Next</button>
+          </div>
+        }
+      }
+    </div>
+  }
 
   <!-- ── Resend password-reset email ──────────────────────────── -->
   @if (tab() === 'reset') {

@@ -44,6 +44,10 @@ export class HrOrderService {
     return this.http.post<Order>(`${API}/${id}/agreement`, { version });
   }
 
+  applyCoupon(id: string, code: string) {
+    return this.http.post<Order>(`${API}/${id}/apply-coupon`, { code });
+  }
+
   createRazorpayOrder(id: string) {
     return this.http.post<Order>(`${API}/${id}/create-razorpay-order`, {});
   }

@@ -38,6 +38,10 @@ export class LeaderPaymentComponent {
   organisationName = signal('');
   razorpayReady = signal(false);
 
+  couponCode = signal('');
+  couponLoading = signal(false);
+  couponError = signal('');
+
   // No role gate here on purpose: the account's stored `role` is
   // single-valued and gets overwritten as it picks up other products (e.g.
   // an org admin who was originally a LEADER), so it can't be used to decide
@@ -165,6 +169,18 @@ export class LeaderPaymentComponent {
     this.orderService.updateDetails(o.id, this.designation(), this.organisationName()).subscribe({
       next: updated => { this.order.set(updated); this.detailsDone.set(true); this.actionLoading.set(false); },
       error: (e: any) => { this.actionLoading.set(false); this.error.set(this.msg(e)); }
+    });
+  }
+
+  applyCoupon() {
+    const o = this.order();
+    const code = this.couponCode().trim();
+    if (!o || !code) return;
+    this.couponLoading.set(true);
+    this.couponError.set('');
+    this.orderService.applyCoupon(o.id, code).subscribe({
+      next: updated => { this.order.set(updated); this.couponLoading.set(false); },
+      error: (e: any) => { this.couponError.set(this.msg(e)); this.couponLoading.set(false); }
     });
   }
 

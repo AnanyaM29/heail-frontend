@@ -24,6 +24,22 @@
       <div class="formwrap" style="max-width:none">
         <p style="font-family:var(--disp);font-size:22px;margin-bottom:6px">Total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
         <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: each candidate's link stays active for 7 calendar days from their assessment start date, then expires permanently — a new license is needed to reassign it · all purchases are strictly non-refundable · results and scorecards go to you, the buyer, only — never to the candidate · if a candidate hasn't started within 7 days of payment, you may request to reallocate their credit to someone else, subject to HEAIL review.</p>
+
+        <div class="fld" style="margin-top:18px">
+          <label for="hrCoupon">Discount coupon <span class="label-hint" style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--mut)">(optional)</span></label>
+          @if (order()?.couponCode) {
+            <p style="color:var(--navy);font-size:13.5px;margin:4px 0 0">Coupon <b>{{ order()!.couponCode }}</b> applied — {{ order()!.discountPercent }}% off. New total: {{ order()!.currency }} {{ order()!.totalAmount | number:'1.2-2' }}</p>
+          } @else {
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <input id="hrCoupon" type="text" placeholder="Enter code" style="flex:1;min-width:160px;text-transform:uppercase" [value]="couponCode()" (input)="couponCode.set($any($event.target).value)">
+              <button class="btn btn-navy no-elevate" type="button" [disabled]="!couponCode().trim() || couponLoading()" (click)="applyCoupon()">
+                @if (couponLoading()) { <span class="spinner"></span> } Apply
+              </button>
+            </div>
+            @if (couponError()) { <p style="color:#b3261e;font-size:12.5px;margin-top:6px">{{ couponError() }}</p> }
+          }
+        </div>
+
         <div class="fld consent" style="margin-top:18px">
           <input type="checkbox" id="hrAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
           <label for="hrAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>

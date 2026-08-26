@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/admin/dashboard`;
+const COUPONS_API = `${environment.apiBaseUrl}/api/v1/admin/coupons`;
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -55,5 +56,17 @@ export class AdminService {
 
   partnerResume(id: string) {
     return this.http.get(`${API}/partners/${id}/resume`, { responseType: 'blob' });
+  }
+
+  generateCoupon(discountPercent: number, email?: string) {
+    return this.http.post<DiscountCoupon>(COUPONS_API, { discountPercent, email: email || null });
+  }
+
+  listCoupons() {
+    return this.http.get<DiscountCoupon[]>(COUPONS_API);
+  }
+
+  revokeCoupon(code: string) {
+    return this.http.post(`${COUPONS_API}/${code}/revoke`, {});
   }
 }

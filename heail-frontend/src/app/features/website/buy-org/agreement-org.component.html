@@ -23,6 +23,22 @@
         <h2 class="sec-title">Before you pay.</h2>
         <div class="formwrap" style="max-width:none">
           <p class="prose-j" style="font-size:14.5px;color:var(--mut)">Key terms: the fee covers all four Pulses for every entered employee and is non-refundable once invitations are dispatched · results require 80% completion and a minimum of 5 employees within 10 days — providing correct employee details, including email addresses, is your responsibility · individual employee answers are confidential and never shared with you; results are aggregate only · employees should be encouraged to answer honestly — the outcome depends on it.</p>
+
+          <div class="fld" style="margin-top:18px">
+            <label for="orgCoupon">Discount coupon <span class="label-hint" style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--mut)">(optional)</span></label>
+            @if (data()?.order?.couponCode) {
+              <p style="color:var(--navy);font-size:13.5px;margin:4px 0 0">Coupon <b>{{ data()!.order.couponCode }}</b> applied — {{ data()!.order.discountPercent }}% off. New total: {{ data()!.order.currency }} {{ data()!.order.totalAmount | number:'1.2-2' }}</p>
+            } @else {
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <input id="orgCoupon" type="text" placeholder="Enter code" style="flex:1;min-width:160px;text-transform:uppercase" [value]="couponCode()" (input)="couponCode.set($any($event.target).value)">
+                <button class="btn btn-navy no-elevate" type="button" [disabled]="!couponCode().trim() || couponLoading()" (click)="applyCoupon()">
+                  @if (couponLoading()) { <span class="spinner"></span> } Apply
+                </button>
+              </div>
+              @if (couponError()) { <p style="color:#b3261e;font-size:12.5px;margin-top:6px">{{ couponError() }}</p> }
+            }
+          </div>
+
           <div class="fld consent" style="margin-top:18px">
             <input type="checkbox" id="orgAgree" [checked]="agreed()" (change)="agreed.set(!agreed())">
             <label for="orgAgree" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;margin:0">Yes — I accept the Terms of Agreement and the no-refund policy.</label>

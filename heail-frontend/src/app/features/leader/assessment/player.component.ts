@@ -31,6 +31,11 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
 
   showDirections = signal(!localStorage.getItem(DIRECTIONS_SEEN_KEY));
 
+  deadlineAt = signal<string | null>(null);
+  secondsLeft = signal<number | null>(null);
+  private timerHandle: ReturnType<typeof setInterval> | null = null;
+  private autoSubmitted = false;
+
   /** True once the test is actually live (past directions, questions loaded) until a
    *  successful submit — drives both testExitGuard and the beforeunload prompt. */
   private testActive = false;
@@ -49,14 +54,39 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     const q = this.current();
     return q ? this.answers()[q.questionId] ?? null : null;
   });
+  timeLabel = computed(() => {
+    const s = this.secondsLeft();
+    if (s === null) return '';
+    const m = Math.floor(Math.max(0, s) / 60);
+    const rem = Math.max(0, s) % 60;
+    return `${m}:${rem.toString().padStart(2, '0')}`;
+  });
+
   ngOnInit() {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
     if (!this.showDirections()) this.loadQuestions();
   }
 
   ngOnDestroy() {
+    if (this.timerHandle) clearInterval(this.timerHandle);
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     this.exitLockdown();
+  }
+
+  private startTimer(deadlineAt: string | null) {
+    this.deadlineAt.set(deadlineAt);
+    if (this.timerHandle) clearInterval(this.timerHandle);
+    if (!deadlineAt) return;
+    const tick = () => {
+      const remaining = Math.round((new Date(deadlineAt).getTime() - Date.now()) / 1000);
+      this.secondsLeft.set(remaining);
+      if (remaining <= 0 && !this.autoSubmitted && !this.submitting()) {
+        this.autoSubmitted = true;
+        this.submit(true);
+      }
+    };
+    tick();
+    this.timerHandle = setInterval(tick, 1000);
   }
 
   /** Used by testExitGuard to decide whether leaving this route needs confirmation. */
@@ -100,6 +130,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
         this.answers.set(res.answeredOptions);
         this.loading.set(false);
         this.testActive = true;
+        this.startTimer(res.deadlineAt);
         if (!document.fullscreenElement) this.enterLockdown();
       },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }
@@ -117,16 +148,15 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
 
   next() { if (this.index() < this.total() - 1) this.index.update(i => i + 1); }
 
-  submit() {
-    if (this.answeredCount() < this.total()) {
-      this.error.set(`Answer all ${this.total()} questions before submitting (${this.answeredCount()} answered).`);
+  submit(forced = false) {
+    if (!forced && this.answeredCount() < this.total()) {
       const firstUnanswered = this.questions().findIndex(q => !this.answers()[q.questionId]);
       if (firstUnanswered >= 0) this.index.set(firstUnanswered);
       return;
     }
     this.submitting.set(true);
     this.error.set('');
-    this.assessment.submit(this.sessionId).subscribe({
+    this.assessment.submit(this.sessionId, forced).subscribe({
       next: () => { this.testActive = false; this.exitLockdown(); this.router.navigate(['/leader']); },
       error: (e: any) => { this.submitting.set(false); this.error.set(this.msg(e)); }
     });

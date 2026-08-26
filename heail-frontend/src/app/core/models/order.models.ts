@@ -15,4 +15,6 @@ export interface Order {
   createdAt: string;
   metadata?: Record<string, string>;
   razorpayKeyId?: string;
+  couponCode?: string;
+  discountPercent?: number;
 }

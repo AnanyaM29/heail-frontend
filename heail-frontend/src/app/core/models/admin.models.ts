@@ -41,6 +41,20 @@ export interface AdminPartner {
   createdAt: string;
 }
 
+export interface DiscountCoupon {
+  id: string;
+  code: string;
+  discountPercent: number;
+  active: boolean;
+  createdBy: string;
+  createdAt: string;
+  expiresAt: string;
+  sentToEmail: string | null;
+  usedAt: string | null;
+  usedByOrderId: string | null;
+  usedByEmail: string | null;
+}
+
 export interface AdminUser {
   id: string;
   name: string;

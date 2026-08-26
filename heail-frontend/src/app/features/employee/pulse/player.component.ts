@@ -120,7 +120,7 @@ export class PulsePlayerComponent implements OnInit, OnDestroy {
       this.secondsLeft.set(remaining);
       if (remaining <= 0 && !this.autoSubmitted && !this.submitting()) {
         this.autoSubmitted = true;
-        this.submit();
+        this.submit(true);
       }
     };
     tick();
@@ -138,16 +138,15 @@ export class PulsePlayerComponent implements OnInit, OnDestroy {
 
   next() { if (this.index() < this.total() - 1) this.index.update(i => i + 1); }
 
-  submit() {
-    if (this.answeredCount() < this.total()) {
-      this.error.set(`Answer all ${this.total()} questions before submitting (${this.answeredCount()} answered).`);
+  submit(forced = false) {
+    if (!forced && this.answeredCount() < this.total()) {
       const firstUnanswered = this.questions().findIndex(q => !this.answers()[q.questionId]);
       if (firstUnanswered >= 0) this.index.set(firstUnanswered);
       return;
     }
     this.submitting.set(true);
     this.error.set('');
-    this.pulseService.submit(this.sessionId).subscribe({
+    this.pulseService.submit(this.sessionId, forced).subscribe({
       next: () => { this.testActive = false; this.router.navigate(['/pulse']); },
       error: (e: any) => { this.submitting.set(false); this.error.set(this.msg(e)); }
     });

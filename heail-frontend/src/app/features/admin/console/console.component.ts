@@ -2,9 +2,9 @@ import { Component, OnInit, signal, computed, inject, WritableSignal } from '@an
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser } from '../../../core/models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon } from '../../../core/models/admin.models';
 
-type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners';
+type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners' | 'coupons';
 
 const PAGE_SIZE = 25;
 
@@ -112,6 +112,77 @@ export class AdminConsoleComponent implements OnInit {
   partnersTotalPages = computed(() => totalPages(this.partners().length));
   pagedPartners = computed(() => pageSlice(this.partners(), this.partnersPage()));
 
+  // ── Discount coupons ──────────────────────────────────────────
+  coupons = signal<DiscountCoupon[]>([]);
+  couponsLoading = signal(false);
+  couponsError = signal('');
+  couponsLoaded = false;
+  couponsPage = signal(1);
+  couponsTotalPages = computed(() => totalPages(this.coupons().length));
+  pagedCoupons = computed(() => pageSlice(this.coupons(), this.couponsPage()));
+
+  newCouponPercent = signal(100);
+  newCouponEmail = signal('');
+  couponGenerating = signal(false);
+  lastGeneratedCode = signal('');
+  revokingCode = signal<string | null>(null);
+
+  couponStatus(c: DiscountCoupon): 'Used' | 'Revoked' | 'Expired' | 'Active' {
+    if (c.usedAt) return 'Used';
+    if (!c.active) return 'Revoked';
+    if (c.expiresAt && new Date(c.expiresAt).getTime() <= Date.now()) return 'Expired';
+    return 'Active';
+  }
+
+  loadCoupons() {
+    this.couponsLoading.set(true);
+    this.couponsError.set('');
+    this.admin.listCoupons().subscribe({
+      next: rows => { this.coupons.set(rows); this.couponsPage.set(1); this.couponsLoading.set(false); this.couponsLoaded = true; },
+      error: (e: any) => {
+        this.couponsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load coupons.');
+        this.couponsLoading.set(false);
+      }
+    });
+  }
+
+  generateCoupon() {
+    if (this.couponGenerating()) return;
+    const pct = this.newCouponPercent();
+    if (pct == null || pct < 0 || pct > 100) return;
+    this.couponGenerating.set(true);
+    this.couponsError.set('');
+    this.lastGeneratedCode.set('');
+    this.admin.generateCoupon(pct, this.newCouponEmail().trim()).subscribe({
+      next: coupon => {
+        this.coupons.update(rows => [coupon, ...rows]);
+        this.lastGeneratedCode.set(coupon.code);
+        this.newCouponEmail.set('');
+        this.couponGenerating.set(false);
+      },
+      error: (e: any) => {
+        this.couponsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not generate coupon.');
+        this.couponGenerating.set(false);
+      }
+    });
+  }
+
+  revokeCoupon(c: DiscountCoupon) {
+    if (this.revokingCode()) return;
+    this.revokingCode.set(c.code);
+    this.couponsError.set('');
+    this.admin.revokeCoupon(c.code).subscribe({
+      next: () => {
+        this.coupons.update(rows => rows.map(row => row.code === c.code ? { ...row, active: false } : row));
+        this.revokingCode.set(null);
+      },
+      error: (e: any) => {
+        this.couponsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not revoke this coupon.');
+        this.revokingCode.set(null);
+      }
+    });
+  }
+
   setPage(pageSignal: WritableSignal<number>, page: number, totalPages: number) {
     pageSignal.set(Math.min(Math.max(1, page), totalPages));
   }
@@ -123,6 +194,7 @@ export class AdminConsoleComponent implements OnInit {
     if (t === 'users' && !this.usersLoaded) this.loadUsers();
     if (t === 'logins' && !this.loginsLoaded) this.loadLogins();
     if (t === 'partners' && !this.partnersLoaded) this.loadPartners();
+    if (t === 'coupons' && !this.couponsLoaded) this.loadCoupons();
   }
 
   loadTests() {

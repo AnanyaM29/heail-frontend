@@ -35,6 +35,10 @@ export class AgreementOrgComponent implements OnInit {
   agreed = signal(false);
   razorpayReady = signal(false);
 
+  couponCode = signal('');
+  couponLoading = signal(false);
+  couponError = signal('');
+
   stage = computed<Stage>(() => {
     const status = this.data()?.order.status;
     if (status === 'PAID') return 'thankyou';
@@ -135,6 +139,17 @@ export class AgreementOrgComponent implements OnInit {
     this.orgOrders.getOrder(this.orderId).subscribe({
       next: res => { this.data.set(res); this.loading.set(false); },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }
+    });
+  }
+
+  applyCoupon() {
+    const code = this.couponCode().trim();
+    if (!code) return;
+    this.couponLoading.set(true);
+    this.couponError.set('');
+    this.orgOrders.applyCoupon(this.orderId, code).subscribe({
+      next: res => { this.data.set(res); this.couponLoading.set(false); },
+      error: (e: any) => { this.couponError.set(this.msg(e)); this.couponLoading.set(false); }
     });
   }
 

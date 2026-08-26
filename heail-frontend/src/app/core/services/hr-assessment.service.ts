@@ -30,8 +30,8 @@ export class HrAssessmentService {
     return this.http.post<AnswerResponse>(`${API}/sessions/${sessionId}/answer`, { questionId, selectedOption });
   }
 
-  submit(sessionId: string) {
-    return this.http.post<HrResult>(`${API}/sessions/${sessionId}/submit`, {});
+  submit(sessionId: string, forced = false) {
+    return this.http.post<HrResult>(`${API}/sessions/${sessionId}/submit`, {}, { params: { forced } });
   }
 
   results() {

@@ -31,8 +31,8 @@ export class AssessmentService {
     return this.http.post<AnswerResponse>(`${API}/${sessionId}/answer`, { questionId, selectedOption });
   }
 
-  submit(sessionId: string) {
-    return this.http.post<LeaderResult>(`${API}/${sessionId}/submit`, {});
+  submit(sessionId: string, forced = false) {
+    return this.http.post<LeaderResult>(`${API}/${sessionId}/submit`, {}, { params: { forced } });
   }
 
   results() {

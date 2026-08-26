@@ -39,6 +39,10 @@ export class HrPaymentComponent implements OnInit {
   agreed = signal(false);
   razorpayReady = signal(false);
 
+  couponCode = signal('');
+  couponLoading = signal(false);
+  couponError = signal('');
+
   stage = computed<Stage>(() => {
     const o = this.order();
     if (!o) return 'agreement';
@@ -135,6 +139,18 @@ export class HrPaymentComponent implements OnInit {
       });
       rzp.open();
     }).catch(() => this.error.set('Could not load Razorpay checkout. Please refresh and try again.'));
+  }
+
+  applyCoupon() {
+    const o = this.order();
+    const code = this.couponCode().trim();
+    if (!o || !code) return;
+    this.couponLoading.set(true);
+    this.couponError.set('');
+    this.orderService.applyCoupon(o.id, code).subscribe({
+      next: updated => { this.order.set(updated); this.couponLoading.set(false); },
+      error: (e: any) => { this.couponError.set(this.msg(e)); this.couponLoading.set(false); }
+    });
   }
 
   acceptAgreement() {
