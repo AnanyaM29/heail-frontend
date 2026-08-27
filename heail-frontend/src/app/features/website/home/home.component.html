@@ -31,47 +31,6 @@
   </div>
 </section>
 
-<!-- Gita Leader spotlight -->
-<section><div class="wrap section-video-split">
-  <div>
-    <div class="eyebrow">For Aspiring Professionals</div>
-    <h2 class="sec-title">The Gita Leader.</h2>
-    <p class="sec-sub prose-j">A year-long classic assessment that measures leadership against principles thousands of years old — not another personality quiz.</p>
-    <p><a class="link" routerLink="/for-leaders">Learn about The Gita Leader →</a></p>
-  </div>
-  <div class="intro-video-band">
-    <video #homeVid class="intro-video" [muted]="videoMuted()" autoplay loop playsinline preload="auto"
-           (play)="videoPlaying.set(true)" (pause)="videoPlaying.set(false)">
-      <source src="/videos/home-gita.mp4" type="video/mp4">
-    </video>
-    <div class="intro-video-controls">
-      <button type="button" aria-label="Mute or unmute" (click)="videoMuted.set(!videoMuted())">
-        @if (videoMuted()) {
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
-          </svg>
-        } @else {
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
-          </svg>
-        }
-      </button>
-      <button type="button" aria-label="Play or pause" (click)="homeVid.paused ? homeVid.play() : homeVid.pause()">
-        @if (videoPlaying()) {
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        } @else {
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
-        }
-      </button>
-      <button type="button" aria-label="View fullscreen" (click)="homeVid.requestFullscreen()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-</div></section>
-
 <!-- Doors -->
 <section class="doors" id="doorsAnchor">
   <div class="wrap">

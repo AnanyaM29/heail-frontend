@@ -5,4 +5,7 @@ import { RouterLink } from '@angular/router';
 export class LeadersComponent {
   videoPlaying = signal(true);
   videoMuted = signal(true);
+
+  heroVideoPlaying = signal(true);
+  heroVideoMuted = signal(true);
 }

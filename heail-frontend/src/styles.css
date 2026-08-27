@@ -111,14 +111,14 @@ section { padding: 88px 0; }
    text, not on top of the hero: the video already has "HEAIL / Human
    Experience + AI Logic" baked into its own opening title card, which
    collided with page headings when tried as a background overlay.
-   .section-video-split gives the text and the video roughly equal width —
-   the video is the point of these sections, so it gets real presence rather
-   than a small sidebar.
+   .section-video-split gives the text column a bit more room than the video,
+   so the video sits shifted toward the right rather than splitting the row
+   exactly down the middle — same position/size on every page that uses it.
    aspect-ratio:16/9 matches these source videos exactly, so object-fit:
    contain has nothing to letterbox — no empty bars, no cropping either.
    Autoplay/muted/loop starts on its own; the play/pause + mute buttons are
    there for anyone who wants to control it, not required to get it going. */
-.section-video-split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.section-video-split { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; }
 .intro-video-band {
   position: relative; width: 100%; aspect-ratio: 16 / 9;
   overflow: hidden; line-height: 0; border-radius: 10px;
@@ -152,6 +152,17 @@ section { padding: 88px 0; }
 .price .per { font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); }
 .price p { font-size: 14px; color: var(--mut); margin-top: 14px; flex: 1; }
 .price .btn { margin-top: 20px; }
+
+/* inds / cracks */
+.inds { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 46px; }
+.ind { background: #fff; border: 1px solid var(--line-tan); padding: 26px; }
+.ind h4 { font-family: var(--disp); font-size: 21px; margin-bottom: 10px; font-weight: 600; }
+.ind .iss { font-size: 14px; padding: 5px 0 5px 22px; position: relative; color: var(--mut); }
+.ind .iss::before { content: ""; position: absolute; left: 0; top: 14px; width: 12px; height: 1.5px; background: var(--gold); }
+.cracks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 42px; }
+.crack { background: var(--navy); color: var(--ivory); padding: 24px 20px; }
+.crack h4 { color: var(--gold-bright); font-family: var(--disp); font-size: 19px; margin-bottom: 8px; font-weight: 600; }
+.crack p { font-size: 13px; color: var(--on-dark-mut); }
 
 /* under dev */
 .udv { text-align: center; padding: 56px 0; }
@@ -212,12 +223,12 @@ section { padding: 88px 0; }
 .door .soonpill { display: inline-block; font-size: 10.5px; letter-spacing: .14em; background: var(--navy); color: var(--gold-bright); padding: 3px 10px; border-radius: 20px; margin-left: 8px; text-transform: uppercase; vertical-align: middle; }
 
 @media (max-width: 960px) {
-  .doorgrid, .cards2 { grid-template-columns: 1fr; }
-  .domains, .pulses, .pricegrid, .contact-grid { grid-template-columns: repeat(2, 1fr); }
+  .doorgrid, .cards2, .inds { grid-template-columns: 1fr; }
+  .domains, .pulses, .cracks, .pricegrid, .contact-grid { grid-template-columns: repeat(2, 1fr); }
   .phases { grid-template-columns: 1fr; }
   .ph { border-right: none; border-bottom: 1px solid var(--line-tan); }
 }
 @media (max-width: 600px) {
-  .domains, .pulses, .pricegrid, .contact-grid { grid-template-columns: 1fr; }
+  .domains, .pulses, .cracks, .pricegrid, .contact-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::after { animation: none !important; transition: none !important; } }

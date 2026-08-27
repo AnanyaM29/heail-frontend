@@ -1,9 +1,42 @@
 <div class="phero">
-  <div class="wrap">
-    <div class="eyebrow">Solutions · For Aspiring Professionals</div>
-    <h1>The Gita Leader</h1>
-    <p class="sub prose-j">Others teach Gita leadership. HEAIL measures it. Fifty timeless management principles, five domains, one honest score — and a year-long path to change it.</p>
-    <p style="margin-top:18px"><a routerLink="/for-leaders/foundation" style="color:var(--gold-bright);font-weight:600;border-bottom:1px solid var(--gold)">Read the foundation this is built on →</a></p>
+  <div class="wrap section-video-split">
+    <div>
+      <div class="eyebrow">Solutions · For Aspiring Professionals</div>
+      <h1>The Gita Leader</h1>
+      <p class="sub prose-j">Others teach Gita leadership. HEAIL measures it. Fifty timeless management principles, five domains, one honest score — and a year-long path to change it.</p>
+      <p style="margin-top:18px"><a routerLink="/for-leaders/foundation" style="color:var(--gold-bright);font-weight:600;border-bottom:1px solid var(--gold)">Read the foundation this is built on →</a></p>
+    </div>
+    <div class="intro-video-band">
+      <video #heroVid class="intro-video" [muted]="heroVideoMuted()" autoplay loop playsinline preload="auto"
+             (play)="heroVideoPlaying.set(true)" (pause)="heroVideoPlaying.set(false)">
+        <source src="/videos/home-gita.mp4" type="video/mp4">
+      </video>
+      <div class="intro-video-controls">
+        <button type="button" aria-label="Mute or unmute" (click)="heroVideoMuted.set(!heroVideoMuted())">
+          @if (heroVideoMuted()) {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+            </svg>
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+            </svg>
+          }
+        </button>
+        <button type="button" aria-label="Play or pause" (click)="heroVid.paused ? heroVid.play() : heroVid.pause()">
+          @if (heroVideoPlaying()) {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+          }
+        </button>
+        <button type="button" aria-label="View fullscreen" (click)="heroVid.requestFullscreen()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
