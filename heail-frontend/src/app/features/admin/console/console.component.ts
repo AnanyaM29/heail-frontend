@@ -58,8 +58,21 @@ export class AdminConsoleComponent implements OnInit {
   testsError = signal('');
   testsLoaded = false;
   testsPage = signal(1);
-  testsTotalPages = computed(() => totalPages(this.tests().length));
-  pagedTests = computed(() => pageSlice(this.tests(), this.testsPage()));
+  testsSearch = signal('');
+  filteredTests = computed(() => {
+    const q = this.testsSearch().trim().toLowerCase();
+    if (!q) return this.tests();
+    return this.tests().filter(t =>
+      (t.userName ?? '').toLowerCase().includes(q) ||
+      (t.userEmail ?? '').toLowerCase().includes(q) ||
+      (t.organisationName ?? '').toLowerCase().includes(q) ||
+      (t.productCode ?? '').toLowerCase().includes(q) ||
+      (t.pulse ?? '').toLowerCase().includes(q)
+    );
+  });
+  testsTotalPages = computed(() => totalPages(this.filteredTests().length));
+  pagedTests = computed(() => pageSlice(this.filteredTests(), this.testsPage()));
+  updateTestsSearch(value: string) { this.testsSearch.set(value); this.testsPage.set(1); }
 
   // ── Payments (last N months) — 24 so admin can always see, and resend
   //    the invoice for, any paid order from the last two years (matching
@@ -70,8 +83,20 @@ export class AdminConsoleComponent implements OnInit {
   paymentsError = signal('');
   paymentsLoaded = false;
   paymentsPage = signal(1);
-  paymentsTotalPages = computed(() => totalPages(this.payments().length));
-  pagedPayments = computed(() => pageSlice(this.payments(), this.paymentsPage()));
+  paymentsSearch = signal('');
+  filteredPayments = computed(() => {
+    const q = this.paymentsSearch().trim().toLowerCase();
+    if (!q) return this.payments();
+    return this.payments().filter(p =>
+      (p.userName ?? '').toLowerCase().includes(q) ||
+      (p.userEmail ?? '').toLowerCase().includes(q) ||
+      (p.productCode ?? '').toLowerCase().includes(q) ||
+      (p.status ?? '').toLowerCase().includes(q)
+    );
+  });
+  paymentsTotalPages = computed(() => totalPages(this.filteredPayments().length));
+  pagedPayments = computed(() => pageSlice(this.filteredPayments(), this.paymentsPage()));
+  updatePaymentsSearch(value: string) { this.paymentsSearch.set(value); this.paymentsPage.set(1); }
 
   // ── Registered users, chronological ──────────────────────────
   users = signal<AdminUser[]>([]);
@@ -100,8 +125,20 @@ export class AdminConsoleComponent implements OnInit {
   loginsError = signal('');
   loginsLoaded = false;
   loginsPage = signal(1);
-  loginsTotalPages = computed(() => totalPages(this.logins().length));
-  pagedLogins = computed(() => pageSlice(this.logins(), this.loginsPage()));
+  loginsSearch = signal('');
+  filteredLogins = computed(() => {
+    const q = this.loginsSearch().trim().toLowerCase();
+    if (!q) return this.logins();
+    return this.logins().filter(u =>
+      (u.name ?? '').toLowerCase().includes(q) ||
+      (u.email ?? '').toLowerCase().includes(q) ||
+      (u.role ?? '').toLowerCase().includes(q) ||
+      (u.organisationName ?? '').toLowerCase().includes(q)
+    );
+  });
+  loginsTotalPages = computed(() => totalPages(this.filteredLogins().length));
+  pagedLogins = computed(() => pageSlice(this.filteredLogins(), this.loginsPage()));
+  updateLoginsSearch(value: string) { this.loginsSearch.set(value); this.loginsPage.set(1); }
 
   // ── Partner applications, chronological ──────────────────────
   partners = signal<AdminPartner[]>([]);
@@ -109,8 +146,20 @@ export class AdminConsoleComponent implements OnInit {
   partnersError = signal('');
   partnersLoaded = false;
   partnersPage = signal(1);
-  partnersTotalPages = computed(() => totalPages(this.partners().length));
-  pagedPartners = computed(() => pageSlice(this.partners(), this.partnersPage()));
+  partnersSearch = signal('');
+  filteredPartners = computed(() => {
+    const q = this.partnersSearch().trim().toLowerCase();
+    if (!q) return this.partners();
+    return this.partners().filter(p =>
+      (p.name ?? '').toLowerCase().includes(q) ||
+      (p.email ?? '').toLowerCase().includes(q) ||
+      (p.city ?? '').toLowerCase().includes(q) ||
+      (p.country ?? '').toLowerCase().includes(q)
+    );
+  });
+  partnersTotalPages = computed(() => totalPages(this.filteredPartners().length));
+  pagedPartners = computed(() => pageSlice(this.filteredPartners(), this.partnersPage()));
+  updatePartnersSearch(value: string) { this.partnersSearch.set(value); this.partnersPage.set(1); }
 
   // ── Discount coupons ──────────────────────────────────────────
   coupons = signal<DiscountCoupon[]>([]);
@@ -118,8 +167,19 @@ export class AdminConsoleComponent implements OnInit {
   couponsError = signal('');
   couponsLoaded = false;
   couponsPage = signal(1);
-  couponsTotalPages = computed(() => totalPages(this.coupons().length));
-  pagedCoupons = computed(() => pageSlice(this.coupons(), this.couponsPage()));
+  couponsSearch = signal('');
+  filteredCoupons = computed(() => {
+    const q = this.couponsSearch().trim().toLowerCase();
+    if (!q) return this.coupons();
+    return this.coupons().filter(c =>
+      (c.code ?? '').toLowerCase().includes(q) ||
+      (c.createdBy ?? '').toLowerCase().includes(q) ||
+      (c.usedByEmail ?? '').toLowerCase().includes(q)
+    );
+  });
+  couponsTotalPages = computed(() => totalPages(this.filteredCoupons().length));
+  pagedCoupons = computed(() => pageSlice(this.filteredCoupons(), this.couponsPage()));
+  updateCouponsSearch(value: string) { this.couponsSearch.set(value); this.couponsPage.set(1); }
 
   newCouponPercent = signal(100);
   newCouponEmail = signal('');
@@ -399,20 +459,94 @@ export class AdminConsoleComponent implements OnInit {
     });
   }
 
-  // ── Resend results (Leader report or Org report, whichever the user has) ──
-  resultsSendingId = signal<string | null>(null);
-  resultsMessage = signal('');
+  // ── Send invoice for a specific test session (Tests tab) ─────────
+  testInvoiceSendingId = signal<string | null>(null);
+  testInvoiceMessage = signal('');
 
-  sendResults(u: AdminUser) {
-    if (this.resultsSendingId()) return;
-    this.resultsSendingId.set(u.id);
-    this.resultsMessage.set('');
-    this.usersError.set('');
-    this.admin.resendResults(u.id).subscribe({
-      next: () => { this.resultsMessage.set(`Results sent to ${u.email}.`); this.resultsSendingId.set(null); },
+  sendTestInvoice(t: AdminTestSession) {
+    if (this.testInvoiceSendingId()) return;
+    this.testInvoiceSendingId.set(t.id);
+    this.testInvoiceMessage.set('');
+    this.testsError.set('');
+    this.admin.resendInvoiceForTest(t.id).subscribe({
+      next: () => { this.testInvoiceMessage.set(`Invoice sent to ${t.userEmail}.`); this.testInvoiceSendingId.set(null); },
       error: (e: any) => {
-        this.usersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not resend results.');
-        this.resultsSendingId.set(null);
+        this.testsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not send invoice.');
+        this.testInvoiceSendingId.set(null);
+      }
+    });
+  }
+
+  // ── Permanent fee discount (0-100%, per account) ──────────────
+  feeDiscountEditingId = signal<string | null>(null);
+  feeDiscountDraft = signal(0);
+  feeDiscountSavingId = signal<string | null>(null);
+  feeDiscountError = signal('');
+
+  startEditFeeDiscount(u: AdminUser) {
+    this.feeDiscountEditingId.set(u.id);
+    this.feeDiscountDraft.set(u.feeDiscountPercent);
+    this.feeDiscountError.set('');
+  }
+
+  cancelEditFeeDiscount() {
+    this.feeDiscountEditingId.set(null);
+    this.feeDiscountError.set('');
+  }
+
+  // ── Revoke confirmation — the × on the discount badge opens this instead
+  //    of removing straight away, so a misclick can't silently wipe a
+  //    discount off someone's account. ───────────────────────────────
+  feeDiscountConfirmTarget = signal<AdminUser | null>(null);
+
+  confirmRemoveFeeDiscount(u: AdminUser) {
+    this.feeDiscountConfirmTarget.set(u);
+    this.feeDiscountError.set('');
+  }
+
+  cancelRemoveFeeDiscount() {
+    if (this.feeDiscountSavingId()) return;
+    this.feeDiscountConfirmTarget.set(null);
+    this.feeDiscountError.set('');
+  }
+
+  /** Clears the discount straight back to 0%, called only from the confirm modal. */
+  removeFeeDiscount(u: AdminUser) {
+    if (this.feeDiscountSavingId()) return;
+    this.feeDiscountSavingId.set(u.id);
+    this.feeDiscountError.set('');
+    this.admin.setFeeDiscount(u.id, 0).subscribe({
+      next: () => {
+        this.users.update(rows => rows.map(row => row.id === u.id ? { ...row, feeDiscountPercent: 0 } : row));
+        this.feeDiscountSavingId.set(null);
+        this.feeDiscountConfirmTarget.set(null);
+      },
+      error: (e: any) => {
+        this.feeDiscountError.set(e?.error?.message ?? e?.error?.error ?? 'Could not remove fee discount.');
+        this.feeDiscountSavingId.set(null);
+      }
+    });
+  }
+
+  saveFeeDiscount(u: AdminUser) {
+    if (this.feeDiscountSavingId()) return;
+    const pct = this.feeDiscountDraft();
+    if (pct == null || isNaN(pct) || pct < 0 || pct > 100) {
+      this.feeDiscountError.set('Discount must be a number between 0 and 100.');
+      return;
+    }
+    this.feeDiscountError.set('');
+    this.feeDiscountSavingId.set(u.id);
+    this.usersError.set('');
+    this.admin.setFeeDiscount(u.id, pct).subscribe({
+      next: () => {
+        this.users.update(rows => rows.map(row => row.id === u.id ? { ...row, feeDiscountPercent: pct } : row));
+        this.feeDiscountSavingId.set(null);
+        this.feeDiscountEditingId.set(null);
+      },
+      error: (e: any) => {
+        this.usersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not update fee discount.');
+        this.feeDiscountSavingId.set(null);
       }
     });
   }

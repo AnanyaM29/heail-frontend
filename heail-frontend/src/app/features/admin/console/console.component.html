@@ -19,7 +19,6 @@
   <!-- ── Registered users, chronological ─────────────────────── -->
   @if (tab() === 'users') {
     @if (usersError()) { <div class="alert-err" role="alert">{{ usersError() }}</div> }
-    @if (resultsMessage()) { <p class="hint" style="color:var(--success);margin-bottom:12px">{{ resultsMessage() }}</p> }
 
     <div class="fld" style="max-width:360px;margin-bottom:16px">
       <label for="userSearch">Search users</label>
@@ -34,7 +33,7 @@
         <table class="monitor-table admin-table">
           <thead>
             <tr>
-              <th>Registered</th><th>Name</th><th>Email</th><th>Role</th><th>Organisation</th><th>Last Login</th><th>Status</th><th>Action</th>
+              <th>Registered</th><th>Name</th><th>Email</th><th>Role</th><th>Organisation</th><th>Last Login</th><th>Status</th><th>Discount</th><th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -51,17 +50,41 @@
                   @else { <span class="pstate pstate-failed">Blocked</span> }
                 </td>
                 <td>
+                  @if (feeDiscountEditingId() === u.id) {
+                    <div style="font-size:11.5px;color:var(--mut);margin-bottom:4px">Discount for {{ u.email }}</div>
+                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                      <input type="number" min="0" max="100" style="width:60px;padding:4px 6px"
+                             [value]="feeDiscountDraft()" (input)="feeDiscountDraft.set($any($event.target).valueAsNumber)">
+                      <span style="font-size:13px;color:var(--mut)">%</span>
+                      <button type="button" class="tog" [disabled]="feeDiscountSavingId() === u.id" (click)="saveFeeDiscount(u)">
+                        @if (feeDiscountSavingId() === u.id) { <span class="spinner"></span> } Save
+                      </button>
+                      <button type="button" class="tog" [disabled]="feeDiscountSavingId() === u.id" (click)="cancelEditFeeDiscount()">Cancel</button>
+                    </div>
+                    @if (feeDiscountError()) { <p style="color:#b3261e;font-size:12px;margin:4px 0 0">{{ feeDiscountError() }}</p> }
+                  } @else {
+                    <div style="display:flex;gap:8px;align-items:center">
+                      @if (u.feeDiscountPercent > 0) {
+                        <span class="pstate pstate-done disc-badge">
+                          {{ u.feeDiscountPercent }}% off
+                          <button type="button" class="disc-badge-x" (click)="confirmRemoveFeeDiscount(u)" aria-label="Revoke discount">×</button>
+                        </span>
+                        <button type="button" class="tog" (click)="startEditFeeDiscount(u)">Edit</button>
+                      } @else {
+                        <button type="button" class="tog" (click)="startEditFeeDiscount(u)">Add Discount</button>
+                      }
+                    </div>
+                  }
+                </td>
+                <td>
                   <button type="button" class="tog" (click)="goToResetWithEmail(u.email)">Reset</button>
                   <button type="button" class="tog" [disabled]="blockingUserId() === u.id" (click)="toggleBlock(u)">
                     {{ u.active ? 'Block' : 'Unblock' }}
                   </button>
-                  <button type="button" class="tog" [disabled]="resultsSendingId() === u.id" (click)="sendResults(u)">
-                    @if (resultsSendingId() === u.id) { <span class="spinner"></span> } Resend Results
-                  </button>
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="8" style="text-align:center;color:var(--mut)">{{ userSearch().trim() ? 'No users match your search.' : 'No users yet.' }}</td></tr>
+              <tr><td colspan="9" style="text-align:center;color:var(--mut)">{{ userSearch().trim() ? 'No users match your search.' : 'No users yet.' }}</td></tr>
             }
           </tbody>
         </table>
@@ -79,6 +102,12 @@
   <!-- ── Logged-in users, chronological, last N months ───────── -->
   @if (tab() === 'logins') {
     @if (loginsError()) { <div class="alert-err" role="alert">{{ loginsError() }}</div> }
+
+    <div class="fld" style="max-width:360px;margin-bottom:16px">
+      <label for="loginsSearch">Search logins</label>
+      <input id="loginsSearch" type="text" placeholder="Name, email, role, or organisation"
+             [value]="loginsSearch()" (input)="updateLoginsSearch($any($event.target).value)">
+    </div>
 
     <div class="dash-panel" style="overflow-x:auto">
       @if (loginsLoading()) {
@@ -98,7 +127,7 @@
                 <td>{{ u.organisationName || '—' }}</td>
               </tr>
             } @empty {
-              <tr><td colspan="5" style="text-align:center;color:var(--mut)">No logins in this window.</td></tr>
+              <tr><td colspan="5" style="text-align:center;color:var(--mut)">{{ loginsSearch().trim() ? 'No logins match your search.' : 'No logins in this window.' }}</td></tr>
             }
           </tbody>
         </table>
@@ -116,6 +145,13 @@
   <!-- ── Tests conducted, last N months ───────────────────────── -->
   @if (tab() === 'tests') {
     @if (testsError()) { <div class="alert-err" role="alert">{{ testsError() }}</div> }
+    @if (testInvoiceMessage()) { <p class="hint" style="color:var(--success);margin-bottom:12px">{{ testInvoiceMessage() }}</p> }
+
+    <div class="fld" style="max-width:360px;margin-bottom:16px">
+      <label for="testsSearch">Search tests</label>
+      <input id="testsSearch" type="text" placeholder="Name, email, organisation, or product"
+             [value]="testsSearch()" (input)="updateTestsSearch($any($event.target).value)">
+    </div>
 
     <div class="dash-panel" style="overflow-x:auto">
       @if (testsLoading()) {
@@ -123,7 +159,7 @@
       } @else {
         <table class="monitor-table admin-table">
           <thead>
-            <tr><th>Started</th><th>User</th><th>Type</th><th>Organisation</th><th>Status</th><th>Completed</th><th>Question IDs</th></tr>
+            <tr><th>Started</th><th>User</th><th>Type</th><th>Organisation</th><th>Status</th><th>Completed</th><th>Question IDs</th><th>Action</th></tr>
           </thead>
           <tbody>
             @for (t of pagedTests(); track t.id) {
@@ -138,9 +174,14 @@
                 </td>
                 <td>{{ t.completedAt ? (t.completedAt | date:'medium') : '—' }}</td>
                 <td [title]="t.questionIds.join(', ')" style="cursor:help">{{ t.questionIds.length }} questions</td>
+                <td>
+                  <button type="button" class="tog" [disabled]="testInvoiceSendingId() === t.id" (click)="sendTestInvoice(t)">
+                    @if (testInvoiceSendingId() === t.id) { <span class="spinner"></span> } Send Invoice
+                  </button>
+                </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" style="text-align:center;color:var(--mut)">No tests in this window.</td></tr>
+              <tr><td colspan="8" style="text-align:center;color:var(--mut)">{{ testsSearch().trim() ? 'No tests match your search.' : 'No tests in this window.' }}</td></tr>
             }
           </tbody>
         </table>
@@ -160,6 +201,12 @@
     @if (paymentsError()) { <div class="alert-err" role="alert">{{ paymentsError() }}</div> }
     @if (reminderMessage()) { <p class="hint" style="color:var(--success);margin-bottom:12px">{{ reminderMessage() }}</p> }
     @if (invoiceMessage()) { <p class="hint" style="color:var(--success);margin-bottom:12px">{{ invoiceMessage() }}</p> }
+
+    <div class="fld" style="max-width:360px;margin-bottom:16px">
+      <label for="paymentsSearch">Search payments</label>
+      <input id="paymentsSearch" type="text" placeholder="Name, email, product, or status"
+             [value]="paymentsSearch()" (input)="updatePaymentsSearch($any($event.target).value)">
+    </div>
 
     @if (selectedPaymentIds().size > 0) {
       <div style="margin-bottom:16px">
@@ -209,7 +256,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="9" style="text-align:center;color:var(--mut)">No orders in this window.</td></tr>
+              <tr><td colspan="9" style="text-align:center;color:var(--mut)">{{ paymentsSearch().trim() ? 'No payments match your search.' : 'No orders in this window.' }}</td></tr>
             }
           </tbody>
         </table>
@@ -227,6 +274,12 @@
   <!-- ── Partner applications, chronological ──────────────────── -->
   @if (tab() === 'partners') {
     @if (partnersError()) { <div class="alert-err" role="alert">{{ partnersError() }}</div> }
+
+    <div class="fld" style="max-width:360px;margin-bottom:16px">
+      <label for="partnersSearch">Search partners</label>
+      <input id="partnersSearch" type="text" placeholder="Name, email, city, or country"
+             [value]="partnersSearch()" (input)="updatePartnersSearch($any($event.target).value)">
+    </div>
 
     <div class="dash-panel" style="overflow-x:auto">
       @if (partnersLoading()) {
@@ -259,7 +312,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" style="text-align:center;color:var(--mut)">No partner applications yet.</td></tr>
+              <tr><td colspan="7" style="text-align:center;color:var(--mut)">{{ partnersSearch().trim() ? 'No partners match your search.' : 'No partner applications yet.' }}</td></tr>
             }
           </tbody>
         </table>
@@ -301,7 +354,13 @@
       }
     </div>
 
-    <div class="dash-panel" style="overflow-x:auto;margin-top:24px">
+    <div class="fld" style="max-width:360px;margin:24px 0 16px">
+      <label for="couponsSearch">Search coupons</label>
+      <input id="couponsSearch" type="text" placeholder="Code, created by, or used by"
+             [value]="couponsSearch()" (input)="updateCouponsSearch($any($event.target).value)">
+    </div>
+
+    <div class="dash-panel" style="overflow-x:auto">
       @if (couponsLoading()) {
         <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
       } @else {
@@ -337,7 +396,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="8" style="text-align:center;color:var(--mut)">No coupons generated yet.</td></tr>
+              <tr><td colspan="8" style="text-align:center;color:var(--mut)">{{ couponsSearch().trim() ? 'No coupons match your search.' : 'No coupons generated yet.' }}</td></tr>
             }
           </tbody>
         </table>
@@ -379,6 +438,22 @@
       <button class="btn btn-gold no-elevate" type="button" style="width:100%" [disabled]="loading() || !email().trim()" (click)="sendResetEmail()">
         @if (loading()) { <span class="spinner"></span> } Send Reset Email
       </button>
+    </div>
+  }
+
+  @if (feeDiscountConfirmTarget(); as fdTarget) {
+    <div class="modal-backdrop" (click)="cancelRemoveFeeDiscount()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h3>Revoke this discount?</h3>
+        <p>Do you really want to revoke the <b>{{ fdTarget.feeDiscountPercent }}% discount</b> from <b>{{ fdTarget.email }}</b>? They'll be charged the full price on their next order.</p>
+        @if (feeDiscountError()) { <div class="alert-err" role="alert">{{ feeDiscountError() }}</div> }
+        <div class="modal-actions">
+          <button type="button" class="tog" [disabled]="feeDiscountSavingId() === fdTarget.id" (click)="cancelRemoveFeeDiscount()">Cancel</button>
+          <button type="button" class="btn btn-navy no-elevate" [disabled]="feeDiscountSavingId() === fdTarget.id" (click)="removeFeeDiscount(fdTarget)">
+            @if (feeDiscountSavingId() === fdTarget.id) { <span class="spinner"></span> } Yes, Revoke
+          </button>
+        </div>
+      </div>
     </div>
   }
 

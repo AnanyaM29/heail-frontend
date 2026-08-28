@@ -14,20 +14,22 @@
         <h2 class="sec-title">Leadership Diagnostics</h2>
       }
 
-      <div class="plans">
-        <div class="planrow">
-          <div class="pinfo">
-            <h3>The Gita Leader — Classic Assessment</h3>
-            <p>50 questions · ~30 minutes · scored out of 250.</p>
-          </div>
-          <div class="pside">
-            <div class="pprice">₹1,000</div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
-              <button class="btn btn-navy" type="button" [disabled]="actionLoading()" (click)="select()">
-                @if (actionLoading()) { <span class="spinner"></span> } Continue
-              </button>
-            </div>
-          </div>
+      <div class="pricegrid">
+        <div class="price">
+          <h4>The Gita Leader — Classic Assessment</h4>
+          <div class="amt">₹1,000</div>
+          <div class="per">50 questions · ~30 minutes</div>
+          <p>The original Classic Assessment — one sitting, instant personalised results.</p>
+          <button class="btn btn-navy" type="button" [disabled]="actionLoading()" (click)="select()">
+            @if (actionLoading()) { <span class="spinner"></span> } Continue
+          </button>
+        </div>
+        <div class="price">
+          <h4>1-Year Leadership Program</h4>
+          <div class="amt req">On request</div>
+          <div class="per">12 months · 1:1</div>
+          <p>Diagnose → Transform → Retest &amp; Plan.</p>
+          <a class="btn btn-navy" routerLink="/contact">Request a quote</a>
         </div>
       </div>
       <p style="font-size:13px;color:var(--mut);margin-top:16px">More diagnostics will be added here.</p>

@@ -42,8 +42,16 @@ export class AdminService {
     return this.http.post(`${API}/orders/${orderId}/resend-invoice`, {});
   }
 
+  resendInvoiceForTest(sessionId: string) {
+    return this.http.post(`${API}/tests/${sessionId}/resend-invoice`, {});
+  }
+
   resendResults(userId: string) {
     return this.http.post(`${API}/users/${userId}/resend-results`, {});
+  }
+
+  setFeeDiscount(userId: string, percent: number) {
+    return this.http.patch(`${API}/users/${userId}/fee-discount`, {}, { params: { percent } });
   }
 
   sendPaymentReminders(orderIds: string[]) {

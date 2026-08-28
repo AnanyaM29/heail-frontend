@@ -55,52 +55,55 @@
 </section>
 
 <section style="background:var(--ivory2)">
-  <div class="wrap section-video-split">
-    <div>
-      <div class="eyebrow">The Assessment</div>
-      <h2 class="sec-title">Begin with the Classic Assessment.</h2>
-      <p class="sec-sub prose-j">Take this simple yet powerful assessment and receive your personalized results instantly on your Personal Dashboard. Your gateway to discovering your true potential and transforming your future starts here.</p>
-      <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/pricing/buy-leader">Take the Assessment</a></div>
-    </div>
-    <div class="intro-video-band">
-      <video #leaderVid class="intro-video" [muted]="videoMuted()" autoplay loop playsinline preload="auto"
-             (play)="videoPlaying.set(true)" (pause)="videoPlaying.set(false)">
-        <source src="/videos/leader-intro.mp4" type="video/mp4">
-      </video>
-      <div class="intro-video-controls">
-        <button type="button" aria-label="Mute or unmute" (click)="videoMuted.set(!videoMuted())">
-          @if (videoMuted()) {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
-            </svg>
-          } @else {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
-            </svg>
-          }
-        </button>
-        <button type="button" aria-label="Play or pause" (click)="leaderVid.paused ? leaderVid.play() : leaderVid.pause()">
-          @if (videoPlaying()) {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          } @else {
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
-          }
-        </button>
-        <button type="button" aria-label="View fullscreen" (click)="leaderVid.requestFullscreen()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+  <div class="wrap">
+    <div class="eyebrow">The Assessment</div>
+    <h2 class="sec-title">Begin with the Classic Assessment.</h2>
+    <p class="sec-sub prose-j">Take this simple yet powerful assessment and receive your personalized results instantly on your Personal Dashboard. Your gateway to discovering your true potential and transforming your future starts here.</p>
+    <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/pricing/buy-leader">Take the Assessment</a></div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="eyebrow">After the Score</div>
-    <h2 class="sec-title">The 1-Year Transformation Roadmap.</h2>
-    <p class="sec-sub prose-j">The score shows where to focus. The year turns it into practised behaviour — same architecture for everyone, personalised in content to your own results.</p>
+    <div class="section-video-split">
+      <div>
+        <div class="eyebrow">After the Score</div>
+        <h2 class="sec-title">The 1-Year Transformation Roadmap.</h2>
+        <p class="sec-sub prose-j">The score shows where to focus. The year turns it into practised behaviour — same architecture for everyone, personalised in content to your own results.</p>
+      </div>
+      <div class="intro-video-band">
+        <video #leaderVid class="intro-video" [muted]="videoMuted()" autoplay loop playsinline preload="auto"
+               (play)="videoPlaying.set(true)" (pause)="videoPlaying.set(false)">
+          <source src="/videos/leader-intro.mp4" type="video/mp4">
+        </video>
+        <div class="intro-video-controls">
+          <button type="button" aria-label="Mute or unmute" (click)="videoMuted.set(!videoMuted())">
+            @if (videoMuted()) {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+              </svg>
+            }
+          </button>
+          <button type="button" aria-label="Play or pause" (click)="leaderVid.paused ? leaderVid.play() : leaderVid.pause()">
+            @if (videoPlaying()) {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+            }
+          </button>
+          <button type="button" aria-label="View fullscreen" (click)="leaderVid.requestFullscreen()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="phases">
       <div class="ph"><div class="m">Months 1–2</div><h4>Diagnose</h4><p>The full five-format measurement strategy produces your Leadership Capability Matrix, the Month 0 baseline.</p></div>
       <div class="ph"><div class="m">Months 3–10</div><h4>Transform</h4><p>Eight monthly cycles: one priority trait each, a Gita-principle cognitive tool, weekly accountability, quarterly pressure-tests.</p></div>

@@ -68,4 +68,5 @@ export interface AdminUser {
   active: boolean;
   blacklistedAt: string | null;
   deletedAt: string | null;
+  feeDiscountPercent: number;
 }
