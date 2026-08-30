@@ -1,29 +1,33 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon } from '../models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon, InvoiceCounter, PagedResponse } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/admin/dashboard`;
 const COUPONS_API = `${environment.apiBaseUrl}/api/v1/admin/coupons`;
+const INVOICE_NUMBER_API = `${environment.apiBaseUrl}/api/v1/admin/invoice-number`;
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private http = inject(HttpClient);
 
-  tests(months = 3) {
-    return this.http.get<AdminTestSession[]>(`${API}/tests`, { params: { months } });
+  // Pagination and search are handled server-side (LIMIT/OFFSET + a filtered
+  // query in Postgres) rather than fetching the whole table and slicing it
+  // client-side — see AdminDashboardService on the backend.
+  tests(months = 3, page = 0, size = 25, q = '') {
+    return this.http.get<PagedResponse<AdminTestSession>>(`${API}/tests`, { params: { months, page, size, q } });
   }
 
-  payments(months = 12) {
-    return this.http.get<AdminPayment[]>(`${API}/payments`, { params: { months } });
+  payments(months = 12, page = 0, size = 25, q = '') {
+    return this.http.get<PagedResponse<AdminPayment>>(`${API}/payments`, { params: { months, page, size, q } });
   }
 
-  users() {
-    return this.http.get<AdminUser[]>(`${API}/users`);
+  users(page = 0, size = 25, q = '') {
+    return this.http.get<PagedResponse<AdminUser>>(`${API}/users`, { params: { page, size, q } });
   }
 
-  logins(months = 12) {
-    return this.http.get<AdminUser[]>(`${API}/logins`, { params: { months } });
+  logins(months = 12, page = 0, size = 25, q = '') {
+    return this.http.get<PagedResponse<AdminUser>>(`${API}/logins`, { params: { months, page, size, q } });
   }
 
   blacklistUser(id: string) {
@@ -58,8 +62,8 @@ export class AdminService {
     return this.http.post(`${API}/orders/send-payment-reminders`, orderIds);
   }
 
-  partners() {
-    return this.http.get<AdminPartner[]>(`${API}/partners`);
+  partners(page = 0, size = 25, q = '') {
+    return this.http.get<PagedResponse<AdminPartner>>(`${API}/partners`, { params: { page, size, q } });
   }
 
   partnerResume(id: string) {
@@ -76,5 +80,22 @@ export class AdminService {
 
   revokeCoupon(code: string) {
     return this.http.post(`${COUPONS_API}/${code}/revoke`, {});
+  }
+
+  // ── Shared invoice-number counter (Postgres sequence invoice_seq) ──
+  // Website invoices and manual/offline invoices both draw from this, so
+  // numbers stay in one sequence with no duplicates.
+  invoiceCounter() {
+    return this.http.get<InvoiceCounter>(INVOICE_NUMBER_API);
+  }
+
+  /** Advances the counter and returns the number to write on a manual invoice. */
+  takeNextInvoiceNumber() {
+    return this.http.post<{ invoiceNumber: string }>(`${INVOICE_NUMBER_API}/next`, {});
+  }
+
+  /** Sets the counter so the next invoice number is `nextValue`. */
+  setInvoiceCounter(nextValue: number) {
+    return this.http.put<InvoiceCounter>(INVOICE_NUMBER_API, {}, { params: { nextValue } });
   }
 }

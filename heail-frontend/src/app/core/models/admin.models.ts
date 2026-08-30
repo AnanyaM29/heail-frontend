@@ -55,6 +55,23 @@ export interface DiscountCoupon {
   usedByEmail: string | null;
 }
 
+export interface InvoiceCounter {
+  /** Last number that was issued; null if none have been yet. */
+  lastUsed: number | null;
+  /** The numeric value the next invoice will take. */
+  nextValue: number;
+  /** The next invoice number, fully formatted, e.g. "HEAIL-INV-000043". */
+  nextNumber: string;
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface AdminUser {
   id: string;
   name: string;

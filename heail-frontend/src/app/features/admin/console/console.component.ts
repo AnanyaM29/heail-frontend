@@ -2,9 +2,9 @@ import { Component, OnInit, signal, computed, inject, WritableSignal } from '@an
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon } from '../../../core/models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon, InvoiceCounter } from '../../../core/models/admin.models';
 
-type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners' | 'coupons';
+type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners' | 'coupons' | 'invoice';
 
 const PAGE_SIZE = 25;
 
@@ -51,115 +51,91 @@ export class AdminConsoleComponent implements OnInit {
     });
   }
 
-  // ── Tests (last N months) ────────────────────────────────────
+  // ── Tests (last N months) — paged + searched server-side (see
+  //    AdminService.tests / the backend AdminDashboardService) rather than
+  //    fetching every session in the window and slicing it in the browser. ──
   testsMonths = signal(3);
   tests = signal<AdminTestSession[]>([]);
+  pagedTests = computed(() => this.tests());
   testsLoading = signal(false);
   testsError = signal('');
   testsLoaded = false;
   testsPage = signal(1);
+  testsTotalPages = signal(1);
   testsSearch = signal('');
-  filteredTests = computed(() => {
-    const q = this.testsSearch().trim().toLowerCase();
-    if (!q) return this.tests();
-    return this.tests().filter(t =>
-      (t.userName ?? '').toLowerCase().includes(q) ||
-      (t.userEmail ?? '').toLowerCase().includes(q) ||
-      (t.organisationName ?? '').toLowerCase().includes(q) ||
-      (t.productCode ?? '').toLowerCase().includes(q) ||
-      (t.pulse ?? '').toLowerCase().includes(q)
-    );
-  });
-  testsTotalPages = computed(() => totalPages(this.filteredTests().length));
-  pagedTests = computed(() => pageSlice(this.filteredTests(), this.testsPage()));
-  updateTestsSearch(value: string) { this.testsSearch.set(value); this.testsPage.set(1); }
+  private testsSearchTimer?: ReturnType<typeof setTimeout>;
+  updateTestsSearch(value: string) {
+    this.testsSearch.set(value);
+    this.testsPage.set(1);
+    clearTimeout(this.testsSearchTimer);
+    this.testsSearchTimer = setTimeout(() => this.loadTests(), 300);
+  }
 
   // ── Payments (last N months) — 24 so admin can always see, and resend
   //    the invoice for, any paid order from the last two years (matching
-  //    the backend's own resend-invoice window). ────────────────────
+  //    the backend's own resend-invoice window). Paged + searched server-side. ──
   paymentsMonths = signal(24);
   payments = signal<AdminPayment[]>([]);
+  pagedPayments = computed(() => this.payments());
   paymentsLoading = signal(false);
   paymentsError = signal('');
   paymentsLoaded = false;
   paymentsPage = signal(1);
+  paymentsTotalPages = signal(1);
   paymentsSearch = signal('');
-  filteredPayments = computed(() => {
-    const q = this.paymentsSearch().trim().toLowerCase();
-    if (!q) return this.payments();
-    return this.payments().filter(p =>
-      (p.userName ?? '').toLowerCase().includes(q) ||
-      (p.userEmail ?? '').toLowerCase().includes(q) ||
-      (p.productCode ?? '').toLowerCase().includes(q) ||
-      (p.status ?? '').toLowerCase().includes(q)
-    );
-  });
-  paymentsTotalPages = computed(() => totalPages(this.filteredPayments().length));
-  pagedPayments = computed(() => pageSlice(this.filteredPayments(), this.paymentsPage()));
-  updatePaymentsSearch(value: string) { this.paymentsSearch.set(value); this.paymentsPage.set(1); }
+  private paymentsSearchTimer?: ReturnType<typeof setTimeout>;
+  updatePaymentsSearch(value: string) {
+    this.paymentsSearch.set(value);
+    this.paymentsPage.set(1);
+    clearTimeout(this.paymentsSearchTimer);
+    this.paymentsSearchTimer = setTimeout(() => this.loadPayments(), 300);
+  }
 
-  // ── Registered users, chronological ──────────────────────────
+  // ── Registered users, chronological — paged + searched server-side. ──
   users = signal<AdminUser[]>([]);
+  pagedUsers = computed(() => this.users());
   usersLoading = signal(false);
   usersError = signal('');
   usersLoaded = false;
   usersPage = signal(1);
+  usersTotalPages = signal(1);
   userSearch = signal('');
-  filteredUsers = computed(() => {
-    const q = this.userSearch().trim().toLowerCase();
-    if (!q) return this.users();
-    return this.users().filter(u =>
-      (u.name ?? '').toLowerCase().includes(q) ||
-      (u.email ?? '').toLowerCase().includes(q) ||
-      (u.role ?? '').toLowerCase().includes(q) ||
-      (u.organisationName ?? '').toLowerCase().includes(q)
-    );
-  });
-  usersTotalPages = computed(() => totalPages(this.filteredUsers().length));
-  pagedUsers = computed(() => pageSlice(this.filteredUsers(), this.usersPage()));
+  private userSearchTimer?: ReturnType<typeof setTimeout>;
 
-  // ── Logged-in users (last N months) ──────────────────────────
+  // ── Logged-in users (last N months) — paged + searched server-side. ──
   loginsMonths = signal(12);
   logins = signal<AdminUser[]>([]);
+  pagedLogins = computed(() => this.logins());
   loginsLoading = signal(false);
   loginsError = signal('');
   loginsLoaded = false;
   loginsPage = signal(1);
+  loginsTotalPages = signal(1);
   loginsSearch = signal('');
-  filteredLogins = computed(() => {
-    const q = this.loginsSearch().trim().toLowerCase();
-    if (!q) return this.logins();
-    return this.logins().filter(u =>
-      (u.name ?? '').toLowerCase().includes(q) ||
-      (u.email ?? '').toLowerCase().includes(q) ||
-      (u.role ?? '').toLowerCase().includes(q) ||
-      (u.organisationName ?? '').toLowerCase().includes(q)
-    );
-  });
-  loginsTotalPages = computed(() => totalPages(this.filteredLogins().length));
-  pagedLogins = computed(() => pageSlice(this.filteredLogins(), this.loginsPage()));
-  updateLoginsSearch(value: string) { this.loginsSearch.set(value); this.loginsPage.set(1); }
+  private loginsSearchTimer?: ReturnType<typeof setTimeout>;
+  updateLoginsSearch(value: string) {
+    this.loginsSearch.set(value);
+    this.loginsPage.set(1);
+    clearTimeout(this.loginsSearchTimer);
+    this.loginsSearchTimer = setTimeout(() => this.loadLogins(), 300);
+  }
 
-  // ── Partner applications, chronological ──────────────────────
+  // ── Partner applications, chronological — paged + searched server-side. ──
   partners = signal<AdminPartner[]>([]);
+  pagedPartners = computed(() => this.partners());
   partnersLoading = signal(false);
   partnersError = signal('');
   partnersLoaded = false;
   partnersPage = signal(1);
+  partnersTotalPages = signal(1);
   partnersSearch = signal('');
-  filteredPartners = computed(() => {
-    const q = this.partnersSearch().trim().toLowerCase();
-    if (!q) return this.partners();
-    return this.partners().filter(p =>
-      (p.name ?? '').toLowerCase().includes(q) ||
-      (p.email ?? '').toLowerCase().includes(q) ||
-      (p.city ?? '').toLowerCase().includes(q) ||
-      (p.country ?? '').toLowerCase().includes(q)
-    );
-  });
-  partnersTotalPages = computed(() => totalPages(this.filteredPartners().length));
-  pagedPartners = computed(() => pageSlice(this.filteredPartners(), this.partnersPage()));
-  updatePartnersSearch(value: string) { this.partnersSearch.set(value); this.partnersPage.set(1); }
+  private partnersSearchTimer?: ReturnType<typeof setTimeout>;
+  updatePartnersSearch(value: string) {
+    this.partnersSearch.set(value);
+    this.partnersPage.set(1);
+    clearTimeout(this.partnersSearchTimer);
+    this.partnersSearchTimer = setTimeout(() => this.loadPartners(), 300);
+  }
 
   // ── Discount coupons ──────────────────────────────────────────
   coupons = signal<DiscountCoupon[]>([]);
@@ -243,8 +219,13 @@ export class AdminConsoleComponent implements OnInit {
     });
   }
 
-  setPage(pageSignal: WritableSignal<number>, page: number, totalPages: number) {
-    pageSignal.set(Math.min(Math.max(1, page), totalPages));
+  /** Clamps to range, then (for server-paged tabs) re-fetches that page — a no-op if the page didn't change.
+   *  `reload` is omitted for Coupons, which still paginates a client-side list. */
+  setPage(pageSignal: WritableSignal<number>, page: number, totalPages: number, reload?: () => void) {
+    const clamped = Math.min(Math.max(1, page), totalPages);
+    if (clamped === pageSignal()) return;
+    pageSignal.set(clamped);
+    reload?.();
   }
 
   selectTab(t: Tab) {
@@ -255,13 +236,115 @@ export class AdminConsoleComponent implements OnInit {
     if (t === 'logins' && !this.loginsLoaded) this.loadLogins();
     if (t === 'partners' && !this.partnersLoaded) this.loadPartners();
     if (t === 'coupons' && !this.couponsLoaded) this.loadCoupons();
+    if (t === 'invoice' && !this.invoiceLoaded) this.loadInvoiceCounter();
+  }
+
+  // ── Shared invoice-number counter ────────────────────────────
+  // Both website-generated invoices and manual/offline ones draw from a single
+  // Postgres sequence, so their numbers never collide. This tab lets the
+  // superadmin read the counter, take the next number for a manual invoice, and
+  // correct the counter (e.g. after issuing a batch of manual invoices).
+  invoiceCounter = signal<InvoiceCounter | null>(null);
+  invoiceLoading = signal(false);
+  invoiceError = signal('');
+  invoiceLoaded = false;
+
+  takingNumber = signal(false);
+  /** Kept on screen after "take next number" so it can be copied onto the manual invoice. */
+  takenNumber = signal('');
+
+  showSetCounter = signal(false);
+  setCounterDraft = signal<number | null>(null);
+  settingCounter = signal(false);
+  setCounterConfirm = signal(false);
+
+  loadInvoiceCounter() {
+    this.invoiceLoading.set(true);
+    this.invoiceError.set('');
+    this.admin.invoiceCounter().subscribe({
+      next: c => { this.invoiceCounter.set(c); this.invoiceLoading.set(false); this.invoiceLoaded = true; },
+      error: (e: any) => {
+        this.invoiceError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load the invoice counter.');
+        this.invoiceLoading.set(false);
+      }
+    });
+  }
+
+  takeNextInvoiceNumber() {
+    if (this.takingNumber()) return;
+    this.takingNumber.set(true);
+    this.invoiceError.set('');
+    this.admin.takeNextInvoiceNumber().subscribe({
+      next: res => {
+        this.takenNumber.set(res.invoiceNumber);
+        this.takingNumber.set(false);
+        this.loadInvoiceCounter();
+      },
+      error: (e: any) => {
+        this.invoiceError.set(e?.error?.message ?? e?.error?.error ?? 'Could not get the next invoice number.');
+        this.takingNumber.set(false);
+      }
+    });
+  }
+
+  copyTakenNumber() {
+    const n = this.takenNumber();
+    if (n) navigator.clipboard?.writeText(n).catch(() => {});
+  }
+
+  openSetCounter() {
+    this.showSetCounter.set(true);
+    this.setCounterDraft.set(this.invoiceCounter()?.nextValue ?? null);
+    this.setCounterConfirm.set(false);
+    this.invoiceError.set('');
+  }
+
+  cancelSetCounter() {
+    if (this.settingCounter()) return;
+    this.showSetCounter.set(false);
+    this.setCounterConfirm.set(false);
+  }
+
+  requestSetCounter() {
+    const n = this.setCounterDraft();
+    if (n == null || isNaN(n) || n < 1) {
+      this.invoiceError.set('Enter a whole number of 1 or more.');
+      return;
+    }
+    this.invoiceError.set('');
+    this.setCounterConfirm.set(true);
+  }
+
+  confirmSetCounter() {
+    const n = this.setCounterDraft();
+    if (n == null || this.settingCounter()) return;
+    this.settingCounter.set(true);
+    this.invoiceError.set('');
+    this.admin.setInvoiceCounter(n).subscribe({
+      next: c => {
+        this.invoiceCounter.set(c);
+        this.settingCounter.set(false);
+        this.showSetCounter.set(false);
+        this.setCounterConfirm.set(false);
+      },
+      error: (e: any) => {
+        this.invoiceError.set(e?.error?.message ?? e?.error?.error ?? 'Could not set the invoice counter.');
+        this.settingCounter.set(false);
+        this.setCounterConfirm.set(false);
+      }
+    });
   }
 
   loadTests() {
     this.testsLoading.set(true);
     this.testsError.set('');
-    this.admin.tests(this.testsMonths()).subscribe({
-      next: rows => { this.tests.set(rows); this.testsPage.set(1); this.testsLoading.set(false); this.testsLoaded = true; },
+    this.admin.tests(this.testsMonths(), this.testsPage() - 1, PAGE_SIZE, this.testsSearch().trim()).subscribe({
+      next: res => {
+        this.tests.set(res.content);
+        this.testsTotalPages.set(res.totalPages);
+        this.testsLoading.set(false);
+        this.testsLoaded = true;
+      },
       error: (e: any) => {
         this.testsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load test activity.');
         this.testsLoading.set(false);
@@ -272,8 +355,13 @@ export class AdminConsoleComponent implements OnInit {
   loadPayments() {
     this.paymentsLoading.set(true);
     this.paymentsError.set('');
-    this.admin.payments(this.paymentsMonths()).subscribe({
-      next: rows => { this.payments.set(rows); this.paymentsPage.set(1); this.paymentsLoading.set(false); this.paymentsLoaded = true; },
+    this.admin.payments(this.paymentsMonths(), this.paymentsPage() - 1, PAGE_SIZE, this.paymentsSearch().trim()).subscribe({
+      next: res => {
+        this.payments.set(res.content);
+        this.paymentsTotalPages.set(res.totalPages);
+        this.paymentsLoading.set(false);
+        this.paymentsLoaded = true;
+      },
       error: (e: any) => {
         this.paymentsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load payments.');
         this.paymentsLoading.set(false);
@@ -284,8 +372,13 @@ export class AdminConsoleComponent implements OnInit {
   loadUsers() {
     this.usersLoading.set(true);
     this.usersError.set('');
-    this.admin.users().subscribe({
-      next: rows => { this.users.set(rows); this.usersPage.set(1); this.usersLoading.set(false); this.usersLoaded = true; },
+    this.admin.users(this.usersPage() - 1, PAGE_SIZE, this.userSearch().trim()).subscribe({
+      next: res => {
+        this.users.set(res.content);
+        this.usersTotalPages.set(res.totalPages);
+        this.usersLoading.set(false);
+        this.usersLoaded = true;
+      },
       error: (e: any) => {
         this.usersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load users.');
         this.usersLoading.set(false);
@@ -296,8 +389,13 @@ export class AdminConsoleComponent implements OnInit {
   loadLogins() {
     this.loginsLoading.set(true);
     this.loginsError.set('');
-    this.admin.logins(this.loginsMonths()).subscribe({
-      next: rows => { this.logins.set(rows); this.loginsPage.set(1); this.loginsLoading.set(false); this.loginsLoaded = true; },
+    this.admin.logins(this.loginsMonths(), this.loginsPage() - 1, PAGE_SIZE, this.loginsSearch().trim()).subscribe({
+      next: res => {
+        this.logins.set(res.content);
+        this.loginsTotalPages.set(res.totalPages);
+        this.loginsLoading.set(false);
+        this.loginsLoaded = true;
+      },
       error: (e: any) => {
         this.loginsError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load login activity.');
         this.loginsLoading.set(false);
@@ -308,8 +406,13 @@ export class AdminConsoleComponent implements OnInit {
   loadPartners() {
     this.partnersLoading.set(true);
     this.partnersError.set('');
-    this.admin.partners().subscribe({
-      next: rows => { this.partners.set(rows); this.partnersPage.set(1); this.partnersLoading.set(false); this.partnersLoaded = true; },
+    this.admin.partners(this.partnersPage() - 1, PAGE_SIZE, this.partnersSearch().trim()).subscribe({
+      next: res => {
+        this.partners.set(res.content);
+        this.partnersTotalPages.set(res.totalPages);
+        this.partnersLoading.set(false);
+        this.partnersLoaded = true;
+      },
       error: (e: any) => {
         this.partnersError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load partner applications.');
         this.partnersLoading.set(false);
@@ -389,6 +492,8 @@ export class AdminConsoleComponent implements OnInit {
   updateUserSearch(value: string) {
     this.userSearch.set(value);
     this.usersPage.set(1);
+    clearTimeout(this.userSearchTimer);
+    this.userSearchTimer = setTimeout(() => this.loadUsers(), 300);
   }
 
   // ── Payment reminders ────────────────────────────────────────

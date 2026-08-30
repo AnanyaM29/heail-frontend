@@ -13,6 +13,7 @@
     <button type="button" class="admin-tab" [class.active]="tab() === 'payments'" (click)="selectTab('payments')">Payments</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'partners'" (click)="selectTab('partners')">Partners</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'coupons'" (click)="selectTab('coupons')">Coupons</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'invoice'" (click)="selectTab('invoice')">Invoice Numbering</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'reset'" (click)="selectTab('reset')">Reset Password</button>
   </div>
 
@@ -90,9 +91,9 @@
         </table>
         @if (usersTotalPages() > 1) {
           <div class="pagination">
-            <button type="button" class="tog" [disabled]="usersPage() === 1" (click)="setPage(usersPage, usersPage() - 1, usersTotalPages())">Prev</button>
+            <button type="button" class="tog" [disabled]="usersPage() === 1" (click)="setPage(usersPage, usersPage() - 1, usersTotalPages(), loadUsers.bind(this))">Prev</button>
             <span class="hint">Page {{ usersPage() }} of {{ usersTotalPages() }}</span>
-            <button type="button" class="tog" [disabled]="usersPage() === usersTotalPages()" (click)="setPage(usersPage, usersPage() + 1, usersTotalPages())">Next</button>
+            <button type="button" class="tog" [disabled]="usersPage() === usersTotalPages()" (click)="setPage(usersPage, usersPage() + 1, usersTotalPages(), loadUsers.bind(this))">Next</button>
           </div>
         }
       }
@@ -133,9 +134,9 @@
         </table>
         @if (loginsTotalPages() > 1) {
           <div class="pagination">
-            <button type="button" class="tog" [disabled]="loginsPage() === 1" (click)="setPage(loginsPage, loginsPage() - 1, loginsTotalPages())">Prev</button>
+            <button type="button" class="tog" [disabled]="loginsPage() === 1" (click)="setPage(loginsPage, loginsPage() - 1, loginsTotalPages(), loadLogins.bind(this))">Prev</button>
             <span class="hint">Page {{ loginsPage() }} of {{ loginsTotalPages() }}</span>
-            <button type="button" class="tog" [disabled]="loginsPage() === loginsTotalPages()" (click)="setPage(loginsPage, loginsPage() + 1, loginsTotalPages())">Next</button>
+            <button type="button" class="tog" [disabled]="loginsPage() === loginsTotalPages()" (click)="setPage(loginsPage, loginsPage() + 1, loginsTotalPages(), loadLogins.bind(this))">Next</button>
           </div>
         }
       }
@@ -187,9 +188,9 @@
         </table>
         @if (testsTotalPages() > 1) {
           <div class="pagination">
-            <button type="button" class="tog" [disabled]="testsPage() === 1" (click)="setPage(testsPage, testsPage() - 1, testsTotalPages())">Prev</button>
+            <button type="button" class="tog" [disabled]="testsPage() === 1" (click)="setPage(testsPage, testsPage() - 1, testsTotalPages(), loadTests.bind(this))">Prev</button>
             <span class="hint">Page {{ testsPage() }} of {{ testsTotalPages() }}</span>
-            <button type="button" class="tog" [disabled]="testsPage() === testsTotalPages()" (click)="setPage(testsPage, testsPage() + 1, testsTotalPages())">Next</button>
+            <button type="button" class="tog" [disabled]="testsPage() === testsTotalPages()" (click)="setPage(testsPage, testsPage() + 1, testsTotalPages(), loadTests.bind(this))">Next</button>
           </div>
         }
       }
@@ -262,9 +263,9 @@
         </table>
         @if (paymentsTotalPages() > 1) {
           <div class="pagination">
-            <button type="button" class="tog" [disabled]="paymentsPage() === 1" (click)="setPage(paymentsPage, paymentsPage() - 1, paymentsTotalPages())">Prev</button>
+            <button type="button" class="tog" [disabled]="paymentsPage() === 1" (click)="setPage(paymentsPage, paymentsPage() - 1, paymentsTotalPages(), loadPayments.bind(this))">Prev</button>
             <span class="hint">Page {{ paymentsPage() }} of {{ paymentsTotalPages() }}</span>
-            <button type="button" class="tog" [disabled]="paymentsPage() === paymentsTotalPages()" (click)="setPage(paymentsPage, paymentsPage() + 1, paymentsTotalPages())">Next</button>
+            <button type="button" class="tog" [disabled]="paymentsPage() === paymentsTotalPages()" (click)="setPage(paymentsPage, paymentsPage() + 1, paymentsTotalPages(), loadPayments.bind(this))">Next</button>
           </div>
         }
       }
@@ -318,9 +319,9 @@
         </table>
         @if (partnersTotalPages() > 1) {
           <div class="pagination">
-            <button type="button" class="tog" [disabled]="partnersPage() === 1" (click)="setPage(partnersPage, partnersPage() - 1, partnersTotalPages())">Prev</button>
+            <button type="button" class="tog" [disabled]="partnersPage() === 1" (click)="setPage(partnersPage, partnersPage() - 1, partnersTotalPages(), loadPartners.bind(this))">Prev</button>
             <span class="hint">Page {{ partnersPage() }} of {{ partnersTotalPages() }}</span>
-            <button type="button" class="tog" [disabled]="partnersPage() === partnersTotalPages()" (click)="setPage(partnersPage, partnersPage() + 1, partnersTotalPages())">Next</button>
+            <button type="button" class="tog" [disabled]="partnersPage() === partnersTotalPages()" (click)="setPage(partnersPage, partnersPage() + 1, partnersTotalPages(), loadPartners.bind(this))">Next</button>
           </div>
         }
       }
@@ -406,6 +407,74 @@
             <span class="hint">Page {{ couponsPage() }} of {{ couponsTotalPages() }}</span>
             <button type="button" class="tog" [disabled]="couponsPage() === couponsTotalPages()" (click)="setPage(couponsPage, couponsPage() + 1, couponsTotalPages())">Next</button>
           </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- ── Shared invoice-number counter ───────────────────────── -->
+  @if (tab() === 'invoice') {
+    <div class="formwrap" style="max-width:520px;margin-top:0">
+      <h3 style="margin-bottom:6px">Invoice numbering</h3>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:20px">
+        Website invoices and manual (offline) invoices share one running sequence, so numbers never
+        clash. When you write a manual invoice, take the next number here — that advances the counter
+        so the next website invoice picks up after it.
+      </p>
+
+      @if (invoiceError()) { <div class="alert-err" role="alert">{{ invoiceError() }}</div> }
+
+      @if (invoiceLoading()) {
+        <div style="text-align:center;padding:32px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+      } @else if (invoiceCounter()) {
+        @if (invoiceCounter(); as ic) {
+        <div class="dash-panel" style="padding:20px;text-align:center">
+          <div class="hint" style="text-transform:uppercase;letter-spacing:.06em">Next invoice number</div>
+          <div style="font-family:var(--disp);font-size:26px;color:var(--navy);margin:6px 0 2px">{{ ic.nextNumber }}</div>
+          <div class="hint">Last issued: {{ ic.lastUsed ?? '—' }}</div>
+        </div>
+
+        <div style="text-align:center;margin-top:18px">
+          <button type="button" class="btn btn-gold no-elevate" [disabled]="takingNumber()" (click)="takeNextInvoiceNumber()">
+            @if (takingNumber()) { <span class="spinner"></span> } Get next number for a manual invoice
+          </button>
+        </div>
+
+        @if (takenNumber()) {
+          <div class="dash-panel" style="padding:16px 18px;margin-top:16px;border-left:3px solid var(--gold)">
+            <div class="hint" style="text-transform:uppercase;letter-spacing:.06em">Use this on your manual invoice</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px">
+              <span style="font-family:var(--disp);font-size:22px;color:var(--navy)">{{ takenNumber() }}</span>
+              <button type="button" class="tog" (click)="copyTakenNumber()">Copy</button>
+            </div>
+            <p class="hint" style="margin-top:8px">The counter has moved on — the next number is now {{ invoiceCounter()?.nextNumber }}.</p>
+          </div>
+        }
+
+        <div style="margin-top:22px;border-top:1px solid var(--line, #E6E6E6);padding-top:14px">
+          @if (!showSetCounter()) {
+            <button type="button" class="resume-link no-elevate" (click)="openSetCounter()">Adjust counter</button>
+          } @else if (!setCounterConfirm()) {
+            <div class="fld" style="max-width:240px">
+              <label for="setCounter">Next number should be</label>
+              <input id="setCounter" type="number" min="1" step="1"
+                     [value]="setCounterDraft()" (input)="setCounterDraft.set($any($event.target).valueAsNumber)">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button type="button" class="tog" (click)="cancelSetCounter()">Cancel</button>
+              <button type="button" class="btn btn-navy no-elevate" (click)="requestSetCounter()">Update</button>
+            </div>
+          } @else {
+            <p style="font-size:14px">Set the counter so the next invoice number is
+              <b>{{ setCounterDraft() }}</b>? Existing invoices are unaffected.</p>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button type="button" class="tog" [disabled]="settingCounter()" (click)="cancelSetCounter()">Cancel</button>
+              <button type="button" class="btn btn-navy no-elevate" [disabled]="settingCounter()" (click)="confirmSetCounter()">
+                @if (settingCounter()) { <span class="spinner"></span> } Yes, set counter
+              </button>
+            </div>
+          }
+        </div>
         }
       }
     </div>
