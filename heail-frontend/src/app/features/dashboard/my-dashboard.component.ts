@@ -46,10 +46,10 @@ export class MyDashboardComponent implements OnInit {
   cancellingId = signal<string | null>(null);
   startingHr = signal<number | null>(null);
 
-  hasOrgs = computed(() => (this.data()?.organisationsAdministered.length ?? 0) > 0);
-  hasRespondent = computed(() => (this.data()?.respondentMemberships.length ?? 0) > 0);
+  hasOrgs = computed(() => (this.data()?.organisationsAdministered?.length ?? 0) > 0);
+  hasRespondent = computed(() => (this.data()?.respondentMemberships?.length ?? 0) > 0);
   hasLeader = computed(() =>
-    (this.data()?.leaderResults.length ?? 0) > 0 || !!this.data()?.leaderInProgress || !!this.data()?.leaderUnpaidOrder);
+    (this.data()?.leaderResults?.length ?? 0) > 0 || !!this.data()?.leaderInProgress || !!this.data()?.leaderUnpaidOrder);
 
   // One row per pillar with any activity — entitled to take, mid-attempt, or
   // already has a result. A pillar nobody's ever bought or touched is left
@@ -59,14 +59,14 @@ export class MyDashboardComponent implements OnInit {
     if (!d) return [];
 
     const latestByAssessment = new Map<number, HrResult>();
-    for (const r of d.hrResults) {
+    for (const r of d.hrResults ?? []) {
       const existing = latestByAssessment.get(r.assessmentId);
       if (!existing || new Date(r.createdAt) > new Date(existing.createdAt)) latestByAssessment.set(r.assessmentId, r);
     }
     const inProgressByAssessment = new Map<number, HrSessionResumeResponse>();
-    for (const s of d.hrInProgress) inProgressByAssessment.set(s.assessmentId, s);
+    for (const s of d.hrInProgress ?? []) inProgressByAssessment.set(s.assessmentId, s);
 
-    return d.hrAssessments
+    return (d.hrAssessments ?? [])
       .map(a => ({ assessment: a, latestResult: latestByAssessment.get(a.id) ?? null, inProgress: inProgressByAssessment.get(a.id) ?? null }))
       .filter(row => row.assessment.entitled || row.latestResult || row.inProgress);
   });
