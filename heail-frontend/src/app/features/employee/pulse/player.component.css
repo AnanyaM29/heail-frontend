@@ -1,9 +1,7 @@
-/* ── Fixed-height app shell ─────────────────────────────────────────────
-   The player fills the locked full-screen test window with NO page scroll.
-   Header (question counter), timer and progress stay pinned; the question
-   text and the Next/Submit button are always visible. Only the options
-   list can scroll, and only if one question's answers genuinely can't
-   fit — a normal question shows with no scrollbar anywhere. ──────────── */
+/* ── Fixed-height, no-scroll test screen ────────────────────────────────
+   The player fills the locked window exactly. Nothing scrolls — not the
+   page, not the options list. The question counter sits just above the
+   question card (not in the hero), and the header is a slim brand bar. ── */
 :host {
   display: flex;
   flex-direction: column;
@@ -12,57 +10,60 @@
   overflow: hidden;
 }
 
-/* Slim the marketing hero down to a compact header bar on the test screen. */
-:host .phero { flex: 0 0 auto; padding: 18px 0; }
+:host .phero { flex: 0 0 auto; padding: 16px 0; }
 :host .phero .om-water { display: none; }
-:host .phero h1 { font-size: 20px; font-weight: 600; margin: 0; }
-:host .phero .eyebrow { margin-bottom: 4px; }
+:host .phero h1 { display: none; }
+:host .phero .eyebrow { margin: 0; }
 
 :host section {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
-  padding: 20px 0;
+  align-items: center;
+  padding: 18px 0;
 }
-:host section > .wrap {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 0;
-}
+:host section > .wrap { width: 100%; }
 
-.test-timer,
-.progress-track,
-.progress-label,
-.alert-err { flex: 0 0 auto; }
-
-.progress-track { max-width: 680px; width: 100%; margin: 0 auto 8px; height: 8px; background: var(--line-tan); border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); transition: width .3s; }
-.progress-label { max-width: 680px; margin: 0 auto 18px; text-align: right; font-size: 12px; color: var(--mut); letter-spacing: .08em; text-transform: uppercase; }
-
-/* The question flow card grows to fill the space left below the header. */
-.question-card {
+/* Question counter + timer, sitting above the card. */
+.q-meta {
   max-width: 680px;
-  width: 100%;
-  align-self: center;
-  flex: 1 1 auto;
-  min-height: 0;
+  margin: 0 auto 10px;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
-.qtext { flex: 0 0 auto; font-family: var(--disp); font-size: 21px; color: var(--navy-deep); line-height: 1.5; margin-bottom: 20px; }
+.q-meta .q-count { font-weight: 600; color: var(--navy); }
+.q-meta .test-timer {
+  max-width: none;
+  margin: 0;
+  font-family: var(--body);
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: var(--mut);
+}
+.q-meta .test-timer-warn { color: #b3261e; font-weight: 600; }
 
-.options { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.progress-track { max-width: 680px; margin: 0 auto 20px; height: 8px; background: var(--line-tan); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); transition: width .3s; }
+
+.question-card { max-width: 680px; width: 100%; margin: 0 auto; }
+.qtext { font-family: var(--disp); font-size: 21px; color: var(--navy-deep); line-height: 1.5; margin-bottom: 20px; }
+
+.options { display: flex; flex-direction: column; gap: 10px; }
 .opt {
-  text-align: left; padding: 15px 18px; border: 1px solid var(--line-tan); background: #fff;
+  text-align: left; padding: 14px 18px; border: 1px solid var(--line-tan); background: #fff;
   font-family: var(--body); font-size: 15px; color: var(--ink); cursor: pointer; border-radius: 2px;
   transition: all .2s; line-height: 1.45; width: 100%;
 }
 .opt:hover { border-color: var(--gold); background: var(--gold-dim); }
 .opt.selected { border-color: var(--gold); background: var(--gold-dim); font-weight: 600; }
 
-.nav-row { flex: 0 0 auto; display: flex; justify-content: flex-end; margin-top: 20px; }
+.nav-row { display: flex; justify-content: flex-end; margin-top: 20px; }
 
 .alert-err {
   max-width: 680px; margin: 0 auto 14px;
@@ -70,7 +71,5 @@
   color: var(--error); padding: 12px 14px; font-size: 14px; border-radius: 2px;
 }
 
-/* Directions and loading cards aren't the timed question flow — size them
-   to content and centre them rather than stretching to full height. */
-:host .formwrap:not(.question-card),
-:host .question-card:has(> h3) { flex: 0 0 auto; align-self: center; overflow: visible; }
+/* Directions and loading cards keep their natural size, centred. */
+:host .formwrap:not(.question-card) { max-width: 620px; margin: 0 auto; }

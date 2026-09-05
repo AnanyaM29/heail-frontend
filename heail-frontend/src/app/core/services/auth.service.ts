@@ -61,7 +61,7 @@ export class AuthService {
     this.clearSession();
     try {
       sessionStorage.removeItem('heail_test_auth');
-      sessionStorage.removeItem('heail_candidate_session');
+      sessionStorage.removeItem('heail_fresh_auth');
     } catch {}
     this.router.navigate(['/login']);
   }

@@ -2,7 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { TEST_AUTH_KEY, isAssessmentUrl } from '../../../core/guards/auth.guard';
+import { TEST_AUTH_KEY, FRESH_AUTH_KEY, isAssessmentUrl, isTestDestination } from '../../../core/guards/auth.guard';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
 
 @Component({
@@ -39,11 +39,13 @@ export class LoginComponent {
         // them away from what they were actually doing).
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         if (returnUrl) {
-          // Assessment routes gate on a fresh sign-in — hand the guard a one-shot
-          // marker proving this login was for that exact test URL.
-          if (isAssessmentUrl(returnUrl)) {
-            try { sessionStorage.setItem(TEST_AUTH_KEY, returnUrl); } catch {}
-          }
+          // The assessment players gate on a fresh sign-in. Signing in on the way
+          // to any test area marks the whole session as freshly authenticated;
+          // a specific player URL also gets a one-shot marker for that exact URL.
+          try {
+            if (isTestDestination(returnUrl)) sessionStorage.setItem(FRESH_AUTH_KEY, '1');
+            if (isAssessmentUrl(returnUrl)) sessionStorage.setItem(TEST_AUTH_KEY, returnUrl);
+          } catch {}
           this.router.navigateByUrl(returnUrl);
         } else this.auth.routeByRole();
       },

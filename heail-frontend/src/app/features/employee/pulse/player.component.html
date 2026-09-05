@@ -1,10 +1,5 @@
 <div class="phero"><div class="wrap">
   <div class="eyebrow">{{ pulseLabel() }}</div>
-  @if (showDirections()) {
-    <h1>Before You Begin</h1>
-  } @else {
-    <h1>Question {{ index() + 1 }} of {{ total() }}</h1>
-  }
 </div></div>
 
 <section><div class="wrap">
@@ -29,9 +24,12 @@
     </div>
   } @else {
 
-    @if (timeLabel()) {
-      <div class="test-timer" [class.test-timer-warn]="secondsLeft() !== null && secondsLeft()! <= 300">Time Remaining: {{ timeLabel() }}</div>
-    }
+    <div class="q-meta">
+      <span class="q-count">Question {{ index() + 1 }} of {{ total() }}</span>
+      @if (timeLabel()) {
+        <span class="test-timer" [class.test-timer-warn]="secondsLeft() !== null && secondsLeft()! <= 300">Time Remaining: {{ timeLabel() }}</span>
+      }
+    </div>
 
     <div class="progress-track"><div class="progress-fill" [style.width.%]="progressPct()"></div></div>
 

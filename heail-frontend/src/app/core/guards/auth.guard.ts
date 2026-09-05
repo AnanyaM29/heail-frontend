@@ -2,23 +2,29 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-/** sessionStorage key: the assessment URL the user has *just* re-authenticated
- *  for. Set by the login page, consumed once by assessmentEntryGuard. */
+/** sessionStorage key: a specific assessment URL the user has *just* signed in
+ *  for. One-shot — set by the login page, consumed once by assessmentEntryGuard. */
 export const TEST_AUTH_KEY = 'heail_test_auth';
 
-/** sessionStorage key: set when a candidate redeems their access-link token.
- *  Such a session is already a per-person, expiring credential, so it's exempt
- *  from the re-login gate below (and a candidate takes several pillars per
- *  sitting, so it must persist, not be one-shot). */
-export const CANDIDATE_SESSION_KEY = 'heail_candidate_session';
+/** sessionStorage key: set on any sign-in whose destination is a test area
+ *  (and on candidate token redemption). Marks this browser session as having
+ *  completed a fresh identity check, so the assessment players can be entered
+ *  without bouncing back to /login again. Persists for the session (a pulse
+ *  round is several sittings); cleared on logout and on a forced re-login. */
+export const FRESH_AUTH_KEY = 'heail_fresh_auth';
 
-/** Routes that require a fresh sign-in on entry, even if a session already exists. */
+/** True for the assessment player routes — entry always needs a fresh sign-in. */
 export const isAssessmentUrl = (url: string) => /^\/(pulse|leader|hr)\/assessment\//.test(url);
+
+/** True for any test-facing destination a "sign in and take your test" email
+ *  link would point at (the pulse/leader dashboards, HR assessment list, a
+ *  candidate link, or a player URL). */
+export const isTestDestination = (url: string) => /^\/(pulse|leader|hr)(\/|$|\?)/.test(url);
 
 /** Clears the sessionStorage markers used by assessmentEntryGuard. */
 export function clearTestAuthMarkers() {
   try { sessionStorage.removeItem(TEST_AUTH_KEY); } catch {}
-  try { sessionStorage.removeItem(CANDIDATE_SESSION_KEY); } catch {}
+  try { sessionStorage.removeItem(FRESH_AUTH_KEY); } catch {}
 }
 
 export const authGuard: CanActivateFn = (_route, state) => {
@@ -30,10 +36,21 @@ export const authGuard: CanActivateFn = (_route, state) => {
   return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
-export const guestGuard: CanActivateFn = () => {
+/**
+ * `/login` is normally hidden from a signed-in user. But an assessment email
+ * links here with `?force=1` — that always ends the current session so the
+ * person must re-authenticate before continuing to their test, even if they
+ * were already logged in.
+ */
+export const guestGuard: CanActivateFn = (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (!auth.isLoggedIn()) return true;
+  if (route.queryParamMap.get('force') === '1') {
+    auth.clearSession();
+    clearTestAuthMarkers();
+    return true;
+  }
   auth.routeByRole();
   return false;
 };
@@ -60,14 +77,6 @@ export const employeeGuard: CanActivateFn = (_route, state) => {
   return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
-/**
- * Gate for the assessment players. Entering a test is always a fresh-auth
- * boundary: any existing session is ended and the user is sent to /login,
- * unless they have *just* signed in for this exact test URL (a one-shot
- * marker the login page sets). Prevents a test being taken on a browser
- * someone else left signed in, and forces an explicit identity check
- * immediately before a timed assessment.
- */
 const sessionStorageWorks = () => {
   try {
     sessionStorage.setItem('__heail_probe', '1');
@@ -76,6 +85,15 @@ const sessionStorageWorks = () => {
   } catch { return false; }
 };
 
+/**
+ * Gate for the assessment players. Entering a test requires a sign-in that
+ * happened in this browser session — either for this exact test URL (one-shot)
+ * or a session-wide fresh-auth marker set when the user logged in on the way
+ * to a test area (see login.component / candidate-landing). Anything else,
+ * including a session that was simply left signed in, is ended here and sent
+ * to /login. Combined with the `?force=1` email links, this makes every test
+ * entry from an email go through a fresh login first.
+ */
 export const assessmentEntryGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
@@ -85,16 +103,13 @@ export const assessmentEntryGuard: CanActivateFn = (_route, state) => {
   // login→marker→enter round-trip, so don't trap a signed-in user in a loop.
   if (auth.isLoggedIn() && !sessionStorageWorks()) return true;
 
-  // Candidate token sessions are already a fresh per-person identity check.
-  if (auth.isLoggedIn() && read(CANDIDATE_SESSION_KEY) === '1') return true;
+  if (auth.isLoggedIn() && read(FRESH_AUTH_KEY) === '1') return true;
 
-  // Password accounts: allowed only straight off a sign-in for this exact test URL.
   if (auth.isLoggedIn() && read(TEST_AUTH_KEY) === state.url) {
     try { sessionStorage.removeItem(TEST_AUTH_KEY); } catch {}
     return true;
   }
 
-  // Anything else — including an already-signed-in session — ends here.
   auth.clearSession();
   clearTestAuthMarkers();
   return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });

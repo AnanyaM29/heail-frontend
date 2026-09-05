@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HrCandidateAccessService } from '../../../core/services/hr-candidate-access.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { CANDIDATE_SESSION_KEY } from '../../../core/guards/auth.guard';
+import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
 
 /** Public landing page for a candidate's emailed access link — no HEAIL
  *  account or login involved. See HrCandidateAccessService (backend) for
@@ -54,7 +54,7 @@ export class CandidateLandingComponent implements OnInit {
             this.auth.applyAuthResponse(res);
             // Mark this as a candidate token session so assessmentEntryGuard
             // lets them into the player without a password re-login they don't have.
-            try { sessionStorage.setItem(CANDIDATE_SESSION_KEY, '1'); } catch {}
+            try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
             this.router.navigate(['/hr/my-assessments']);
           },
           error: (e: any) => { this.starting.set(false); this.error.set(this.msg(e)); }
