@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { AssessmentService } from '../../../core/services/assessment.service';
 import { Question } from '../../../core/models/assessment.models';
 
@@ -156,7 +158,18 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     }
     this.submitting.set(true);
     this.error.set('');
-    this.assessment.submit(this.sessionId, forced).subscribe({
+
+    // Flush every local answer before submitting. select() saves fire-and-forget,
+    // so answering the last question and immediately hitting Submit can race the
+    // final save and the server rejects "N-1 of N answered". answer() is an
+    // idempotent upsert — re-sending already-saved ones is harmless.
+    const a = this.answers();
+    const flushes = Object.keys(a).map(qid => this.assessment.answer(this.sessionId, qid, a[qid]));
+    const flushed$ = flushes.length ? forkJoin(flushes).pipe(catchError(() => of(null))) : of(null);
+
+    flushed$.pipe(
+      switchMap(() => this.assessment.submit(this.sessionId, forced))
+    ).subscribe({
       next: () => { this.testActive = false; this.exitLockdown(); this.router.navigate(['/leader']); },
       error: (e: any) => { this.submitting.set(false); this.error.set(this.msg(e)); }
     });

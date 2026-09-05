@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { TEST_AUTH_KEY, isAssessmentUrl } from '../../../core/guards/auth.guard';
 import { HeailLogoComponent } from '../../../shared/heail-logo.component';
 
 @Component({
@@ -37,8 +38,14 @@ export class LoginComponent {
         // default homepage (which sends a SUPERADMIN to /admin, stranding
         // them away from what they were actually doing).
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        if (returnUrl) this.router.navigateByUrl(returnUrl);
-        else this.auth.routeByRole();
+        if (returnUrl) {
+          // Assessment routes gate on a fresh sign-in — hand the guard a one-shot
+          // marker proving this login was for that exact test URL.
+          if (isAssessmentUrl(returnUrl)) {
+            try { sessionStorage.setItem(TEST_AUTH_KEY, returnUrl); } catch {}
+          }
+          this.router.navigateByUrl(returnUrl);
+        } else this.auth.routeByRole();
       },
       error: (e: any) => {
         this.error.set(e?.error?.message ?? 'Invalid email or password.');

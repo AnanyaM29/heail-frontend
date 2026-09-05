@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { guestGuard, authGuard, leaderGuard, employeeGuard, superadminGuard } from './core/guards/auth.guard';
+import { guestGuard, authGuard, leaderGuard, employeeGuard, superadminGuard, assessmentEntryGuard } from './core/guards/auth.guard';
 import { testExitGuard } from './core/guards/test-exit.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
@@ -66,9 +66,9 @@ export const routes: Routes = [
      other site pages while a timed test is in progress; opened in a new
      browser window/tab from the dashboard). canDeactivate confirms before
      any in-app navigation away while the test is live. ── */
-  { path: 'pulse/assessment/:pulseCode/:sessionId', canActivate: [authGuard, employeeGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/employee/pulse/player.component').then(m => m.PulsePlayerComponent) },
-  { path: 'leader/assessment/:sessionId', canActivate: [authGuard, leaderGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/leader/assessment/player.component').then(m => m.AssessmentPlayerComponent) },
-  { path: 'hr/assessment/:sessionId', canActivate: [authGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/hr/assessment/hr-player.component').then(m => m.HrPlayerComponent) },
+  { path: 'pulse/assessment/:pulseCode/:sessionId', canActivate: [assessmentEntryGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/employee/pulse/player.component').then(m => m.PulsePlayerComponent) },
+  { path: 'leader/assessment/:sessionId', canActivate: [assessmentEntryGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/leader/assessment/player.component').then(m => m.AssessmentPlayerComponent) },
+  { path: 'hr/assessment/:sessionId', canActivate: [assessmentEntryGuard], canDeactivate: [testExitGuard], loadComponent: () => import('./features/hr/assessment/hr-player.component').then(m => m.HrPlayerComponent) },
 
   { path: '**', redirectTo: '' }
 ];

@@ -47,11 +47,22 @@ export class AuthService {
     return this.http.post<void>(`${API}/reset-password`, req);
   }
 
-  logout() {
+  /** Clears all auth state but does NOT navigate — for callers that handle the
+   *  redirect themselves (e.g. the assessment-entry guard, which forces a fresh
+   *  sign-in and returns its own UrlTree). */
+  clearSession() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_KEY);
     localStorage.removeItem(USER_KEY);
     this._user.set(null);
+  }
+
+  logout() {
+    this.clearSession();
+    try {
+      sessionStorage.removeItem('heail_test_auth');
+      sessionStorage.removeItem('heail_candidate_session');
+    } catch {}
     this.router.navigate(['/login']);
   }
 
