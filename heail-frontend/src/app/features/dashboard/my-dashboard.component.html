@@ -20,6 +20,15 @@
       </div>
     }
 
+    <!-- ═══ GROUP 1 — things you buy / set up for other people ═══════ -->
+    @if (hasManaging()) {
+    <div class="dash-group">
+      <div class="dash-group-head">
+        <div class="eyebrow">Managing for others</div>
+        <h2 class="group-title">Assessments You've Set Up for Others</h2>
+        <p class="sec-sub">You've purchased or configured these — you don't take them yourself.</p>
+      </div>
+
     <!-- ── Organisations this account administers ─────────────────── -->
     @if (hasOrgs()) {
       <div class="dash-sec">
@@ -53,6 +62,37 @@
         </div>
       </div>
     }
+
+    <!-- ── HR assessments this account has registered candidates for ── -->
+    @if (hasHrCandidates()) {
+      <div class="dash-sec">
+        <div class="eyebrow">HR Assessments</div>
+        <h2 class="sec-title">Candidates You've Registered</h2>
+        <p class="sec-sub">HR competency assessments you're paying for other people to take.</p>
+
+        <div class="act-grid">
+          <a class="actcard" routerLink="/dashboard/hr-candidates">
+            <div class="aud">{{ hrCandidates().length }} {{ hrCandidates().length === 1 ? 'Candidate' : 'Candidates' }}</div>
+            <h3>HR Competency Assessments</h3>
+            <p class="stat-line tone-good">{{ hrCandidateResultCount() }} of {{ hrCandidates().length }} completed</p>
+            <p class="sub-line">Invite status, links and results per candidate</p>
+            <span class="go">Manage Candidates →</span>
+          </a>
+        </div>
+      </div>
+    }
+
+    </div>
+    }
+
+    <!-- ═══ GROUP 2 — assessments assigned to you personally ════════ -->
+    @if (hasOwn()) {
+    <div class="dash-group">
+      <div class="dash-group-head">
+        <div class="eyebrow">Your assessments</div>
+        <h2 class="group-title">Assessments to Complete</h2>
+        <p class="sec-sub">Assigned to you personally — you take these yourself.</p>
+      </div>
 
     <!-- ── This account's own respondent progress in others' rounds ── -->
     @if (hasRespondent()) {
@@ -150,6 +190,9 @@
           }
         </div>
       </div>
+    }
+
+    </div>
     }
 
   }

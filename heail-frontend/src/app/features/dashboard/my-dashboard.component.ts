@@ -4,8 +4,10 @@ import { Router, RouterLink } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { OrgOrderService } from '../../core/services/org-order.service';
 import { HrAssessmentService } from '../../core/services/hr-assessment.service';
+import { HrOrderService } from '../../core/services/hr-order.service';
 import { MyDashboard } from '../../core/models/dashboard.models';
 import { HrAssessment, HrResult, HrSessionResumeResponse } from '../../core/models/hr.models';
+import { HrCandidateDto } from '../../core/models/hr-candidate.models';
 import { ConfirmService } from '../../shared/confirm/confirm.service';
 
 interface HrRow {
@@ -14,12 +16,13 @@ interface HrRow {
   inProgress: HrSessionResumeResponse | null;
 }
 
-/** Unified "home" for a logged-in account: shows every HEAIL activity tied to
- *  this person — organisations they administer, their own respondent progress
- *  in any org's pulse round, and their individual Leader (Gita Leader) results
- *  — regardless of which single role their account happens to carry. A person
- *  can legitimately have all three at once (e.g. an org admin who is also a
- *  respondent in their own or another organisation's round). */
+/** Unified "home" for a logged-in account. Everything is split into two clearly
+ *  labelled groups so there's no confusion between the two hats a person can wear
+ *  at once: things they BUY/SET UP FOR OTHERS (org pulse rounds they administer,
+ *  HR assessments they've registered candidates for) and assessments assigned to
+ *  THEM PERSONALLY to complete (pulse rounds they're a respondent in, their own
+ *  Leader assessment, their own HR competency assessments). A single account can
+ *  have activity in both groups (e.g. an org admin who is also a respondent). */
 @Component({
   selector: 'app-my-dashboard',
   standalone: true,
@@ -32,6 +35,7 @@ export class MyDashboardComponent implements OnInit {
   private orgOrders = inject(OrgOrderService);
   private confirmSvc = inject(ConfirmService);
   private hrAssessments = inject(HrAssessmentService);
+  private hrOrders = inject(HrOrderService);
   private router = inject(Router);
 
   // No toolbar/location/menu bar — a stripped-down popup window instead of a
@@ -43,10 +47,17 @@ export class MyDashboardComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   data = signal<MyDashboard | null>(null);
+  hrCandidates = signal<HrCandidateDto[]>([]);
   cancellingId = signal<string | null>(null);
   startingHr = signal<number | null>(null);
 
+  // ── "Managing for others" — bought / set up, not taken by this account ──
   hasOrgs = computed(() => (this.data()?.organisationsAdministered?.length ?? 0) > 0);
+  hasHrCandidates = computed(() => this.hrCandidates().length > 0);
+  hrCandidateResultCount = computed(() =>
+    this.hrCandidates().filter(c => c.results.some(r => r.completed)).length);
+
+  // ── "Your assessments to complete" — assigned to this account personally ──
   hasRespondent = computed(() => (this.data()?.respondentMemberships?.length ?? 0) > 0);
   hasLeader = computed(() =>
     (this.data()?.leaderResults?.length ?? 0) > 0 || !!this.data()?.leaderInProgress || !!this.data()?.leaderUnpaidOrder);
@@ -72,8 +83,9 @@ export class MyDashboardComponent implements OnInit {
   });
   hasHr = computed(() => this.hrRows().length > 0);
 
-  hasNothing = computed(() =>
-    !this.loading() && !this.hasOrgs() && !this.hasRespondent() && !this.hasLeader() && !this.hasHr());
+  hasManaging = computed(() => this.hasOrgs() || this.hasHrCandidates());
+  hasOwn = computed(() => this.hasRespondent() || this.hasLeader() || this.hasHr());
+  hasNothing = computed(() => !this.loading() && !this.hasManaging() && !this.hasOwn());
 
   ngOnInit() {
     this.load();
@@ -84,6 +96,13 @@ export class MyDashboardComponent implements OnInit {
     this.dashboardService.getDashboard().subscribe({
       next: res => { this.data.set(res); this.loading.set(false); },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }
+    });
+    // Separate call — HR buyers (candidates registered for others) aren't part of
+    // the main dashboard payload. A failure here just leaves the "managing" group
+    // without its HR card; it never blocks the rest of the dashboard.
+    this.hrOrders.listMyCandidates().subscribe({
+      next: rows => this.hrCandidates.set(rows ?? []),
+      error: () => this.hrCandidates.set([]),
     });
   }
 

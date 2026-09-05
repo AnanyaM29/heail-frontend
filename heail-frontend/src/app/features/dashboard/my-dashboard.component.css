@@ -8,6 +8,26 @@
   margin-bottom: 28px;
 }
 
+/* Two top-level groups — "managing for others" vs "your own assessments".
+   A heavy top rule + generous spacing makes the split unmistakable. */
+.dash-group { margin-bottom: 72px; }
+.dash-group:last-child { margin-bottom: 0; }
+.dash-group + .dash-group { border-top: 2px solid var(--navy-deep); padding-top: 52px; }
+
+.dash-group-head { margin-bottom: 8px; }
+.dash-group-head .group-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--navy-deep);
+  margin: 6px 0 4px;
+}
+.dash-group-head .sec-sub { margin-bottom: 0; }
+
+/* Sections nested inside a group sit closer together than the old flat layout. */
+.dash-group .dash-sec { margin-top: 40px; margin-bottom: 40px; }
+.dash-group .dash-sec:last-child { margin-bottom: 0; }
+.dash-group .dash-sec .act-grid { margin-top: 24px; }
+
 .dash-sec { margin-bottom: 64px; }
 .dash-sec:last-child { margin-bottom: 0; }
 
@@ -79,4 +99,7 @@
 
 @media (max-width: 600px) {
   .dash-sec { margin-bottom: 48px; }
+  .dash-group { margin-bottom: 56px; }
+  .dash-group + .dash-group { padding-top: 40px; }
+  .dash-group-head .group-title { font-size: 24px; }
 }
