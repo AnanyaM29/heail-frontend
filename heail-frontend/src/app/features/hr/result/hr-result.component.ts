@@ -28,7 +28,7 @@ export class HrResultComponent implements OnInit {
 
   skillCategoryEntries = computed(() => {
     const r = this.result();
-    return r ? Object.entries(r.skillCategoryScores) : [];
+    return r?.skillCategoryScores ? Object.entries(r.skillCategoryScores) : [];
   });
 
   ngOnInit() {

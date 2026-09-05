@@ -167,16 +167,16 @@
                 <div class="card-actions"><button type="button" class="go" (click)="resumeHr(row.inProgress)">Resume →</button></div>
               } @else {
                 @if (row.latestResult; as r) {
-                  <p class="stat-line">{{ r.overallScore }}%</p>
+                  <p class="stat-line tone-good">Completed</p>
                   <p class="sub-line">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</p>
-                  <div class="card-actions">
-                    <a class="go" [routerLink]="['/hr/result', r.id]">View Result →</a>
-                    @if (row.assessment.entitled) {
+                  <p class="sub-line">Results are shared with the organisation that arranged this assessment.</p>
+                  @if (row.assessment.entitled) {
+                    <div class="card-actions">
                       <button type="button" class="go" [disabled]="startingHr() === row.assessment.id" (click)="startHr(row.assessment.id)">
                         {{ startingHr() === row.assessment.id ? 'Starting…' : 'Start New Attempt →' }}
                       </button>
-                    }
-                  </div>
+                    </div>
+                  }
                 } @else if (row.assessment.entitled) {
                   <p class="stat-line tone-good">Ready to start</p>
                   <div class="card-actions">

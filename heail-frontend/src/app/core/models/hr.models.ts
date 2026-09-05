@@ -37,6 +37,9 @@ export interface HrSessionResumeResponse {
   deadlineAt: string | null;
 }
 
+/** A test-taker's view of one HR attempt. HR results are shown only to the
+ *  buyer, so for the person who took the test every score field below is null —
+ *  they see the record (assessment, attempt, date), not the outcome. */
 export interface HrResult {
   id: string;
   sessionId: string;
@@ -44,9 +47,9 @@ export interface HrResult {
   assessmentCode: string;
   assessmentName: string;
   attemptNumber: number;
-  overallScore: number;
-  competencyScores: Record<string, number>;
-  skillCategoryScores: Record<string, number>;
+  overallScore: number | null;
+  competencyScores: Record<string, number> | null;
+  skillCategoryScores: Record<string, number> | null;
   strongestCompetency: string | null;
   strongestCompetencyName: string | null;
   weakestCompetency: string | null;

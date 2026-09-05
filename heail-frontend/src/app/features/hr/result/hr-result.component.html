@@ -18,24 +18,32 @@
     @if (result(); as r) {
       <div class="formwrap result-card">
         <div class="eyebrow" style="text-align:center">{{ r.assessmentName }} · Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
-        <div style="text-align:center">
-          <div class="overall-score">{{ r.overallScore }}<span>%</span></div>
-        </div>
 
-        <div class="domain-grid">
-          @for (entry of skillCategoryEntries(); track entry[0]) {
-            <div class="domain-card">
-              <h4>{{ entry[0] }}</h4>
-              <p class="score">{{ entry[1] }}%</p>
+        @if (r.overallScore == null) {
+          <p style="text-align:center;font-size:15px;color:var(--mut);line-height:1.6;margin-top:18px">
+            Your responses have been recorded. The scored results for this assessment are
+            shared only with the organisation that arranged it — they aren't shown here.
+          </p>
+        } @else {
+          <div style="text-align:center">
+            <div class="overall-score">{{ r.overallScore }}<span>%</span></div>
+          </div>
+
+          <div class="domain-grid">
+            @for (entry of skillCategoryEntries(); track entry[0]) {
+              <div class="domain-card">
+                <h4>{{ entry[0] }}</h4>
+                <p class="score">{{ entry[1] }}%</p>
+              </div>
+            }
+          </div>
+
+          @if (r.strongestCompetencyName || r.weakestCompetencyName) {
+            <div class="principle-row">
+              <div><span class="lbl">Strongest competency</span>{{ r.strongestCompetencyName ?? r.strongestCompetency }}</div>
+              <div><span class="lbl">Weakest competency</span>{{ r.weakestCompetencyName ?? r.weakestCompetency }}</div>
             </div>
           }
-        </div>
-
-        @if (r.strongestCompetencyName || r.weakestCompetencyName) {
-          <div class="principle-row">
-            <div><span class="lbl">Strongest competency</span>{{ r.strongestCompetencyName ?? r.strongestCompetency }}</div>
-            <div><span class="lbl">Weakest competency</span>{{ r.weakestCompetencyName ?? r.weakestCompetency }}</div>
-          </div>
         }
       </div>
     }

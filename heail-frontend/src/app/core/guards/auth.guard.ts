@@ -55,6 +55,28 @@ export const guestGuard: CanActivateFn = (route) => {
   return false;
 };
 
+/** Where each `/take-test/:dest` value lands the user after they sign in. */
+const TAKE_TEST_DEST: Record<string, string> = {
+  pulse: '/pulse',
+  leader: '/leader',
+  hr: '/hr/my-assessments',
+};
+
+/**
+ * The single entry point every "take your test" email links to:
+ * `{frontendBaseUrl}/take-test/pulse` (or `/leader`, `/hr`). No query string —
+ * nothing for a mail client to mangle. Always ends any current session and
+ * sends the person to /login, from where they return to the right test area.
+ */
+export const forceTestLoginGuard: CanActivateFn = (route) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  auth.clearSession();
+  clearTestAuthMarkers();
+  const returnUrl = TAKE_TEST_DEST[route.paramMap.get('dest') ?? ''] ?? '/dashboard';
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl } });
+};
+
 // TEMPORARY — these used to strictly require role() === 'LEADER'/'EMPLOYEE'.
 // Since a single account's stored role no longer implies it's the *only*
 // thing that account does (an org admin can also be a respondent, etc.),

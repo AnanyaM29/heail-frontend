@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { guestGuard, authGuard, leaderGuard, employeeGuard, superadminGuard, assessmentEntryGuard } from './core/guards/auth.guard';
+import { guestGuard, authGuard, leaderGuard, employeeGuard, superadminGuard, assessmentEntryGuard, forceTestLoginGuard } from './core/guards/auth.guard';
 import { testExitGuard } from './core/guards/test-exit.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
@@ -61,6 +61,11 @@ export const routes: Routes = [
   { path: 'register',        canActivate: [guestGuard], loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   { path: 'forgot-password', canActivate: [guestGuard], loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
   { path: 'reset-password',  loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
+
+  /* Every "take your test" email links here (e.g. /take-test/pulse). The guard
+     always ends the current session and redirects to /login; the loadComponent
+     never renders because the guard returns a redirect UrlTree first. */
+  { path: 'take-test/:dest', canActivate: [forceTestLoginGuard], loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
 
   /* ── Assessment players (full-screen, no nav/footer — no way to browse to
      other site pages while a timed test is in progress; opened in a new
