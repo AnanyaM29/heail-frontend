@@ -2,13 +2,18 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HrCandidateAccessService } from '../../../core/services/hr-candidate-access.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
+import { FRESH_AUTH_KEY, clearTestAuthMarkers } from '../../../core/guards/auth.guard';
 
 /** Public landing page for a candidate's emailed access link — no HEAIL
  *  account or login involved. See HrCandidateAccessService (backend) for
  *  why: the token itself is the credential, and "Begin" exchanges it for a
  *  normal JWT behind the scenes, same as any other login, so everything
- *  downstream (my-assessments, the HR player) is unmodified. */
+ *  downstream (my-assessments, the HR player) is unmodified.
+ *
+ *  On load this ends whatever session already exists on the device — the
+ *  buyer who registered the candidate is often the one who forwards/opens
+ *  the link, and the candidate must take the assessment as themselves, not
+ *  under the buyer's session. */
 @Component({
   selector: 'app-candidate-landing',
   standalone: true,
@@ -31,6 +36,11 @@ export class CandidateLandingComponent implements OnInit {
   starting = signal(false);
 
   ngOnInit() {
+    // Whoever is logged in on this device is not the candidate — end that
+    // session so nothing bleeds through into the assessment.
+    this.auth.clearSession();
+    clearTestAuthMarkers();
+
     this.access.tokenInfo(this.token).subscribe({
       next: res => {
         this.candidateName.set(res.candidateName);
