@@ -55,6 +55,19 @@ export interface DiscountCoupon {
   usedByEmail: string | null;
 }
 
+export interface EmailTemplate {
+  key: string;
+  label: string;
+  placeholders: string[];
+  subject: string;
+  body: string;
+  defaultSubject: string;
+  defaultBody: string;
+  overridden: boolean;
+  updatedAt: string | null;
+  updatedBy: string | null;
+}
+
 export interface InvoiceCounter {
   /** Last number that was issued; null if none have been yet. */
   lastUsed: number | null;

@@ -19,14 +19,14 @@
       <div class="formwrap result-card">
         <div class="eyebrow" style="text-align:center">{{ r.assessmentName }} · Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
         <div style="text-align:center">
-          <div class="overall-score">{{ r.overallScore }} <span>/ 150</span></div>
+          <div class="overall-score">{{ r.overallScore }}<span>%</span></div>
         </div>
 
         <div class="domain-grid">
           @for (entry of skillCategoryEntries(); track entry[0]) {
             <div class="domain-card">
               <h4>{{ entry[0] }}</h4>
-              <p class="score">{{ entry[1] }}</p>
+              <p class="score">{{ entry[1] }}%</p>
             </div>
           }
         </div>

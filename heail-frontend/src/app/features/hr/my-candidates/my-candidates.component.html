@@ -31,7 +31,7 @@
           @if (c.results.length > 0) {
             <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px">
               @for (r of c.results; track r.assessmentId) {
-                <span style="font-size:12.5px;background:var(--ivory2);padding:6px 12px;border-radius:20px">{{ r.assessmentName }}: <b>{{ r.overallScore }}</b></span>
+                <span style="font-size:12.5px;background:var(--ivory2);padding:6px 12px;border-radius:20px">{{ r.assessmentName }}: <b>{{ r.overallScore }}%</b></span>
               }
             </div>
           }

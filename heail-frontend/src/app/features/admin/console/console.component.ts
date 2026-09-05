@@ -1,10 +1,10 @@
-import { Component, OnInit, signal, computed, inject, WritableSignal } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef, signal, computed, inject, WritableSignal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon, InvoiceCounter } from '../../../core/models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon, EmailTemplate, InvoiceCounter } from '../../../core/models/admin.models';
 
-type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners' | 'coupons' | 'invoice';
+type Tab = 'reset' | 'tests' | 'payments' | 'users' | 'logins' | 'partners' | 'coupons' | 'invoice' | 'email';
 
 const PAGE_SIZE = 25;
 
@@ -15,7 +15,7 @@ const PAGE_SIZE = 25;
   templateUrl: './console.component.html',
   styleUrl: './console.component.css'
 })
-export class AdminConsoleComponent implements OnInit {
+export class AdminConsoleComponent implements OnInit, AfterViewChecked, OnDestroy {
   private auth = inject(AuthService);
   private admin = inject(AdminService);
 
@@ -23,6 +23,41 @@ export class AdminConsoleComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
+  }
+
+  ngAfterViewChecked() {
+    this.syncEmailEditorHeight();
+  }
+
+  ngOnDestroy() {
+    this.emailEditorResizeObserver?.disconnect();
+  }
+
+  // ── Email-templates tab: the template list is height-matched to the editor
+  //    panel via ResizeObserver (the editor's own height is left alone — it
+  //    never scrolls — and varies per template with placeholder count), so
+  //    the list ends exactly where the editor's buttons do and scrolls
+  //    internally instead. getBoundingClientRect (not entry.contentRect,
+  //    which excludes padding/border) because .formwrap carries 42px of
+  //    padding plus a border, and both panels are border-box sized. ──────
+  @ViewChild('emailEditorPanel') emailEditorPanel?: ElementRef<HTMLElement>;
+  emailListHeightPx = signal<number | null>(null);
+  private emailEditorResizeObserver?: ResizeObserver;
+  private observedEmailEditorEl?: HTMLElement;
+
+  private syncEmailEditorHeight() {
+    const el = this.emailEditorPanel?.nativeElement;
+    if (el === this.observedEmailEditorEl) return;
+
+    this.emailEditorResizeObserver?.disconnect();
+    this.observedEmailEditorEl = el;
+
+    if (!el) { this.emailListHeightPx.set(null); return; }
+
+    this.emailEditorResizeObserver = new ResizeObserver(() => {
+      this.emailListHeightPx.set(Math.round(el.getBoundingClientRect().height));
+    });
+    this.emailEditorResizeObserver.observe(el);
   }
 
   // ── Resend password-reset email ──────────────────────────────
@@ -237,6 +272,121 @@ export class AdminConsoleComponent implements OnInit {
     if (t === 'partners' && !this.partnersLoaded) this.loadPartners();
     if (t === 'coupons' && !this.couponsLoaded) this.loadCoupons();
     if (t === 'invoice' && !this.invoiceLoaded) this.loadInvoiceCounter();
+    if (t === 'email' && !this.emailLoaded) this.loadEmailTemplates();
+  }
+
+  // ── Editable transactional-email wording ─────────────────────
+  emailTemplates = signal<EmailTemplate[]>([]);
+  emailLoading = signal(false);
+  emailError = signal('');
+  emailLoaded = false;
+
+  selectedTemplateKey = signal<string | null>(null);
+  templateSubjectDraft = signal('');
+  templateBodyDraft = signal('');
+  savingTemplate = signal(false);
+  resettingTemplate = signal(false);
+  sendingTest = signal(false);
+  templateMessage = signal('');
+
+  selectedTemplate = computed(() =>
+    this.emailTemplates().find(t => t.key === this.selectedTemplateKey()) ?? null);
+
+  templateDirty = computed(() => {
+    const t = this.selectedTemplate();
+    return !!t && (this.templateSubjectDraft() !== t.subject || this.templateBodyDraft() !== t.body);
+  });
+
+  loadEmailTemplates() {
+    this.emailLoading.set(true);
+    this.emailError.set('');
+    this.admin.emailTemplates().subscribe({
+      next: rows => {
+        this.emailTemplates.set(rows);
+        this.emailLoading.set(false);
+        this.emailLoaded = true;
+        if (!this.selectedTemplateKey() && rows.length) this.selectTemplate(rows[0].key);
+        else this.syncTemplateDrafts();
+      },
+      error: (e: any) => {
+        this.emailError.set(e?.error?.message ?? e?.error?.error ?? 'Could not load email templates.');
+        this.emailLoading.set(false);
+      }
+    });
+  }
+
+  selectTemplate(key: string) {
+    this.selectedTemplateKey.set(key);
+    this.templateMessage.set('');
+    this.emailError.set('');
+    this.syncTemplateDrafts();
+  }
+
+  private syncTemplateDrafts() {
+    const t = this.selectedTemplate();
+    this.templateSubjectDraft.set(t?.subject ?? '');
+    this.templateBodyDraft.set(t?.body ?? '');
+  }
+
+  saveTemplate() {
+    const t = this.selectedTemplate();
+    if (!t || this.savingTemplate()) return;
+    const subject = this.templateSubjectDraft().trim();
+    const body = this.templateBodyDraft();
+    if (!subject || !body.trim()) {
+      this.emailError.set('Subject and body are both required.');
+      return;
+    }
+    this.savingTemplate.set(true);
+    this.emailError.set('');
+    this.templateMessage.set('');
+    this.admin.updateEmailTemplate(t.key, subject, body).subscribe({
+      next: updated => {
+        this.emailTemplates.update(rows => rows.map(r => r.key === updated.key ? updated : r));
+        this.savingTemplate.set(false);
+        this.templateMessage.set('Saved.');
+        this.syncTemplateDrafts();
+      },
+      error: (e: any) => {
+        this.emailError.set(e?.error?.message ?? e?.error?.error ?? 'Could not save this template.');
+        this.savingTemplate.set(false);
+      }
+    });
+  }
+
+  resetTemplate() {
+    const t = this.selectedTemplate();
+    if (!t || this.resettingTemplate() || !t.overridden) return;
+    this.resettingTemplate.set(true);
+    this.emailError.set('');
+    this.templateMessage.set('');
+    this.admin.resetEmailTemplate(t.key).subscribe({
+      next: updated => {
+        this.emailTemplates.update(rows => rows.map(r => r.key === updated.key ? updated : r));
+        this.resettingTemplate.set(false);
+        this.templateMessage.set('Reset to the built-in default.');
+        this.syncTemplateDrafts();
+      },
+      error: (e: any) => {
+        this.emailError.set(e?.error?.message ?? e?.error?.error ?? 'Could not reset this template.');
+        this.resettingTemplate.set(false);
+      }
+    });
+  }
+
+  sendTemplateTest() {
+    const t = this.selectedTemplate();
+    if (!t || this.sendingTest()) return;
+    this.sendingTest.set(true);
+    this.emailError.set('');
+    this.templateMessage.set('');
+    this.admin.testEmailTemplate(t.key).subscribe({
+      next: res => { this.templateMessage.set(res.message); this.sendingTest.set(false); },
+      error: (e: any) => {
+        this.emailError.set(e?.error?.message ?? e?.error?.error ?? 'Could not send the test email.');
+        this.sendingTest.set(false);
+      }
+    });
   }
 
   // ── Shared invoice-number counter ────────────────────────────

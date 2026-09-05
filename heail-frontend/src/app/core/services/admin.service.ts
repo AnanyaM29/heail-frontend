@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon, InvoiceCounter, PagedResponse } from '../models/admin.models';
+import { AdminPartner, AdminPayment, AdminTestSession, AdminUser, DiscountCoupon, EmailTemplate, InvoiceCounter, PagedResponse } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/admin/dashboard`;
 const COUPONS_API = `${environment.apiBaseUrl}/api/v1/admin/coupons`;
 const INVOICE_NUMBER_API = `${environment.apiBaseUrl}/api/v1/admin/invoice-number`;
+const EMAIL_TEMPLATES_API = `${environment.apiBaseUrl}/api/v1/admin/email-templates`;
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -97,5 +98,24 @@ export class AdminService {
   /** Sets the counter so the next invoice number is `nextValue`. */
   setInvoiceCounter(nextValue: number) {
     return this.http.put<InvoiceCounter>(INVOICE_NUMBER_API, {}, { params: { nextValue } });
+  }
+
+  // ── Editable transactional-email wording ──────────────────────
+  emailTemplates() {
+    return this.http.get<EmailTemplate[]>(EMAIL_TEMPLATES_API);
+  }
+
+  updateEmailTemplate(key: string, subject: string, body: string) {
+    return this.http.put<EmailTemplate>(`${EMAIL_TEMPLATES_API}/${key}`, { subject, body });
+  }
+
+  resetEmailTemplate(key: string) {
+    return this.http.post<EmailTemplate>(`${EMAIL_TEMPLATES_API}/${key}/reset`, {});
+  }
+
+  /** Sends the template (with sample values) to `email`, or to the logged-in admin if omitted. */
+  testEmailTemplate(key: string, email?: string) {
+    const options = email ? { params: { email } } : {};
+    return this.http.post<{ message: string }>(`${EMAIL_TEMPLATES_API}/${key}/test`, {}, options);
   }
 }

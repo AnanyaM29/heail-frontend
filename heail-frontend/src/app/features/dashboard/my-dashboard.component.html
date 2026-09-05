@@ -127,7 +127,7 @@
                 <div class="card-actions"><button type="button" class="go" (click)="resumeHr(row.inProgress)">Resume →</button></div>
               } @else {
                 @if (row.latestResult; as r) {
-                  <p class="stat-line">{{ r.overallScore }} / 150</p>
+                  <p class="stat-line">{{ r.overallScore }}%</p>
                   <p class="sub-line">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</p>
                   <div class="card-actions">
                     <a class="go" [routerLink]="['/hr/result', r.id]">View Result →</a>

@@ -14,6 +14,7 @@
     <button type="button" class="admin-tab" [class.active]="tab() === 'partners'" (click)="selectTab('partners')">Partners</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'coupons'" (click)="selectTab('coupons')">Coupons</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'invoice'" (click)="selectTab('invoice')">Invoice Numbering</button>
+    <button type="button" class="admin-tab" [class.active]="tab() === 'email'" (click)="selectTab('email')">Email Templates</button>
     <button type="button" class="admin-tab" [class.active]="tab() === 'reset'" (click)="selectTab('reset')">Reset Password</button>
   </div>
 
@@ -478,6 +479,93 @@
         }
       }
     </div>
+  }
+
+  <!-- ── Editable transactional-email wording ────────────────── -->
+  @if (tab() === 'email') {
+    <p style="color:var(--mut);font-size:14px;margin:0 0 16px;max-width:640px">
+      Every automated email HEAIL sends. Edit the subject and body; <code>{{ '{' }}placeholder{{ '}' }}</code>
+      tokens are filled in when the email is sent. Unedited templates use the built-in default.
+    </p>
+
+    @if (emailError()) { <div class="alert-err" role="alert">{{ emailError() }}</div> }
+
+    @if (emailLoading()) {
+      <div style="text-align:center;padding:40px"><span class="spinner" style="width:24px;height:24px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span></div>
+    } @else {
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+
+        <!-- template list — height-matched to the editor panel via ResizeObserver
+             (syncEmailEditorHeight in the component), so it ends exactly where the
+             editor's buttons do and scrolls internally; the editor itself never
+             scrolls and is never stretched taller than its own content. -->
+        <div class="dash-panel" style="flex:0 0 260px;padding:6px;overflow-y:auto"
+             [style.height.px]="emailListHeightPx()">
+          @for (t of emailTemplates(); track t.key) {
+            <button type="button"
+                    style="display:block;width:100%;text-align:left;padding:9px 10px;border:0;background:transparent;cursor:pointer;font-size:13px;border-radius:3px"
+                    [style.background]="t.key === selectedTemplateKey() ? 'var(--navy)' : 'transparent'"
+                    [style.color]="t.key === selectedTemplateKey() ? '#fff' : 'var(--ink, #13294B)'"
+                    (click)="selectTemplate(t.key)">
+              {{ t.label }}
+              @if (t.overridden) { <span title="Edited" style="color:var(--gold)"> ●</span> }
+            </button>
+          }
+        </div>
+
+        <!-- editor -->
+        @if (selectedTemplate(); as t) {
+          <div class="formwrap" #emailEditorPanel style="flex:1 1 380px;max-width:640px;margin-top:0">
+            <h3 style="margin-bottom:4px">{{ t.label }}</h3>
+            <p class="hint" style="margin-bottom:14px">
+              {{ t.overridden ? 'Customised' : 'Built-in default' }}
+              @if (t.overridden && t.updatedBy) { · last edited by {{ t.updatedBy }} }
+            </p>
+
+            @if (t.placeholders.length) {
+              <div style="margin-bottom:14px">
+                <div class="hint" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Placeholders</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  @for (p of t.placeholders; track p) {
+                    <code style="background:var(--wash, #F2F4F7);padding:2px 7px;border-radius:3px;font-size:12px">{{ '{' }}{{ p }}{{ '}' }}</code>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="fld">
+              <label for="tplSubject">Subject</label>
+              <input id="tplSubject" type="text"
+                     [value]="templateSubjectDraft()" (input)="templateSubjectDraft.set($any($event.target).value)">
+            </div>
+
+            <div class="fld">
+              <label for="tplBody">Body</label>
+              <textarea id="tplBody" rows="16" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.5"
+                        [value]="templateBodyDraft()" (input)="templateBodyDraft.set($any($event.target).value)"></textarea>
+            </div>
+
+            @if (templateMessage()) {
+              <p class="hint" style="color:var(--success);margin:0 0 12px">{{ templateMessage() }}</p>
+            }
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <button type="button" class="btn btn-gold no-elevate"
+                      [disabled]="savingTemplate() || !templateDirty()" (click)="saveTemplate()">
+                @if (savingTemplate()) { <span class="spinner"></span> } Save
+              </button>
+              <button type="button" class="tog"
+                      [disabled]="resettingTemplate() || !t.overridden" (click)="resetTemplate()">
+                @if (resettingTemplate()) { <span class="spinner"></span> } Reset to default
+              </button>
+              <button type="button" class="tog" [disabled]="sendingTest()" (click)="sendTemplateTest()">
+                @if (sendingTest()) { <span class="spinner"></span> } Send test to me
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
   }
 
   <!-- ── Resend password-reset email ──────────────────────────── -->
