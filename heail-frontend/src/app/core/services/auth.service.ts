@@ -49,7 +49,7 @@ export class AuthService {
 
   /** Clears all auth state but does NOT navigate — for callers that handle the
    *  redirect themselves (e.g. the assessment-entry guard, which forces a fresh
-   *  sign-in and returns its own UrlTree). *
+   *  sign-in and returns its own UrlTree). */
   clearSession() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_KEY);
