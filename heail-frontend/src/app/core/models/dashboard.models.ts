@@ -25,6 +25,8 @@ export interface MyDashboard {
   leaderResults: LeaderResult[];
   leaderInProgress: SessionResumeResponse | null;
   leaderUnpaidOrder: boolean;
+  /** Paid (or 100%-coupon) Leader purchase that hasn't been started yet. */
+  leaderReadyToStart: boolean;
   respondentMemberships: RespondentMembership[];
   hrAssessments: HrAssessment[];
   hrResults: HrResult[];

@@ -5,6 +5,7 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { OrgOrderService } from '../../core/services/org-order.service';
 import { HrAssessmentService } from '../../core/services/hr-assessment.service';
 import { HrOrderService } from '../../core/services/hr-order.service';
+import { AssessmentService } from '../../core/services/assessment.service';
 import { MyDashboard } from '../../core/models/dashboard.models';
 import { HrAssessment, HrResult, HrSessionResumeResponse } from '../../core/models/hr.models';
 import { HrCandidateDto } from '../../core/models/hr-candidate.models';
@@ -36,6 +37,7 @@ export class MyDashboardComponent implements OnInit {
   private confirmSvc = inject(ConfirmService);
   private hrAssessments = inject(HrAssessmentService);
   private hrOrders = inject(HrOrderService);
+  private leaderAssessment = inject(AssessmentService);
   private router = inject(Router);
 
   // No toolbar/location/menu bar — a stripped-down popup window instead of a
@@ -50,6 +52,7 @@ export class MyDashboardComponent implements OnInit {
   hrCandidates = signal<HrCandidateDto[]>([]);
   cancellingId = signal<string | null>(null);
   startingHr = signal<number | null>(null);
+  startingLeader = signal(false);
 
   // ── "Managing for others" — bought / set up, not taken by this account ──
   hasOrgs = computed(() => (this.data()?.organisationsAdministered?.length ?? 0) > 0);
@@ -60,7 +63,8 @@ export class MyDashboardComponent implements OnInit {
   // ── "Your assessments to complete" — assigned to this account personally ──
   hasRespondent = computed(() => (this.data()?.respondentMemberships?.length ?? 0) > 0);
   hasLeader = computed(() =>
-    (this.data()?.leaderResults?.length ?? 0) > 0 || !!this.data()?.leaderInProgress || !!this.data()?.leaderUnpaidOrder);
+    (this.data()?.leaderResults?.length ?? 0) > 0 || !!this.data()?.leaderInProgress
+    || !!this.data()?.leaderUnpaidOrder || !!this.data()?.leaderReadyToStart);
 
   // One row per pillar with any activity — entitled to take, mid-attempt, or
   // already has a result. A pillar nobody's ever bought or touched is left
@@ -148,6 +152,27 @@ export class MyDashboardComponent implements OnInit {
       },
       error: (e: any) => {
         this.startingHr.set(null);
+        testWindow?.close();
+        this.error.set(this.msg(e));
+      }
+    });
+  }
+
+  startLeader() {
+    if (this.startingLeader()) return;
+    this.startingLeader.set(true);
+    this.error.set('');
+    // Open the window synchronously in the click handler, then redirect it once
+    // the session-start call returns (same reason as startHr).
+    const testWindow = window.open('', '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
+    this.leaderAssessment.start().subscribe({
+      next: res => {
+        this.startingLeader.set(false);
+        const url = this.router.createUrlTree(['/leader/assessment', res.sessionId]).toString();
+        if (testWindow) testWindow.location.href = url; else window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
+      },
+      error: (e: any) => {
+        this.startingLeader.set(false);
         testWindow?.close();
         this.error.set(this.msg(e));
       }

@@ -137,6 +137,17 @@
               <p class="stat-line tone-warn">{{ s.questions.length }} questions</p>
               <span class="go">Resume →</span>
             </a>
+          } @else if (data()!.leaderReadyToStart) {
+            <div class="actcard">
+              <div class="aud">Leader Assessment</div>
+              <h3>Ready to Start</h3>
+              <p class="stat-line tone-good">50 questions · ~30 min · one sitting</p>
+              <div class="card-actions">
+                <button type="button" class="go" [disabled]="startingLeader()" (click)="startLeader()">
+                  {{ startingLeader() ? 'Starting…' : 'Start Assessment →' }}
+                </button>
+              </div>
+            </div>
           }
           @for (r of data()!.leaderResults; track r.id) {
             <a class="actcard" routerLink="/leader">
