@@ -2,11 +2,13 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLoggedIn()) return true;
-  return router.createUrlTree(['/login']);
+  // Carry the attempted URL through login so a test link clicked while logged
+  // out lands the user ON the test after signing in, not on the dashboard.
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
 export const guestGuard: CanActivateFn = () => {
@@ -25,18 +27,18 @@ export const guestGuard: CanActivateFn = () => {
 // per-product entitlement checks (does this account actually have a Leader
 // purchase / a pulse invitation?) are enforced by the API calls each page
 // makes, not by the route guard.
-export const leaderGuard: CanActivateFn = () => {
+export const leaderGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   if (auth.isLoggedIn()) return true;
   const router = inject(Router);
-  return router.createUrlTree(['/login']);
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
-export const employeeGuard: CanActivateFn = () => {
+export const employeeGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   if (auth.isLoggedIn()) return true;
   const router = inject(Router);
-  return router.createUrlTree(['/login']);
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
 export const superadminGuard: CanActivateFn = () => {
