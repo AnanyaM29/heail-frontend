@@ -190,13 +190,8 @@
                   }
                   <p class="sub-line">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</p>
                   <p class="sub-line">Results are shared with the organisation that arranged this assessment.</p>
-                  @if (row.assessment.entitled) {
-                    <div class="card-actions">
-                      <button type="button" class="go" [disabled]="startingHr() === row.assessment.id" (click)="startHr(row.assessment.id)">
-                        {{ startingHr() === row.assessment.id ? 'Starting…' : 'Start New Attempt →' }}
-                      </button>
-                    </div>
-                  }
+                  <!-- HR assessments are taken once — no retake / new attempt. A fresh
+                       sitting is a new purchase made by the sponsoring organisation. -->
                 } @else if (row.assessment.entitled) {
                   <p class="stat-line tone-good">Assessment Pending</p>
                   <div class="card-actions">

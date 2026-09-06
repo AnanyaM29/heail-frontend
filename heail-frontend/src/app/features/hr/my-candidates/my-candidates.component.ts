@@ -41,6 +41,23 @@ export class MyCandidatesComponent implements OnInit {
     });
   }
 
+  /** What the buyer sees on the status pill. The invite-lifecycle enum on the
+   *  candidate row stops at ACCESSED ("clicked the link") — it never flips to a
+   *  done state — so completion and timeout are read off the actual results. */
+  displayStatus(c: HrCandidateDto): string {
+    if (c.results?.some(r => r.timedOut)) return 'Timed Out';
+    if (c.results?.some(r => r.completed)) return 'Completed';
+    return this.statusLabel(c.status);
+  }
+
+  isDone(c: HrCandidateDto): boolean {
+    return !!c.results?.some(r => r.completed || r.timedOut);
+  }
+
+  isTimedOut(c: HrCandidateDto): boolean {
+    return !!c.results?.some(r => r.timedOut);
+  }
+
   statusLabel(status: string): string {
     switch (status) {
       case 'PENDING': return 'Processing';

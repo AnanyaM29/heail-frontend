@@ -23,8 +23,11 @@
               <h3 style="font-family:var(--disp);font-size:19px;font-weight:600">{{ c.name }}</h3>
               <p style="font-size:13px;color:var(--mut)">{{ c.email }} · Start date {{ c.assessmentStartDate }}</p>
             </div>
-            <span class="pstate" [class.pstate-done]="c.status === 'ACCESSED'" [class.pstate-progress]="c.status === 'SENT'" [class.pstate-failed]="c.status === 'EXPIRED' || c.status === 'REALLOCATED'">
-              {{ statusLabel(c.status) }}
+            <span class="pstate"
+                  [class.pstate-done]="isDone(c) && !isTimedOut(c)"
+                  [class.pstate-progress]="!isDone(c) && (c.status === 'ACCESSED' || c.status === 'SENT')"
+                  [class.pstate-failed]="isTimedOut(c) || c.status === 'EXPIRED' || c.status === 'REALLOCATED'">
+              {{ displayStatus(c) }}
             </span>
           </div>
 
