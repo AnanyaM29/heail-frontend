@@ -50,10 +50,12 @@ export class HrPlayerComponent implements OnInit, OnDestroy {
   };
 
   current = computed(() => this.questions()[this.index()] ?? null);
-  total = computed(() => this.questions().length);
+  /** Distinct question ids — answers are keyed by id, so a repeated id in the
+   *  session must not make "all answered" permanently unreachable. */
+  total = computed(() => new Set(this.questions().map(q => q.questionId)).size);
   answeredCount = computed(() => Object.keys(this.answers()).length);
   progressPct = computed(() => this.total() ? Math.round((this.answeredCount() / this.total()) * 100) : 0);
-  isLast = computed(() => this.index() === this.total() - 1);
+  isLast = computed(() => this.index() === this.questions().length - 1);
   currentSelected = computed(() => {
     const q = this.current();
     return q ? this.answers()[q.questionId] ?? null : null;

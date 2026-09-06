@@ -48,10 +48,13 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   };
 
   current = computed(() => this.questions()[this.index()] ?? null);
-  total = computed(() => this.questions().length);
+  /** Distinct question ids — answers are keyed by id, so if the session ever
+   *  carries a repeated id, counting raw slots would make "all answered" never
+   *  true and Submit would silently no-op. */
+  total = computed(() => new Set(this.questions().map(q => q.questionId)).size);
   answeredCount = computed(() => Object.keys(this.answers()).length);
   progressPct = computed(() => this.total() ? Math.round((this.answeredCount() / this.total()) * 100) : 0);
-  isLast = computed(() => this.index() === this.total() - 1);
+  isLast = computed(() => this.index() === this.questions().length - 1);
   currentSelected = computed(() => {
     const q = this.current();
     return q ? this.answers()[q.questionId] ?? null : null;
@@ -151,9 +154,20 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   next() { if (this.index() < this.total() - 1) this.index.update(i => i + 1); }
 
   submit(forced = false) {
-    if (!forced && this.answeredCount() < this.total()) {
-      const firstUnanswered = this.questions().findIndex(q => !this.answers()[q.questionId]);
-      if (firstUnanswered >= 0) this.index.set(firstUnanswered);
+    const answeredKeys = new Set(Object.keys(this.answers()));
+    const unanswered = this.questions()
+      .map((q, i) => ({ q, i }))
+      .filter(({ q }) => !answeredKeys.has(q.questionId));
+    console.log('[leader submit]', {
+      forced,
+      total: this.total(),
+      answered: this.answeredCount(),
+      questionCount: this.questions().length,
+      unansweredIndexes: unanswered.map(x => x.i + 1),
+    });
+    if (!forced && unanswered.length > 0) {
+      this.error.set(`Please answer all questions before submitting — question ${unanswered.map(x => x.i + 1).join(', ')} still unanswered.`);
+      this.index.set(unanswered[0].i);
       return;
     }
     this.submitting.set(true);
@@ -171,7 +185,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
       switchMap(() => this.assessment.submit(this.sessionId, forced))
     ).subscribe({
       next: () => { this.testActive = false; this.exitLockdown(); this.router.navigate(['/leader']); },
-      error: (e: any) => { this.submitting.set(false); this.error.set(this.msg(e)); }
+      error: (e: any) => { this.submitting.set(false); console.error('Leader submit failed', e); this.error.set(this.msg(e)); }
     });
   }
 
