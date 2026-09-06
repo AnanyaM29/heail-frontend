@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
-import { DatePipe, DecimalPipe, TitleCasePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { OrgOrderService } from '../../core/services/org-order.service';
@@ -27,7 +27,7 @@ interface HrRow {
 @Component({
   selector: 'app-my-dashboard',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, TitleCasePipe, RouterLink],
+  imports: [DatePipe, TitleCasePipe, RouterLink],
   templateUrl: './my-dashboard.component.html',
   styleUrl: './my-dashboard.component.css'
 })

@@ -54,5 +54,8 @@ export interface HrResult {
   strongestCompetencyName: string | null;
   weakestCompetency: string | null;
   weakestCompetencyName: string | null;
+  /** True when the attempt ended because the time limit was reached rather than
+   *  finished. Shown to the taker too — it's a status, not a score. */
+  timedOut: boolean;
   createdAt: string;
 }

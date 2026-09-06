@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { guestGuard, authGuard, leaderGuard, employeeGuard, superadminGuard, assessmentEntryGuard, forceTestLoginGuard } from './core/guards/auth.guard';
+import { guestGuard, loginPageGuard, authGuard, leaderGuard, employeeGuard, superadminGuard, assessmentEntryGuard, forceTestLoginGuard } from './core/guards/auth.guard';
 import { testExitGuard } from './core/guards/test-exit.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
@@ -57,7 +57,7 @@ export const routes: Routes = [
   },
 
   /* ── Auth (full-screen, no nav/footer) ── */
-  { path: 'login',           canActivate: [guestGuard], loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'login',           canActivate: [loginPageGuard], loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register',        canActivate: [guestGuard], loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   { path: 'forgot-password', canActivate: [guestGuard], loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
   { path: 'reset-password',  loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },

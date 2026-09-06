@@ -23,23 +23,34 @@
     } @else if (latest()) {
       <div class="formwrap result-card">
         <div class="eyebrow" style="text-align:center">Attempt {{ latest()!.attemptNumber }}</div>
-        <div style="text-align:center">
-          <div class="overall-score">{{ latest()!.overallScore }} <span>/ 250</span></div>
-          <div class="band-pill">{{ latest()!.band }}</div>
-        </div>
-        <div class="domain-grid">
-          @for (d of domainEntries(); track d[0]) {
-            <div class="domain-card">
-              <div class="domain-code">{{ d[0] }}</div>
-              <h4>{{ domainLabel(d[0]) }}</h4>
-              <p class="score">{{ d[1] }} / 50</p>
-            </div>
-          }
-        </div>
-        <div class="principle-row">
-          <div><span class="lbl">Strongest principle</span>{{ latest()!.strongestPrincipleText ?? latest()!.strongestPrinciple }}</div>
-          <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrincipleText ?? latest()!.weakestPrinciple }}</div>
-        </div>
+
+        @if (latest()!.timedOut) {
+          <p style="text-align:center;font-size:20px;font-weight:600;color:var(--navy);margin-top:14px">Assessment Timed Out</p>
+          <p style="text-align:center;font-size:14px;color:var(--mut);line-height:1.6;margin-top:8px">
+            The time limit was reached before you completed the assessment. This attempt has
+            been closed.
+          </p>
+        } @else {
+          <p style="text-align:center;font-size:20px;font-weight:600;color:var(--navy);margin-top:14px">Assessment Completed</p>
+          <div style="text-align:center">
+            <div class="overall-score">{{ latest()!.overallScore }} <span>/ 250</span></div>
+            <div class="band-pill">{{ latest()!.band }}</div>
+          </div>
+          <div class="domain-grid">
+            @for (d of domainEntries(); track d[0]) {
+              <div class="domain-card">
+                <div class="domain-code">{{ d[0] }}</div>
+                <h4>{{ domainLabel(d[0]) }}</h4>
+                <p class="score">{{ d[1] }} / 50</p>
+              </div>
+            }
+          </div>
+          <div class="principle-row">
+            <div><span class="lbl">Strongest principle</span>{{ latest()!.strongestPrincipleText ?? latest()!.strongestPrinciple }}</div>
+            <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrincipleText ?? latest()!.weakestPrinciple }}</div>
+          </div>
+        }
+
         <div style="text-align:center;margin-top:28px">
           @if (!entitlementChecked()) {
             <span class="spinner" style="width:22px;height:22px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
@@ -66,8 +77,8 @@
                 <tr>
                   <td>{{ r.attemptNumber }}</td>
                   <td>{{ r.createdAt | date:'mediumDate' }}</td>
-                  <td>{{ r.overallScore }} / 250</td>
-                  <td>{{ r.band }}</td>
+                  <td>{{ r.timedOut ? '—' : r.overallScore + ' / 250' }}</td>
+                  <td>{{ r.timedOut ? 'Timed Out' : r.band }}</td>
                 </tr>
               }
             </tbody>

@@ -31,39 +31,19 @@
           @if (c.results.length > 0) {
             <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px">
               @for (r of c.results; track r.assessmentId) {
-                <span style="font-size:12.5px;background:var(--ivory2);padding:6px 12px;border-radius:20px">{{ r.assessmentName }}: <b>{{ r.overallScore }}%</b></span>
+                <span style="font-size:12.5px;background:var(--ivory2);padding:6px 12px;border-radius:20px">
+                  {{ r.assessmentName }}: <b>{{ r.overallScore }}%</b>
+                  @if (r.timedOut) { <span style="color:var(--mut)">· Timed Out</span> }
+                </span>
               }
             </div>
           }
 
-          @if (c.canRequestReallocation || c.canRequestRetake) {
+          @if (c.canRequestRetake) {
             <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
-              @if (c.canRequestReallocation && reallocatingId() !== c.id) {
-                <button class="csvbtn" type="button" (click)="openReallocate(c)">Reallocate to someone else</button>
-              }
-              @if (c.canRequestRetake) {
-                <button class="csvbtn" type="button" [disabled]="actionBusy() === c.id" (click)="retake(c.id)">
-                  @if (actionBusy() === c.id) { <span class="spinner"></span> } Buy a retake
-                </button>
-              }
-            </div>
-          }
-
-          @if (reallocatingId() === c.id) {
-            <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line-tan)">
-              <p class="panel-label" style="margin-bottom:14px">Replacement candidate's details</p>
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-                <input placeholder="Full name" [value]="reallocateForm().newName" (input)="updateForm('newName', $any($event.target).value)">
-                <input type="date" [max]="today" [value]="reallocateForm().newDob" (input)="updateForm('newDob', $any($event.target).value)">
-                <input type="email" placeholder="Email" [value]="reallocateForm().newEmail" (input)="updateForm('newEmail', $any($event.target).value)">
-                <input placeholder="Mobile" [value]="reallocateForm().newMobile" (input)="updateForm('newMobile', $any($event.target).value)">
-              </div>
-              <div style="margin-top:14px;display:flex;gap:10px">
-                <button class="btn btn-navy" type="button" [disabled]="actionBusy() === c.id" (click)="submitReallocation(c.id)">
-                  @if (actionBusy() === c.id) { <span class="spinner"></span> } Continue to Payment
-                </button>
-                <button class="csvbtn" type="button" (click)="cancelReallocate()">Cancel</button>
-              </div>
+              <button class="csvbtn" type="button" [disabled]="actionBusy() === c.id" (click)="retake(c.id)">
+                @if (actionBusy() === c.id) { <span class="spinner"></span> } Buy a retake
+              </button>
             </div>
           }
         </div>

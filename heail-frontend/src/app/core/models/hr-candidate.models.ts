@@ -19,6 +19,9 @@ export interface HrCandidateResultSummary {
   assessmentName: string;
   completed: boolean;
   overallScore: number | null;
+  /** True when the attempt was closed by the deadline; overallScore is then the
+   *  percentage of marks achieved before time ran out. */
+  timedOut: boolean;
 }
 
 export interface HrCandidateDto {
@@ -31,7 +34,6 @@ export interface HrCandidateDto {
   assessmentStartDate: string;
   status: 'PENDING' | 'SENT' | 'ACCESSED' | 'EXPIRED' | 'REALLOCATED';
   tokenExpiresAt: string | null;
-  canRequestReallocation: boolean;
   canRequestRetake: boolean;
   results: HrCandidateResultSummary[];
 }
@@ -46,11 +48,4 @@ export interface HrCandidateTokenInfo {
   candidateName: string;
   assessmentNames: string[];
   termsAccepted: boolean;
-}
-
-export interface ReallocationRequest {
-  newName: string;
-  newDob: string;
-  newEmail: string;
-  newMobile: string;
 }

@@ -19,10 +19,20 @@
       <div class="formwrap result-card">
         <div class="eyebrow" style="text-align:center">{{ r.assessmentName }} · Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
 
+        <p style="text-align:center;font-size:18px;font-weight:600;color:var(--navy);margin-top:18px">
+          {{ r.timedOut ? 'Assessment Timed Out' : 'Assessment Completed' }}
+        </p>
+
         @if (r.overallScore == null) {
-          <p style="text-align:center;font-size:15px;color:var(--mut);line-height:1.6;margin-top:18px">
-            Your responses have been recorded. The scored results for this assessment are
-            shared only with the organisation that arranged it — they aren't shown here.
+          <p style="text-align:center;font-size:15px;color:var(--mut);line-height:1.6;margin-top:12px">
+            @if (r.timedOut) {
+              The time limit was reached before you finished. Your responses up to that point
+              have been recorded.
+            } @else {
+              Your responses have been recorded.
+            }
+            The scored results for this assessment are shared only with the organisation that
+            arranged it — they aren't shown here.
           </p>
         } @else {
           <div style="text-align:center">

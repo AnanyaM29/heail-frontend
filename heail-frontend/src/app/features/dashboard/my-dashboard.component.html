@@ -152,8 +152,13 @@
           @for (r of data()!.leaderResults; track r.id) {
             <a class="actcard" routerLink="/leader">
               <div class="aud">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
-              <h3>{{ r.overallScore | number:'1.0-1' }} Score</h3>
-              <p class="stat-line" [class]="'tone-' + statusTone(r.band)">{{ statusLabel(r.band) }}</p>
+              @if (r.timedOut) {
+                <h3>Assessment Timed Out</h3>
+                <p class="stat-line tone-warn">Assessment Timed Out</p>
+              } @else {
+                <h3>{{ r.overallScore }} Score</h3>
+                <p class="stat-line" [class]="'tone-' + statusTone(r.band)">{{ statusLabel(r.band) }}</p>
+              }
               <span class="go">View Result →</span>
             </a>
           }
@@ -174,11 +179,15 @@
               <h3>{{ row.assessment.name }}</h3>
 
               @if (row.inProgress) {
-                <p class="stat-line tone-warn">Attempt {{ row.inProgress.attemptNumber }} — in progress</p>
+                <p class="stat-line tone-warn">Assessment Pending · Attempt {{ row.inProgress.attemptNumber }}</p>
                 <div class="card-actions"><button type="button" class="go" (click)="resumeHr(row.inProgress)">Resume →</button></div>
               } @else {
                 @if (row.latestResult; as r) {
-                  <p class="stat-line tone-good">Completed</p>
+                  @if (r.timedOut) {
+                    <p class="stat-line tone-warn">Assessment Timed Out</p>
+                  } @else {
+                    <p class="stat-line tone-good">Assessment Completed</p>
+                  }
                   <p class="sub-line">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</p>
                   <p class="sub-line">Results are shared with the organisation that arranged this assessment.</p>
                   @if (row.assessment.entitled) {
@@ -189,7 +198,7 @@
                     </div>
                   }
                 } @else if (row.assessment.entitled) {
-                  <p class="stat-line tone-good">Ready to start</p>
+                  <p class="stat-line tone-good">Assessment Pending</p>
                   <div class="card-actions">
                     <button type="button" class="go" [disabled]="startingHr() === row.assessment.id" (click)="startHr(row.assessment.id)">
                       {{ startingHr() === row.assessment.id ? 'Starting…' : 'Start Assessment →' }}

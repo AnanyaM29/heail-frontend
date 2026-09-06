@@ -43,6 +43,9 @@ export interface LeaderResult {
   sessionId: string;
   attemptNumber: number;
   overallScore: number;
+  /** True when the attempt was closed out by the time limit rather than finished.
+   *  When set, the taker sees only the status "Assessment Timed Out" — no score. */
+  timedOut: boolean;
   band: LeaderBand;
   domainScores: Record<string, number>;
   strongestPrinciple: string | null;

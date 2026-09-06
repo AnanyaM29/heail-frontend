@@ -37,22 +37,30 @@ export const authGuard: CanActivateFn = (_route, state) => {
 };
 
 /**
- * `/login` is normally hidden from a signed-in user. But an assessment email
- * links here with `?force=1` — that always ends the current session so the
- * person must re-authenticate before continuing to their test, even if they
- * were already logged in.
+ * For /register and /forgot-password: a signed-in user is sent to their home
+ * page instead of seeing those forms.
  */
-export const guestGuard: CanActivateFn = (route) => {
+export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
-  const router = inject(Router);
   if (!auth.isLoggedIn()) return true;
-  if (route.queryParamMap.get('force') === '1') {
-    auth.clearSession();
-    clearTestAuthMarkers();
-    return true;
-  }
   auth.routeByRole();
   return false;
+};
+
+/**
+ * For /login only. The login page must ALWAYS render — an emailed link that
+ * resolves to /login (query string stripped by a mail client, an old-format
+ * link, whatever) must never silently drop the recipient onto whoever is
+ * currently signed in on the device's dashboard. Any existing session is
+ * ended so the intended person signs in fresh.
+ */
+export const loginPageGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  if (auth.isLoggedIn()) {
+    auth.clearSession();
+    clearTestAuthMarkers();
+  }
+  return true;
 };
 
 /** Where each `/take-test/:dest` value lands the user after they sign in. */

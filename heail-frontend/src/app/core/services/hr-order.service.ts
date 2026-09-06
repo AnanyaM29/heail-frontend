@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Order } from '../models/order.models';
-import { CandidateRow, HrCandidateDto, HrOrderResponse, ReallocationRequest } from '../models/hr-candidate.models';
+import { CandidateRow, HrCandidateDto, HrOrderResponse } from '../models/hr-candidate.models';
 import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/api/v1/hr/orders`;
@@ -30,14 +30,11 @@ export class HrOrderService {
     return this.http.get<HrCandidateDto[]>(`${API}/candidates/mine`);
   }
 
-  /** Both return a fresh DRAFT order with one candidate already on it — the
-   *  caller routes straight to /pricing/buy-hr/{id} to pay. */
+  /** Returns a fresh DRAFT order with the same candidate on it — the caller
+   *  routes straight to /pricing/buy-hr/{id} to pay. A retake is for the same
+   *  person only; there is no reallocation to a different person. */
   createRetakeOrder(candidateId: string) {
     return this.http.post<Order>(`${API}/candidates/${candidateId}/retake`, {});
-  }
-
-  createReallocationOrder(candidateId: string, body: ReallocationRequest) {
-    return this.http.post<Order>(`${API}/candidates/${candidateId}/reallocate`, body);
   }
 
   acceptAgreement(id: string, version: string) {
