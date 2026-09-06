@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { HrOrderService } from '../../../core/services/hr-order.service';
 import { HrCandidateDto } from '../../../core/models/hr-candidate.models';
 
@@ -7,10 +7,8 @@ import { HrCandidateDto } from '../../../core/models/hr-candidate.models';
  *  paid HR order, their invite status, and results once completed. Reached
  *  from the payment thank-you page and the dashboard.
  *
- *  "Retake" is a self-service paid action — it spins up a fresh single-candidate
- *  order for the SAME person and same pillars and routes into the normal payment
- *  flow. Reallocation to a different person is deliberately not offered: an
- *  assessment stays tied to whoever the buyer originally registered. */
+ *  An assessment is taken once. There is no retake / reallocation path — a fresh
+ *  sitting is a brand new order placed through the normal buy-HR flow. */
 @Component({
   selector: 'app-my-candidates',
   standalone: true,
@@ -20,14 +18,10 @@ import { HrCandidateDto } from '../../../core/models/hr-candidate.models';
 })
 export class MyCandidatesComponent implements OnInit {
   private hrOrders = inject(HrOrderService);
-  private router = inject(Router);
 
   loading = signal(true);
   error = signal('');
   candidates = signal<HrCandidateDto[]>([]);
-
-  actionBusy = signal<string | null>(null);
-  actionMessage = signal('');
 
   ngOnInit() {
     this.load();
@@ -67,15 +61,6 @@ export class MyCandidatesComponent implements OnInit {
       case 'REALLOCATED': return 'Reallocated';
       default: return status;
     }
-  }
-
-  retake(candidateId: string) {
-    this.actionBusy.set(candidateId);
-    this.actionMessage.set('');
-    this.hrOrders.createRetakeOrder(candidateId).subscribe({
-      next: order => this.router.navigate(['/pricing/buy-hr', order.id]),
-      error: (e: any) => { this.actionBusy.set(null); this.actionMessage.set(this.msg(e)); }
-    });
   }
 
   private msg(e: any) {

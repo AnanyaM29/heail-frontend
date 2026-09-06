@@ -30,13 +30,6 @@ export class HrOrderService {
     return this.http.get<HrCandidateDto[]>(`${API}/candidates/mine`);
   }
 
-  /** Returns a fresh DRAFT order with the same candidate on it — the caller
-   *  routes straight to /pricing/buy-hr/{id} to pay. A retake is for the same
-   *  person only; there is no reallocation to a different person. */
-  createRetakeOrder(candidateId: string) {
-    return this.http.post<Order>(`${API}/candidates/${candidateId}/retake`, {});
-  }
-
   acceptAgreement(id: string, version: string) {
     return this.http.post<Order>(`${API}/${id}/agreement`, { version });
   }

@@ -95,12 +95,9 @@ export class LeaderDashboardComponent implements OnInit {
       next: r => {
         this.results.set(r);
         this.loading.set(false);
-        // Check entitlement whenever there's no in-progress session — even if
-        // there are prior results. A user can legitimately buy the assessment
-        // again after completing it once, which grants a fresh unused
-        // entitlement; skipping this check whenever results already existed
-        // meant a repeat purchase was never detected, and "Retake Assessment"
-        // just kept sending the buyer back to the purchase page forever.
+        // Only relevant before a first sitting: if the account holds an unused
+        // entitlement and has no in-progress session, the "no results yet" view
+        // offers "Start Assessment". There is no retake once a result exists.
         if (!this.currentSession()) this.checkEntitlement();
       },
       error: (e: any) => { this.error.set(this.msg(e)); this.loading.set(false); }

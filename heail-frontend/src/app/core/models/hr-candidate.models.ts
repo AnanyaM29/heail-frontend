@@ -34,7 +34,6 @@ export interface HrCandidateDto {
   assessmentStartDate: string;
   status: 'PENDING' | 'SENT' | 'ACCESSED' | 'EXPIRED' | 'REALLOCATED';
   tokenExpiresAt: string | null;
-  canRequestRetake: boolean;
   results: HrCandidateResultSummary[];
 }
 

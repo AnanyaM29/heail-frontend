@@ -6,7 +6,6 @@
 
 <section><div class="wrap">
   @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
-  @if (actionMessage()) { <p class="hint" style="text-align:center;margin-bottom:20px">{{ actionMessage() }}</p> }
 
   @if (loading()) {
     <div style="text-align:center;padding:60px">
@@ -42,13 +41,6 @@
             </div>
           }
 
-          @if (c.canRequestRetake) {
-            <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
-              <button class="csvbtn" type="button" [disabled]="actionBusy() === c.id" (click)="retake(c.id)">
-                @if (actionBusy() === c.id) { <span class="spinner"></span> } Buy a retake
-              </button>
-            </div>
-          }
         </div>
       }
     </div>
