@@ -10,6 +10,7 @@ import { MyDashboard } from '../../core/models/dashboard.models';
 import { HrAssessment, HrResult, HrSessionResumeResponse } from '../../core/models/hr.models';
 import { HrCandidateDto } from '../../core/models/hr-candidate.models';
 import { ConfirmService } from '../../shared/confirm/confirm.service';
+import { FRESH_AUTH_KEY } from '../../core/guards/auth.guard';
 
 interface HrRow {
   assessment: HrAssessment;
@@ -131,7 +132,17 @@ export class MyDashboardComponent implements OnInit {
     });
   }
 
+  /** In-app test launches are for a user already signed in on the dashboard —
+   *  mark the session fresh-authed BEFORE opening the popup so it inherits the
+   *  marker (sessionStorage is cloned into the new window at open time) and
+   *  assessmentEntryGuard admits it instead of bouncing to /login. Email links
+   *  still force re-login via /take-test/:dest → forceTestLoginGuard. */
+  private markFreshAuth() {
+    try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
+  }
+
   resumeHr(session: HrSessionResumeResponse) {
+    this.markFreshAuth();
     const url = this.router.createUrlTree(['/hr/assessment', session.sessionId]).toString();
     window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
   }
@@ -140,6 +151,7 @@ export class MyDashboardComponent implements OnInit {
     if (this.startingHr()) return;
     this.startingHr.set(assessmentId);
     this.error.set('');
+    this.markFreshAuth();
     // Must call window.open() synchronously, inside this click handler, or
     // browsers block it as an unrequested popup — open blank and redirect it
     // once the session-start call comes back.
@@ -162,6 +174,7 @@ export class MyDashboardComponent implements OnInit {
     if (this.startingLeader()) return;
     this.startingLeader.set(true);
     this.error.set('');
+    this.markFreshAuth();
     // Open the window synchronously in the click handler, then redirect it once
     // the session-start call returns (same reason as startHr).
     const testWindow = window.open('', '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);

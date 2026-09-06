@@ -118,11 +118,16 @@
       <a class="backbtn" routerLink="/pricing">← Back</a>
       <div class="eyebrow">Payment Successful</div>
       <h2 class="sec-title">Thank you for making payment.</h2>
-      <p class="sec-sub" style="margin:0 auto">Please check your email and complete the test as soon as possible.</p>
+      <p class="sec-sub" style="margin:0 auto">You can begin now, or return to it later from your dashboard.</p>
       @if (order()!.gatewayReference) {
         <p class="hint" style="margin-top:14px">Receipt reference: {{ order()!.gatewayReference }}</p>
       }
-      <div style="margin-top:30px"><a class="btn btn-navy" routerLink="/leader">Go to Dashboard — Start Assessment</a></div>
+      @if (error()) { <div class="alert-err" role="alert" style="margin-top:18px">{{ error() }}</div> }
+      <div style="margin-top:30px;text-align:center">
+        <button class="btn btn-gold" type="button" [disabled]="starting()" (click)="startAssessment()">
+          @if (starting()) { <span class="spinner"></span> } Start Assessment
+        </button>
+      </div>
     </div></section>
   }
 }

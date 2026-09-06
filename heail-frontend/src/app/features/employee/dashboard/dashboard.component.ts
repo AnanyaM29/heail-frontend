@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { PulseService } from '../../../core/services/pulse.service';
 import { PulseInfo, PulseCode } from '../../../core/models/pulse.models';
+import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
 
 const PULSE_ORDER: PulseCode[] = ['LEADER_PULSE', 'TALENT_PULSE', 'SYSTEM_PULSE', 'GROWTH_PULSE'];
 
@@ -61,6 +62,11 @@ export class PulseDashboardComponent implements OnInit {
     if (pulse.state !== 'PENDING' && pulse.state !== 'IN_PROGRESS') return;
     this.starting.set(pulse.pulseCode);
     this.error.set('');
+    // In-app launch by a signed-in respondent — mark fresh-auth BEFORE opening
+    // the popup so it inherits the marker (sessionStorage is cloned into the new
+    // window at open time) and assessmentEntryGuard admits it without a /login
+    // bounce. Email links still force re-login via /take-test/:dest.
+    try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
     // Opens in a new window on purpose — a timed, locked-down test window
     // separate from the browsable main site (see testExitGuard/beforeunload
     // in PulsePlayerComponent). Must call window.open() synchronously, inside

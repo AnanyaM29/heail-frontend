@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AssessmentService } from '../../../core/services/assessment.service';
 import { LeaderResult, SessionResumeResponse } from '../../../core/models/assessment.models';
+import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
 
 const DOMAIN_LABELS: Record<string, string> = {
   I: 'Leadership & Vision',
@@ -58,6 +59,12 @@ export class LeaderDashboardComponent implements OnInit {
     this.starting.set(true);
     this.error.set('');
     this.noEntitlement.set(false);
+    // This is an in-app start by an already-signed-in user — mark the session as
+    // fresh-authed BEFORE opening the popup so it inherits the marker (sessionStorage
+    // is cloned into the new window at open time) and assessmentEntryGuard lets it
+    // straight in instead of bouncing to /login. Email links still force re-login
+    // via /take-test/:dest → forceTestLoginGuard, which clears this marker.
+    this.markFreshAuth();
     // Opens in a locked-down window on purpose — separate from the browsable
     // main site (see testExitGuard/beforeunload in AssessmentPlayerComponent).
     // Must call window.open() synchronously, inside this click handler, or
@@ -82,8 +89,17 @@ export class LeaderDashboardComponent implements OnInit {
   resumeAssessment() {
     const s = this.currentSession();
     if (!s) return;
+    this.markFreshAuth();
     const url = this.router.createUrlTree(['/leader/assessment', s.sessionId]).toString();
     window.open(url, '_blank', LeaderDashboardComponent.LOCKDOWN_FEATURES);
+  }
+
+  /** In-app test launches happen for a user who is already signed in on this
+   *  page, so entering the player must not bounce through /login. Setting this
+   *  synchronously — before any window.open — means a popup opened right after
+   *  inherits it in its cloned sessionStorage. */
+  private markFreshAuth() {
+    try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
   }
 
   domainLabel(code: string) {

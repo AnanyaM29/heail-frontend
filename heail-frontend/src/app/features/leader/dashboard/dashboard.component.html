@@ -50,7 +50,17 @@
             <div><span class="lbl">Weakest principle</span>{{ latest()!.weakestPrincipleText ?? latest()!.weakestPrinciple }}</div>
           </div>
         }
-        <!-- The assessment is taken once. There is no retake / new-attempt path. -->
+
+        <!-- No free retake. This only appears once the account holds an UNUSED
+             entitlement — i.e. another sitting has actually been purchased. -->
+        @if (entitlementChecked() && entitled()) {
+          <div style="text-align:center;margin-top:26px">
+            <button class="btn btn-gold" [disabled]="starting()" (click)="startAssessment()">
+              @if (starting()) { <span class="spinner"></span> } Start Assessment
+            </button>
+            <p class="hint" style="margin-top:10px">You have a purchased assessment ready to begin.</p>
+          </div>
+        }
       </div>
 
       @if (results().length > 1) {

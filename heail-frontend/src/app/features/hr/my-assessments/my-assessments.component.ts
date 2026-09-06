@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
 import { HrAssessment, HrResult } from '../../../core/models/hr.models';
+import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
 
 interface AssessmentCard {
   assessment: HrAssessment;
@@ -79,6 +80,11 @@ export class MyAssessmentsComponent implements OnInit {
 
   go(card: AssessmentCard) {
     if (card.completed || this.starting() !== null) return;
+
+    // The signed-in candidate is on the page they were sent to take their test —
+    // entering the player must not detour through /login. (redeem() sets this on
+    // token redemption too; re-set here so a back-nav or refresh still works.)
+    try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
 
     if (card.sessionId) {
       this.router.navigate(['/hr/assessment', card.sessionId]);
