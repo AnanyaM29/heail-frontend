@@ -381,6 +381,8 @@ export class BuyOrgFormComponent implements OnInit {
           return;
         }
 
+        console.log('console',payloadRows,this.organisationName().trim())
+
         this.orgOrders.setEmployees(id, payloadRows).subscribe({
           next: () => {
             if (this.embedded) this.orderCreated.emit(id);

@@ -134,6 +134,13 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
         this.questions.set(res.questions);
         this.answers.set(res.answeredOptions);
         this.loading.set(false);
+
+        const answered = new Set(Object.keys(res.answeredOptions));
+        const firstUnansweredIndex = res.questions.findIndex(
+          q => !answered.has(q.questionId)
+        );
+
+        this.index.set(firstUnansweredIndex === -1 ? res.questions.length - 1 : firstUnansweredIndex);
         this.testActive = true;
         this.startTimer(res.deadlineAt);
         if (!document.fullscreenElement) this.enterLockdown();
@@ -184,7 +191,16 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     flushed$.pipe(
       switchMap(() => this.assessment.submit(this.sessionId, forced))
     ).subscribe({
-      next: () => { this.testActive = false; this.exitLockdown(); this.router.navigate(['/leader']); },
+      next: result => {
+        this.testActive = false;
+        this.exitLockdown();
+        // Carry the just-created result's id so the dashboard shows THIS attempt —
+        // otherwise it falls back to "is there any live session at all", and if a
+        // separate, older attempt is independently still in progress, that one's
+        // "Resume" banner would take over instead of this attempt's result (timed
+        // out or not) ever being shown.
+        this.router.navigate(['/leader'], { queryParams: { result: result.id } });
+      },
       error: (e: any) => { this.submitting.set(false); console.error('Leader submit failed', e); this.error.set(this.msg(e)); }
     });
   }

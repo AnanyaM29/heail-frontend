@@ -26,7 +26,10 @@ export interface MyDashboard {
   name: string;
   organisationsAdministered: OrgOrderResponse[];
   leaderResults: LeaderResult[];
-  leaderInProgress: SessionResumeResponse | null;
+  /** Every one of the caller's own unfinished Leader attempts — usually 0 or 1,
+   *  but each purchase is its own independent session, so more than one can be
+   *  in progress at once. */
+  leaderInProgress: SessionResumeResponse[];
   leaderUnpaidOrder: boolean;
   /** Paid (or 100%-coupon) Leader purchase that hasn't been started yet. */
   leaderReadyToStart: boolean;

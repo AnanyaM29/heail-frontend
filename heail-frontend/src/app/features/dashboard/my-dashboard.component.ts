@@ -57,7 +57,7 @@ export class MyDashboardComponent implements OnInit {
   // ── "Your assessments to complete" — assigned to this account personally ──
   hasRespondent = computed(() => (this.data()?.respondentMemberships?.length ?? 0) > 0);
   hasLeader = computed(() =>
-    (this.data()?.leaderResults?.length ?? 0) > 0 || !!this.data()?.leaderInProgress
+    (this.data()?.leaderResults?.length ?? 0) > 0 || (this.data()?.leaderInProgress?.length ?? 0) > 0
     || !!this.data()?.leaderUnpaidOrder || !!this.data()?.leaderReadyToStart);
 
   // One card per HR assignment (entitlement) — never merged by pillar type, so

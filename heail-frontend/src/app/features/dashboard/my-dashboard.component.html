@@ -88,17 +88,10 @@
     <!-- ═══ GROUP 2 — assessments assigned to you personally ════════ -->
     @if (hasOwn()) {
     <div class="dash-group">
-      <div class="dash-group-head">
-        <div class="eyebrow">Your assessments</div>
-        <h2 class="group-title">Assessments to Complete</h2>
-        <p class="sec-sub">Assigned to you personally — you take these yourself.</p>
-      </div>
-
     <!-- ── This account's own respondent progress in others' rounds ── -->
     @if (hasRespondent()) {
       <div class="dash-sec">
-        <div class="eyebrow">Respondent</div>
-        <h2 class="sec-title">Assessments You're Taking</h2>
+        <h2 class="sec-title">Organization Pulse Assessments Assigned To You</h2>
         <p class="sec-sub">Pulse rounds where you've been added as a respondent.</p>
 
         <div class="act-grid">
@@ -130,8 +123,7 @@
     <!-- ── This account's own Leader (Gita Leader) activity ─────────── -->
     @if (hasLeader()) {
       <div class="dash-sec">
-        <div class="eyebrow">Leader</div>
-        <h2 class="sec-title">Your Leader Assessment</h2>
+        <h2 class="sec-title">Leadership Assessment You're Taking</h2>
 
         <div class="act-grid">
           @if (data()!.leaderUnpaidOrder) {
@@ -142,7 +134,9 @@
               <span class="go">Complete Payment →</span>
             </a>
           }
-          @if (data()!.leaderInProgress; as s) {
+          <!-- One card per unfinished attempt — each purchase is its own
+               independent session, so more than one can be in progress at once. -->
+          @for (s of data()!.leaderInProgress; track s.sessionId) {
             <a class="actcard" [routerLink]="['/leader/assessment', s.sessionId]" target="_blank">
               <div class="aud">Attempt {{ s.attemptNumber }}</div>
               <h3>In Progress</h3>
@@ -150,7 +144,8 @@
               @if (s.startedAt) { <p class="sub-line">Started {{ s.startedAt | date:'mediumDate' }}</p> }
               <span class="go">Resume →</span>
             </a>
-          } @else if (data()!.leaderReadyToStart) {
+          }
+          @if (data()!.leaderReadyToStart) {
             <div class="actcard">
               <div class="aud">Leader Assessment</div>
               <h3>Ready to Start</h3>
@@ -182,8 +177,7 @@
     <!-- ── This account's HR Competency Assessment activity ─────────── -->
     @if (hasHr()) {
       <div class="dash-sec">
-        <div class="eyebrow">HR</div>
-        <h2 class="sec-title">Your HR Competency Assessments</h2>
+        <h2 class="sec-title">HR Assessment Assigned To You</h2>
 
         <div class="act-grid">
           <!-- One card per ASSIGNMENT (entitlement), not per pillar — the same
