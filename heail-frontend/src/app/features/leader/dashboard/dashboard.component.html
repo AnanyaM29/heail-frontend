@@ -14,7 +14,10 @@
 
     @if (error()) { <div class="alert-err" role="alert">{{ error() }}</div> }
 
-    @if (currentSession()) {
+    @if (currentSession() && !selectedId()) {
+      <!-- Only the default landing (no specific ?result= picked) defers to the
+           live session — clicking a specific finished attempt must always show
+           that attempt's result, even while a separate attempt is in progress. -->
       <div class="formwrap" style="text-align:center">
         <h3>You have an assessment in progress</h3>
         <p style="color:var(--mut)">Attempt {{ currentSession()!.attemptNumber }} — pick up where you left off.</p>
@@ -66,11 +69,12 @@
       @if (results().length > 1) {
         <div class="formwrap result-card" style="margin-top:24px">
           <h3 style="margin-bottom:16px">Attempt history</h3>
+          <p class="hint" style="margin:-8px 0 14px">Click an attempt to view its result above.</p>
           <table class="history">
             <thead><tr><th>Attempt</th><th>Date</th><th>Score</th><th>Band</th></tr></thead>
             <tbody>
               @for (r of results(); track r.id) {
-                <tr>
+                <tr class="history-row" [class.active]="r.id === latest()?.id" (click)="viewAttempt(r)">
                   <td>{{ r.attemptNumber }}</td>
                   <td>{{ r.createdAt | date:'mediumDate' }}</td>
                   <td>{{ r.timedOut ? '—' : r.overallScore + ' / 250' }}</td>

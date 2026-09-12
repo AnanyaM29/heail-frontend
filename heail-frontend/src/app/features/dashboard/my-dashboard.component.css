@@ -92,6 +92,10 @@
 }
 .actcard:hover .go { color: var(--gold); }
 
+/* Same tag shape as .go ("Continue →") but green and inert — sits in a plain
+   (non-link) .actcard, so there's no hover state and no pointer cursor. */
+.actcard .go-done { color: var(--success); cursor: default; }
+
 .actcard .go-cancel { color: var(--error); }
 .actcard:hover .go-cancel { color: var(--error); }
 .actcard .go-cancel:hover:not(:disabled) { color: #8F3623; }

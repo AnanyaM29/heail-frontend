@@ -10,12 +10,15 @@ const API = `${environment.apiBaseUrl}/api/v1/employee/pulse`;
 export class PulseService {
   private http = inject(HttpClient);
 
-  status() {
-    return this.http.get<PulseStatusResponse>(`${API}/status`);
+  /** orderId picks which paid round to act on — the respondent's dashboard card
+   *  carries the round's order id so "Continue" always lands on the round they
+   *  clicked, not just whichever round the backend picked by default. */
+  status(orderId?: string) {
+    return this.http.get<PulseStatusResponse>(`${API}/status`, { params: orderId ? { orderId } : {} });
   }
 
-  start(pulseCode: PulseCode) {
-    return this.http.post<StartAssessmentResponse>(`${API}/${pulseCode}/start`, {});
+  start(pulseCode: PulseCode, orderId?: string) {
+    return this.http.post<StartAssessmentResponse>(`${API}/${pulseCode}/start`, {}, { params: orderId ? { orderId } : {} });
   }
 
   resume(sessionId: string) {

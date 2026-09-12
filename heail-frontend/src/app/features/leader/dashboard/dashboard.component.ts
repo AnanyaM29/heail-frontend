@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AssessmentService } from '../../../core/services/assessment.service';
 import { LeaderResult, SessionResumeResponse } from '../../../core/models/assessment.models';
 import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
@@ -23,6 +23,7 @@ const DOMAIN_LABELS: Record<string, string> = {
 export class LeaderDashboardComponent implements OnInit {
   private assessment = inject(AssessmentService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = signal(true);
   starting = signal(false);
@@ -34,17 +35,40 @@ export class LeaderDashboardComponent implements OnInit {
   currentSession = signal<SessionResumeResponse | null>(null);
   results = signal<LeaderResult[]>([]);
 
-  latest = computed(() => this.results()[0] ?? null);
+  /** Which attempt's history row was clicked (id), via the `?result=` query
+   *  param — so the link is shareable/bookmarkable and survives a refresh. */
+  selectedId = signal<string | null>(null);
+
+  /** The attempt currently on screen: the one selected from history, or the
+   *  most recent if nothing's been picked. Despite the name, this is NOT
+   *  always the newest attempt — see selectedId. */
+  latest = computed(() => {
+    const list = this.results();
+    if (list.length === 0) return null;
+    const id = this.selectedId();
+    return (id && list.find(r => r.id === id)) || list[0];
+  });
   domainEntries = computed(() => {
     const r = this.latest();
     return r ? Object.entries(r.domainScores) : [];
   });
 
   ngOnInit() {
+    // Reactive, not a one-off snapshot read: clicking a different history row
+    // re-navigates to the same route with a new query param, which Angular
+    // reuses this component instance for (ngOnInit won't refire) but does
+    // push through this observable.
+    this.route.queryParamMap.subscribe(params => this.selectedId.set(params.get('result')));
     this.assessment.current().subscribe({
       next: session => { this.currentSession.set(session); this.loadResults(); },
       error: () => this.loadResults()
     });
+  }
+
+  /** Clicking a row in "Attempt history" shows that attempt above instead of
+   *  always the latest one. */
+  viewAttempt(r: LeaderResult) {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { result: r.id }, queryParamsHandling: 'merge' });
   }
 
   /** No toolbar/location/menu bar — a stripped-down popup window instead of a

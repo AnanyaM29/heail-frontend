@@ -27,6 +27,7 @@ export interface SessionResumeResponse {
   questions: Question[];
   answeredOptions: Record<string, string>;
   deadlineAt: string | null;
+  startedAt: string | null;
 }
 
 export interface AnswerResponse {

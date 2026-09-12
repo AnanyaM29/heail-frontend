@@ -103,13 +103,25 @@
 
         <div class="act-grid">
           @for (m of data()!.respondentMemberships; track m.orderId) {
-            <a class="actcard" routerLink="/pulse">
-              <div class="aud">{{ m.level }}</div>
-              <h3>{{ m.organisationName }}</h3>
-              <p class="stat-line" [class]="'tone-' + statusTone(m.invitationStatus)">{{ m.pulsesCompleted }} of {{ m.pulsesTotal }} Pulses complete</p>
-              <p class="sub-line">{{ statusLabel(m.invitationStatus) }}</p>
-              <span class="go">Continue →</span>
-            </a>
+            @if (m.pulsesCompleted === m.pulsesTotal && m.pulsesTotal > 0) {
+              <!-- All 4 Pulses done — not clickable. Individual answers are confidential
+                   and never shown back to the respondent, so there's nowhere to go. -->
+              <div class="actcard">
+                <div class="aud">{{ m.level }}</div>
+                <h3>{{ m.organisationName }}</h3>
+                <p class="stat-line tone-good">All {{ m.pulsesTotal }} Pulses complete</p>
+                @if (m.assignedAt) { <p class="sub-line">Assigned {{ m.assignedAt | date:'mediumDate' }}</p> }
+                <span class="go go-done">Completed</span>
+              </div>
+            } @else {
+              <a class="actcard" routerLink="/pulse" [queryParams]="{ order: m.orderId }">
+                <div class="aud">{{ m.level }}</div>
+                <h3>{{ m.organisationName }}</h3>
+                <p class="stat-line" [class]="'tone-' + statusTone(m.invitationStatus)">{{ m.pulsesCompleted }} of {{ m.pulsesTotal }} Pulses complete</p>
+                @if (m.assignedAt) { <p class="sub-line">Assigned {{ m.assignedAt | date:'mediumDate' }}</p> }
+                <span class="go">Continue →</span>
+              </a>
+            }
           }
         </div>
       </div>
@@ -135,6 +147,7 @@
               <div class="aud">Attempt {{ s.attemptNumber }}</div>
               <h3>In Progress</h3>
               <p class="stat-line tone-warn">{{ s.questions.length }} questions</p>
+              @if (s.startedAt) { <p class="sub-line">Started {{ s.startedAt | date:'mediumDate' }}</p> }
               <span class="go">Resume →</span>
             </a>
           } @else if (data()!.leaderReadyToStart) {
@@ -150,7 +163,7 @@
             </div>
           }
           @for (r of data()!.leaderResults; track r.id) {
-            <a class="actcard" routerLink="/leader">
+            <a class="actcard" routerLink="/leader" [queryParams]="{ result: r.id }">
               <div class="aud">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</div>
               @if (r.timedOut) {
                 <h3>Assessment Timed Out</h3>
@@ -173,30 +186,36 @@
         <h2 class="sec-title">Your HR Competency Assessments</h2>
 
         <div class="act-grid">
-          @for (row of hrRows(); track row.assessment.id) {
+          <!-- One card per ASSIGNMENT (entitlement), not per pillar — the same
+               pillar assigned to this account twice shows as two separate cards. -->
+          @for (row of hrRows(); track row.entitlementId) {
             <div class="actcard">
-              <div class="aud">{{ row.assessment.questionCount }} questions · ~{{ row.assessment.timeMinutes }} min</div>
-              <h3>{{ row.assessment.name }}</h3>
+              <div class="aud">{{ row.questionCount }} questions · ~{{ row.timeMinutes }} min</div>
+              <h3>{{ row.assessmentName }}</h3>
 
-              @if (row.inProgress) {
-                <p class="stat-line tone-warn">Assessment Pending · Attempt {{ row.inProgress.attemptNumber }}</p>
-                <div class="card-actions"><button type="button" class="go" (click)="resumeHr(row.inProgress)">Resume →</button></div>
-              } @else {
-                @if (row.latestResult; as r) {
-                  @if (r.timedOut) {
+              @switch (row.status) {
+                @case ('IN_PROGRESS') {
+                  <p class="stat-line tone-warn">Assessment Pending · Attempt {{ row.attemptNumber }}</p>
+                  <p class="sub-line">Assigned {{ row.assignedAt | date:'mediumDate' }}</p>
+                  <div class="card-actions"><button type="button" class="go" (click)="resumeHr(row.sessionId!)">Resume →</button></div>
+                }
+                @case ('COMPLETED') {
+                  @if (row.timedOut) {
                     <p class="stat-line tone-warn">Assessment Timed Out</p>
                   } @else {
                     <p class="stat-line tone-good">Assessment Completed</p>
                   }
-                  <p class="sub-line">Attempt {{ r.attemptNumber }} · {{ r.createdAt | date:'mediumDate' }}</p>
+                  <p class="sub-line">Attempt {{ row.attemptNumber }} · Assigned {{ row.assignedAt | date:'mediumDate' }}</p>
                   <p class="sub-line">Results are shared with the organisation that arranged this assessment.</p>
                   <!-- HR assessments are taken once — no retake / new attempt. A fresh
-                       sitting is a new purchase made by the sponsoring organisation. -->
-                } @else if (row.assessment.entitled) {
+                       sitting is a separate assignment, shown as its own card. -->
+                }
+                @default {
                   <p class="stat-line tone-good">Assessment Pending</p>
+                  <p class="sub-line">Assigned {{ row.assignedAt | date:'mediumDate' }}</p>
                   <div class="card-actions">
-                    <button type="button" class="go" [disabled]="startingHr() === row.assessment.id" (click)="startHr(row.assessment.id)">
-                      {{ startingHr() === row.assessment.id ? 'Starting…' : 'Start Assessment →' }}
+                    <button type="button" class="go" [disabled]="startingHr() === row.assessmentId" (click)="startHr(row.assessmentId)">
+                      {{ startingHr() === row.assessmentId ? 'Starting…' : 'Start Assessment →' }}
                     </button>
                   </div>
                 }

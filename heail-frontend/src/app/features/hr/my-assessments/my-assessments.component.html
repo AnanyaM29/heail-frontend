@@ -11,24 +11,42 @@
     <div style="text-align:center;padding:60px">
       <span class="spinner" style="width:28px;height:28px;border-color:rgba(19,41,75,.2);border-top-color:var(--navy)"></span>
     </div>
-  } @else if (cards().length === 0) {
+  } @else if (assignments().length === 0) {
     <p style="text-align:center;color:var(--mut)">No assessments are currently assigned to you.</p>
   } @else {
     <div class="act-grid">
-      @for (card of cards(); track card.assessment.id) {
-        <div class="actcard" [class.hr-pick-owned]="card.completed">
-          <div class="aud">{{ card.assessment.questionCount }} questions · ~{{ card.assessment.timeMinutes }} min</div>
-          <h3>{{ card.assessment.name }}</h3>
+      <!-- One card per ASSIGNMENT (entitlement) — the same pillar assigned to you
+           more than once shows as separate cards, each with its own attempt. -->
+      @for (card of assignments(); track card.entitlementId) {
+        <div class="actcard" [class.hr-pick-owned]="card.status === 'COMPLETED'">
+          <div class="aud">{{ card.questionCount }} questions · ~{{ card.timeMinutes }} min</div>
+          <h3>{{ card.assessmentName }}</h3>
+          @if (assignments().length > 1) {
+            <p class="sub-line">Assigned {{ card.assignedAt | date:'mediumDate' }}</p>
+          }
 
-          @if (card.completed) {
-            <p class="stat-line tone-good">Completed</p>
-          } @else {
-            <div class="card-actions">
-              <button class="btn btn-navy" type="button" [disabled]="starting() !== null" (click)="go(card)">
-                @if (starting() === card.assessment.id) { <span class="spinner"></span> }
-                {{ card.sessionId ? 'Resume' : 'Start' }}
-              </button>
-            </div>
+          @switch (card.status) {
+            @case ('COMPLETED') {
+              <p class="stat-line" [class.tone-good]="!card.timedOut" [class.tone-warn]="card.timedOut">
+                {{ card.timedOut ? 'Timed Out' : 'Completed' }}
+              </p>
+            }
+            @case ('IN_PROGRESS') {
+              <div class="card-actions">
+                <button class="btn btn-navy" type="button" [disabled]="starting() !== null" (click)="go(card)">
+                  @if (starting() === card.entitlementId) { <span class="spinner"></span> }
+                  Resume
+                </button>
+              </div>
+            }
+            @default {
+              <div class="card-actions">
+                <button class="btn btn-navy" type="button" [disabled]="starting() !== null" (click)="go(card)">
+                  @if (starting() === card.entitlementId) { <span class="spinner"></span> }
+                  Start
+                </button>
+              </div>
+            }
           }
         </div>
       }

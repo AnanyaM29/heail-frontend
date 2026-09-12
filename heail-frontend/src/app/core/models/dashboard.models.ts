@@ -1,6 +1,6 @@
 import { OrgOrderResponse } from './org-order.models';
 import { LeaderResult, SessionResumeResponse } from './assessment.models';
-import { HrAssessment, HrResult, HrSessionResumeResponse } from './hr.models';
+import { HrAssignment } from './hr.models';
 
 /** One organisation's pulse round the caller has been invited into as a
  *  respondent — separate from any round they might administer themselves. */
@@ -11,6 +11,9 @@ export interface RespondentMembership {
   invitationStatus: string;
   orderStatus: string;
   paidAt: string | null;
+  /** When this person was added to the round — not when it was paid for or
+   *  when they started answering. */
+  assignedAt: string | null;
   pulsesCompleted: number;
   pulsesTotal: number;
 }
@@ -28,7 +31,7 @@ export interface MyDashboard {
   /** Paid (or 100%-coupon) Leader purchase that hasn't been started yet. */
   leaderReadyToStart: boolean;
   respondentMemberships: RespondentMembership[];
-  hrAssessments: HrAssessment[];
-  hrResults: HrResult[];
-  hrInProgress: HrSessionResumeResponse[];
+  /** One entry per HR assignment (entitlement) — the same pillar shows up as
+   *  more than one entry if it was assigned to this person more than once. */
+  hrAssignments: HrAssignment[];
 }

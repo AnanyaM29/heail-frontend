@@ -44,3 +44,7 @@
 .history { width: 100%; border-collapse: collapse; }
 .history th, .history td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line-tan); font-size: 14px; }
 .history th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); font-weight: 600; }
+.history-row { cursor: pointer; transition: background .15s; }
+.history-row:hover { background: var(--gold-dim); }
+.history-row.active td:first-child { font-weight: 700; color: var(--navy); }
+.history-row.active { background: var(--gold-dim); }

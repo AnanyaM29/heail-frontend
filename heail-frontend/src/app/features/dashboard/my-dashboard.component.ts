@@ -7,16 +7,9 @@ import { HrAssessmentService } from '../../core/services/hr-assessment.service';
 import { HrOrderService } from '../../core/services/hr-order.service';
 import { AssessmentService } from '../../core/services/assessment.service';
 import { MyDashboard } from '../../core/models/dashboard.models';
-import { HrAssessment, HrResult, HrSessionResumeResponse } from '../../core/models/hr.models';
 import { HrCandidateDto } from '../../core/models/hr-candidate.models';
 import { ConfirmService } from '../../shared/confirm/confirm.service';
 import { FRESH_AUTH_KEY } from '../../core/guards/auth.guard';
-
-interface HrRow {
-  assessment: HrAssessment;
-  latestResult: HrResult | null;
-  inProgress: HrSessionResumeResponse | null;
-}
 
 /** Unified "home" for a logged-in account. Everything is split into two clearly
  *  labelled groups so there's no confusion between the two hats a person can wear
@@ -67,25 +60,10 @@ export class MyDashboardComponent implements OnInit {
     (this.data()?.leaderResults?.length ?? 0) > 0 || !!this.data()?.leaderInProgress
     || !!this.data()?.leaderUnpaidOrder || !!this.data()?.leaderReadyToStart);
 
-  // One row per pillar with any activity — entitled to take, mid-attempt, or
-  // already has a result. A pillar nobody's ever bought or touched is left
-  // out entirely; browsing/buying happens on /pricing/buy-hr instead.
-  hrRows = computed<HrRow[]>(() => {
-    const d = this.data();
-    if (!d) return [];
-
-    const latestByAssessment = new Map<number, HrResult>();
-    for (const r of d.hrResults ?? []) {
-      const existing = latestByAssessment.get(r.assessmentId);
-      if (!existing || new Date(r.createdAt) > new Date(existing.createdAt)) latestByAssessment.set(r.assessmentId, r);
-    }
-    const inProgressByAssessment = new Map<number, HrSessionResumeResponse>();
-    for (const s of d.hrInProgress ?? []) inProgressByAssessment.set(s.assessmentId, s);
-
-    return (d.hrAssessments ?? [])
-      .map(a => ({ assessment: a, latestResult: latestByAssessment.get(a.id) ?? null, inProgress: inProgressByAssessment.get(a.id) ?? null }))
-      .filter(row => row.assessment.entitled || row.latestResult || row.inProgress);
-  });
+  // One card per HR assignment (entitlement) — never merged by pillar type, so
+  // the same pillar assigned to this person twice shows as two separate cards,
+  // each with its own assigned date, attempt number and status.
+  hrRows = computed(() => this.data()?.hrAssignments ?? []);
   hasHr = computed(() => this.hrRows().length > 0);
 
   hasManaging = computed(() => this.hasOrgs() || this.hasHrCandidates());
@@ -141,9 +119,12 @@ export class MyDashboardComponent implements OnInit {
     try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
   }
 
-  resumeHr(session: HrSessionResumeResponse) {
+  /** Takes a plain session id (not the full HrSessionResumeResponse) so a
+   *  pillar can still be resumed even when hrInProgress's resume() lookup
+   *  failed for it — see hrRows()'s fallback to assessment.inProgressSessionId. */
+  resumeHr(sessionId: string) {
     this.markFreshAuth();
-    const url = this.router.createUrlTree(['/hr/assessment', session.sessionId]).toString();
+    const url = this.router.createUrlTree(['/hr/assessment', sessionId]).toString();
     window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
   }
 

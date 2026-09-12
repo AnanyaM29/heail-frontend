@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PulseService } from '../../../core/services/pulse.service';
 import { PulseInfo, PulseCode } from '../../../core/models/pulse.models';
 import { FRESH_AUTH_KEY } from '../../../core/guards/auth.guard';
@@ -31,6 +31,7 @@ const PULSE_DESCRIPTIONS: Record<PulseCode, string> = {
 export class PulseDashboardComponent implements OnInit {
   private pulseService = inject(PulseService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = signal(true);
   starting = signal<PulseCode | null>(null);
@@ -38,8 +39,14 @@ export class PulseDashboardComponent implements OnInit {
   pulses = signal<PulseInfo[]>([]);
   allCompleted = signal(false);
 
+  /** Which round to show — carried from the specific card clicked on the
+   *  dashboard (?order=<id>). Falls back to the account's most recently paid
+   *  round when arriving without one (bare /pulse entry, take-test links). */
+  private orderId: string | null = null;
+
   ngOnInit() {
-    this.pulseService.status().subscribe({
+    this.orderId = this.route.snapshot.queryParamMap.get('order');
+    this.pulseService.status(this.orderId ?? undefined).subscribe({
       next: res => {
         this.pulses.set(res.pulses);
         this.allCompleted.set(res.allCompleted);
@@ -74,7 +81,7 @@ export class PulseDashboardComponent implements OnInit {
     // block it — the target URL isn't known yet, so open blank and redirect
     // it once the session-start call comes back.
     const testWindow = window.open('', '_blank');
-    this.pulseService.start(pulse.pulseCode).subscribe({
+    this.pulseService.start(pulse.pulseCode, this.orderId ?? undefined).subscribe({
       next: res => {
         this.starting.set(null);
         const url = this.router.createUrlTree(['/pulse/assessment', pulse.pulseCode, res.sessionId]).toString();

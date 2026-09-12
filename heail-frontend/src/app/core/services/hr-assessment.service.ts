@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HrAssessment, HrStartAssessmentResponse, HrSessionResumeResponse, HrResult } from '../models/hr.models';
+import { HrAssessment, HrAssignment, HrStartAssessmentResponse, HrSessionResumeResponse, HrResult } from '../models/hr.models';
 import { AnswerResponse } from '../models/assessment.models';
 import { environment } from '../../../environments/environment';
 
@@ -10,8 +10,15 @@ const API = `${environment.apiBaseUrl}/api/v1/hr`;
 export class HrAssessmentService {
   private http = inject(HttpClient);
 
+  /** The 7-pillar catalogue — one row per pillar type, used for browsing/buying. */
   assessments() {
     return this.http.get<HrAssessment[]>(`${API}/assessments`);
+  }
+
+  /** Every individual assignment (entitlement) the caller holds — one card per
+   *  assignment, even when the same pillar was assigned to them more than once. */
+  assignments() {
+    return this.http.get<HrAssignment[]>(`${API}/assessments/mine`);
   }
 
   start(assessmentId: number) {

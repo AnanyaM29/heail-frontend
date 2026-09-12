@@ -15,6 +15,31 @@ export interface HrAssessment {
   questionCount: number;
   timeMinutes: number;
   entitled: boolean;
+  /** Set when there's a live in-progress session for this pillar — stays set
+   *  even after entitled flips to false (start() consumes the entitlement). */
+  inProgressSessionId: string | null;
+  /** When this pillar's entitlement was granted to the candidate — null if
+   *  they were never entitled to it at all. */
+  assignedAt: string | null;
+}
+
+export type HrAssignmentStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+
+/** One HR pillar assignment (entitlement) for the caller — one card per
+ *  assignment, even when the same pillar was assigned to them more than once
+ *  (e.g. registered as a candidate on two separate orders). */
+export interface HrAssignment {
+  entitlementId: string;
+  assessmentId: number;
+  assessmentCode: string;
+  assessmentName: string;
+  questionCount: number;
+  timeMinutes: number;
+  assignedAt: string;
+  attemptNumber: number;
+  status: HrAssignmentStatus;
+  sessionId: string | null;
+  timedOut: boolean;
 }
 
 export interface HrStartAssessmentResponse {
