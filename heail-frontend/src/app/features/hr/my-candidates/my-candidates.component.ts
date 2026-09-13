@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HrOrderService } from '../../../core/services/hr-order.service';
 import { HrCandidateDto } from '../../../core/models/hr-candidate.models';
@@ -12,7 +13,7 @@ import { HrCandidateDto } from '../../../core/models/hr-candidate.models';
 @Component({
   selector: 'app-my-candidates',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DatePipe],
   templateUrl: './my-candidates.component.html',
   styleUrl: './my-candidates.component.css'
 })

@@ -20,7 +20,10 @@
           <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:baseline">
             <div>
               <h3 style="font-family:var(--disp);font-size:19px;font-weight:600">{{ c.name }}</h3>
-              <p style="font-size:13px;color:var(--mut)">{{ c.email }} · Start date {{ c.assessmentStartDate }}</p>
+              <p style="font-size:13px;color:var(--mut)">
+                {{ c.email }} · Start date {{ c.assessmentStartDate }}
+                @if (c.tokenExpiresAt) { · End date {{ c.tokenExpiresAt | date:'mediumDate' }} }
+              </p>
             </div>
             <span class="pstate"
                   [class.pstate-done]="isDone(c) && !isTimedOut(c)"
