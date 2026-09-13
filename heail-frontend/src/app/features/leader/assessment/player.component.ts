@@ -31,7 +31,11 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   answers = signal<Record<string, string>>({});
   index = signal(0);
 
-  showDirections = signal(!localStorage.getItem(DIRECTIONS_SEEN_KEY));
+  // ?directions=1 forces this screen even if the "seen" flag is set — useful
+  // for verifying it's actually deployed without having to clear localStorage.
+  showDirections = signal(
+    this.route.snapshot.queryParamMap.get('directions') === '1' || !localStorage.getItem(DIRECTIONS_SEEN_KEY)
+  );
 
   deadlineAt = signal<string | null>(null);
   secondsLeft = signal<number | null>(null);

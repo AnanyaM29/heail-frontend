@@ -21,8 +21,11 @@ export class HrAssessmentService {
     return this.http.get<HrAssignment[]>(`${API}/assessments/mine`);
   }
 
-  start(assessmentId: number) {
-    return this.http.post<HrStartAssessmentResponse>(`${API}/assessments/${assessmentId}/start`, {});
+  /** Keyed by entitlementId — the specific assignment — not by pillar type, so
+   *  starting always acts on exactly the assignment card that was clicked even
+   *  when the same pillar was assigned more than once. */
+  start(entitlementId: string) {
+    return this.http.post<HrStartAssessmentResponse>(`${API}/assignments/${entitlementId}/start`, {});
   }
 
   current(assessmentId: number) {

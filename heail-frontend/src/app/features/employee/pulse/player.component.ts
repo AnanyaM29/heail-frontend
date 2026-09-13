@@ -13,10 +13,14 @@ const PULSE_LABELS: Record<string, string> = {
   GROWTH_PULSE: 'GrowthPulse'
 };
 
-// Directions are shown once before the FIRST pulse of a round only — not
-// repeated before each of the four. Keyed by a flag in localStorage so it
-// survives a page reload but doesn't need any backend state.
-const FIRST_PULSE: PulseCode = 'LEADER_PULSE';
+// Directions are shown once per browser, before whichever pulse the respondent
+// actually opens first on THIS device — not tied to LEADER_PULSE specifically.
+// Pulses are always taken in strict sequence (start() enforces "complete X
+// before Y"), but the *person* isn't tied to one device across the round: if
+// they complete pulse 1 on their phone and come back on a laptop for pulse 2,
+// the laptop has never shown them anything, so gating on "is this pulse #1"
+// would skip instructions entirely on that device. Keyed by a flag in
+// localStorage so it survives a page reload but doesn't need any backend state.
 const DIRECTIONS_SEEN_KEY = 'heail_pulse_directions_seen';
 
 @Component({
@@ -42,7 +46,11 @@ export class PulsePlayerComponent implements OnInit, OnDestroy {
   answers = signal<Record<string, string>>({});
   index = signal(0);
 
-  showDirections = signal(this.pulseCode === FIRST_PULSE && !localStorage.getItem(DIRECTIONS_SEEN_KEY));
+  // ?directions=1 forces this screen even if the "seen" flag is set — useful
+  // for verifying it's actually deployed without having to clear localStorage.
+  showDirections = signal(
+    this.route.snapshot.queryParamMap.get('directions') === '1' || !localStorage.getItem(DIRECTIONS_SEEN_KEY)
+  );
 
   deadlineAt = signal<string | null>(null);
   secondsLeft = signal<number | null>(null);
@@ -108,6 +116,14 @@ export class PulsePlayerComponent implements OnInit, OnDestroy {
         this.questions.set(res.questions);
         this.answers.set(res.answeredOptions);
         this.loading.set(false);
+
+        // Resume at the first unanswered question, not always question 1 — a
+        // respondent who answered a few and came back should pick up where they
+        // left off. If everything's answered, land on the last question.
+        const answered = new Set(Object.keys(res.answeredOptions));
+        const firstUnansweredIndex = res.questions.findIndex(q => !answered.has(q.questionId));
+        this.index.set(firstUnansweredIndex === -1 ? res.questions.length - 1 : firstUnansweredIndex);
+
         this.testActive = true;
         this.startTimer(res.deadlineAt);
       },

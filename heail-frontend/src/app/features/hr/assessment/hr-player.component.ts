@@ -5,10 +5,6 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { HrAssessmentService } from '../../../core/services/hr-assessment.service';
 import { HrQuestion } from '../../../core/models/hr.models';
 
-// Directions are shown once before a respondent's first-ever attempt at any HR
-// pillar — not repeated on retakes or across pillars. Keyed by a flag in localStorage.
-const DIRECTIONS_SEEN_KEY = 'heail_hr_directions_seen';
-
 /** Same locked-down, no-timer test player as AssessmentPlayerComponent (Leader),
  *  generalized to 5 options (A-E) instead of 4. */
 @Component({
@@ -33,7 +29,14 @@ export class HrPlayerComponent implements OnInit, OnDestroy {
   answers = signal<Record<string, string>>({});
   index = signal(0);
 
-  showDirections = signal(!localStorage.getItem(DIRECTIONS_SEEN_KEY));
+  // Each HR pillar is its own independent test — directions show whenever this
+  // is a genuinely fresh start (the launcher navigates here with ?fresh=1 right
+  // after calling start()), never on a resume of an already-in-progress session.
+  // ?directions=1 forces it regardless, for verifying this is actually deployed.
+  showDirections = signal(
+    this.route.snapshot.queryParamMap.get('fresh') === '1' ||
+    this.route.snapshot.queryParamMap.get('directions') === '1'
+  );
 
   deadlineAt = signal<string | null>(null);
   secondsLeft = signal<number | null>(null);
@@ -101,7 +104,6 @@ export class HrPlayerComponent implements OnInit, OnDestroy {
   }
 
   beginAfterDirections() {
-    localStorage.setItem(DIRECTIONS_SEEN_KEY, '1');
     this.showDirections.set(false);
     // Must happen synchronously inside this click handler — browsers only grant
     // fullscreen from a direct user gesture, not from an async subscribe callback.
@@ -135,6 +137,14 @@ export class HrPlayerComponent implements OnInit, OnDestroy {
         this.questions.set(res.questions);
         this.answers.set(res.answeredOptions);
         this.loading.set(false);
+
+        // Resume at the first unanswered question, not always question 1 — a
+        // candidate who answered a few and came back should pick up where they
+        // left off. If everything's answered, land on the last question.
+        const answered = new Set(Object.keys(res.answeredOptions));
+        const firstUnansweredIndex = res.questions.findIndex(q => !answered.has(q.questionId));
+        this.index.set(firstUnansweredIndex === -1 ? res.questions.length - 1 : firstUnansweredIndex);
+
         this.testActive = true;
         this.startTimer(res.deadlineAt);
         if (!document.fullscreenElement) this.enterLockdown();

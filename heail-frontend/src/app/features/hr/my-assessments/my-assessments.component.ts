@@ -44,16 +44,18 @@ export class MyAssessmentsComponent implements OnInit {
     try { sessionStorage.setItem(FRESH_AUTH_KEY, '1'); } catch {}
 
     if (card.sessionId) {
+      // Resuming an already-started assignment — no directions replay.
       this.router.navigate(['/hr/assessment', card.sessionId]);
       return;
     }
 
-    // PENDING: start() always consumes this pillar's OLDEST unused entitlement,
-    // which — since assignments are listed oldest-first — is exactly this card
-    // whenever it's the first PENDING one for its pillar.
+    // PENDING: start() is keyed by this exact assignment's entitlementId, so it
+    // always starts THIS card, never some other pending assignment of the same
+    // pillar. ?fresh=1 tells the player this is a genuinely new sitting, so it
+    // shows the directions screen (each pillar is its own independent test).
     this.starting.set(card.entitlementId);
-    this.hrAssessments.start(card.assessmentId).subscribe({
-      next: res => this.router.navigate(['/hr/assessment', res.sessionId]),
+    this.hrAssessments.start(card.entitlementId).subscribe({
+      next: res => this.router.navigate(['/hr/assessment', res.sessionId], { queryParams: { fresh: '1' } }),
       error: (e: any) => { this.starting.set(null); this.error.set(this.msg(e)); }
     });
   }

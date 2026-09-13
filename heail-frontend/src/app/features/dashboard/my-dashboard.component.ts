@@ -45,7 +45,7 @@ export class MyDashboardComponent implements OnInit {
   data = signal<MyDashboard | null>(null);
   hrCandidates = signal<HrCandidateDto[]>([]);
   cancellingId = signal<string | null>(null);
-  startingHr = signal<number | null>(null);
+  startingHr = signal<string | null>(null); // entitlementId currently starting
   startingLeader = signal(false);
 
   // ── "Managing for others" — bought / set up, not taken by this account ──
@@ -128,19 +128,24 @@ export class MyDashboardComponent implements OnInit {
     window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
   }
 
-  startHr(assessmentId: number) {
+  /** Keyed by entitlementId — the specific assignment card clicked — not by
+   *  pillar type, so this always starts THAT assignment even when the same
+   *  pillar was assigned more than once. */
+  startHr(entitlementId: string) {
     if (this.startingHr()) return;
-    this.startingHr.set(assessmentId);
+    this.startingHr.set(entitlementId);
     this.error.set('');
     this.markFreshAuth();
     // Must call window.open() synchronously, inside this click handler, or
     // browsers block it as an unrequested popup — open blank and redirect it
     // once the session-start call comes back.
     const testWindow = window.open('', '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
-    this.hrAssessments.start(assessmentId).subscribe({
+    this.hrAssessments.start(entitlementId).subscribe({
       next: res => {
         this.startingHr.set(null);
-        const url = this.router.createUrlTree(['/hr/assessment', res.sessionId]).toString();
+        // ?fresh=1 tells the player this is a genuinely new sitting, so it shows
+        // the directions screen (each pillar is its own independent test).
+        const url = this.router.createUrlTree(['/hr/assessment', res.sessionId], { queryParams: { fresh: '1' } }).toString();
         if (testWindow) testWindow.location.href = url; else window.open(url, '_blank', MyDashboardComponent.LOCKDOWN_FEATURES);
       },
       error: (e: any) => {

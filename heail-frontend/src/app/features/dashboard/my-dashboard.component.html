@@ -23,16 +23,10 @@
     <!-- ═══ GROUP 1 — things you buy / set up for other people ═══════ -->
     @if (hasManaging()) {
     <div class="dash-group">
-      <div class="dash-group-head">
-        <div class="eyebrow">Managing for others</div>
-        <h2 class="group-title">Assessments You've Set Up for Others</h2>
-        <p class="sec-sub">You've purchased or configured these — you don't take them yourself.</p>
-      </div>
 
     <!-- ── Organisations this account administers ─────────────────── -->
     @if (hasOrgs()) {
       <div class="dash-sec">
-        <div class="eyebrow">Organisation Admin</div>
         <h2 class="sec-title">Organisations You Administer</h2>
         <p class="sec-sub">Diagnostic rounds you've purchased or set up for others to take.</p>
 
@@ -66,7 +60,6 @@
     <!-- ── HR assessments this account has registered candidates for ── -->
     @if (hasHrCandidates()) {
       <div class="dash-sec">
-        <div class="eyebrow">HR Assessments</div>
         <h2 class="sec-title">Candidates You've Registered</h2>
         <p class="sec-sub">HR competency assessments you're paying for other people to take.</p>
 
@@ -208,8 +201,8 @@
                   <p class="stat-line tone-good">Assessment Pending</p>
                   <p class="sub-line">Assigned {{ row.assignedAt | date:'mediumDate' }}</p>
                   <div class="card-actions">
-                    <button type="button" class="go" [disabled]="startingHr() === row.assessmentId" (click)="startHr(row.assessmentId)">
-                      {{ startingHr() === row.assessmentId ? 'Starting…' : 'Start Assessment →' }}
+                    <button type="button" class="go" [disabled]="startingHr() === row.entitlementId" (click)="startHr(row.entitlementId)">
+                      {{ startingHr() === row.entitlementId ? 'Starting…' : 'Start Assessment →' }}
                     </button>
                   </div>
                 }

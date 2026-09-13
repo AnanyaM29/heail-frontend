@@ -51,6 +51,18 @@ export class AuthService {
    *  redirect themselves (e.g. the assessment-entry guard, which forces a fresh
    *  sign-in and returns its own UrlTree). */
   clearSession() {
+    // Best-effort, fire-and-forget: also end the session server-side so the
+    // backend's single-session flag clears (see AuthService.login() on the
+    // backend) — otherwise the forced fresh sign-in this is usually a prelude
+    // to would itself be wrongly refused as "already logged in elsewhere". The
+    // token is read and sent explicitly, before it's removed below, rather than
+    // relying on the auth interceptor's live localStorage read — that races
+    // against the synchronous clear on the next lines.
+    const token = this.getToken();
+    if (token) {
+      this.http.post(`${API}/logout`, {}, { headers: { Authorization: `Bearer ${token}` } })
+        .subscribe({ error: () => {} });
+    }
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_KEY);
     localStorage.removeItem(USER_KEY);
