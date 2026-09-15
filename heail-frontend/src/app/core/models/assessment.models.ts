@@ -49,6 +49,8 @@ export interface LeaderResult {
   timedOut: boolean;
   band: LeaderBand;
   domainScores: Record<string, number>;
+  /** Null for results scored before this field existed. */
+  domainMax: Record<string, number> | null;
   strongestPrinciple: string | null;
   strongestPrincipleText: string | null;
   weakestPrinciple: string | null;

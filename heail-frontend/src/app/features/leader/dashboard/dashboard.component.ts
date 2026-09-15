@@ -130,6 +130,13 @@ export class LeaderDashboardComponent implements OnInit {
     return DOMAIN_LABELS[code] ?? code;
   }
 
+  /** The 50 principles don't split evenly 5 ways across domains, so each domain's
+   *  achievable max varies — falls back to 50 only for results scored before
+   *  domainMax existed. */
+  domainMax(code: string): number {
+    return this.latest()?.domainMax?.[code] ?? 50;
+  }
+
   private loadResults() {
     this.assessment.results().subscribe({
       next: r => {
