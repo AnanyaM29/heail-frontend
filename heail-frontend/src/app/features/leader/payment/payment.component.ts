@@ -222,7 +222,9 @@ export class LeaderPaymentComponent {
     this.assessment.start().subscribe({
       next: res => {
         this.starting.set(false);
-        const url = this.router.createUrlTree(['/leader/assessment', res.sessionId]).toString();
+        // start() always creates a brand new session — ?fresh=1 tells the player
+        // this is a genuinely new sitting, so it shows the directions screen.
+        const url = this.router.createUrlTree(['/leader/assessment', res.sessionId], { queryParams: { fresh: '1' } }).toString();
         if (testWindow) testWindow.location.href = url;
         else window.open(url, '_blank', LeaderPaymentComponent.LOCKDOWN_FEATURES);
       },

@@ -5,10 +5,6 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { AssessmentService } from '../../../core/services/assessment.service';
 import { Question } from '../../../core/models/assessment.models';
 
-// Directions are shown once before a respondent's first-ever attempt at this
-// assessment — not repeated on retakes. Keyed by a flag in localStorage.
-const DIRECTIONS_SEEN_KEY = 'heail_leader_directions_seen';
-
 @Component({
   selector: 'app-assessment-player',
   standalone: true,
@@ -31,10 +27,13 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   answers = signal<Record<string, string>>({});
   index = signal(0);
 
-  // ?directions=1 forces this screen even if the "seen" flag is set — useful
-  // for verifying it's actually deployed without having to clear localStorage.
+  // Directions show whenever this is a genuinely fresh start (the dashboard
+  // navigates here with ?fresh=1 right after calling start(), which always
+  // creates a brand new session) — never on a resume of an already-in-progress
+  // one. ?directions=1 forces it regardless, for verifying it's actually deployed.
   showDirections = signal(
-    this.route.snapshot.queryParamMap.get('directions') === '1' || !localStorage.getItem(DIRECTIONS_SEEN_KEY)
+    this.route.snapshot.queryParamMap.get('fresh') === '1' ||
+    this.route.snapshot.queryParamMap.get('directions') === '1'
   );
 
   deadlineAt = signal<string | null>(null);
@@ -104,7 +103,6 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   }
 
   beginAfterDirections() {
-    localStorage.setItem(DIRECTIONS_SEEN_KEY, '1');
     this.showDirections.set(false);
     // Must happen synchronously inside this click handler — browsers only grant
     // fullscreen from a direct user gesture, not from an async subscribe callback.

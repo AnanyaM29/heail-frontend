@@ -84,7 +84,11 @@ export class PulseDashboardComponent implements OnInit {
     this.pulseService.start(pulse.pulseCode, this.orderId ?? undefined).subscribe({
       next: res => {
         this.starting.set(null);
-        const url = this.router.createUrlTree(['/pulse/assessment', pulse.pulseCode, res.sessionId]).toString();
+        // Carry the round's orderId through so the player can scope its "have I seen
+        // the directions for THIS round" flag per round, not globally forever — a
+        // respondent in a second round for a different company should see them again.
+        const url = this.router.createUrlTree(['/pulse/assessment', pulse.pulseCode, res.sessionId],
+          { queryParams: this.orderId ? { order: this.orderId } : {} }).toString();
         if (testWindow) testWindow.location.href = url; else window.open(url, '_blank');
       },
       error: (e: any) => { this.starting.set(null); this.error.set(this.msg(e)); testWindow?.close(); }
